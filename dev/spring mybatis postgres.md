@@ -130,7 +130,7 @@ public class ActorService {
 }
 ```
 
-## DAO :: DvdRentalDao.java
+## DAO(Mapper:Java) :: DvdRentalDao.java
 ```java
 package com.example.springwebex.dao;
 
@@ -152,7 +152,7 @@ public interface DvdRentalDao {
 }
 ```
 
-## Mapper :: resource/mapper/DvdRentalDao.xml
+## Mapper(Xml) :: resource/mapper/DvdRentalDao.xml
 ```xml
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.springwebex.dao.DvdRentalDao">
