@@ -16,7 +16,8 @@ dependencies {
 
 ### dependency
 springboot 프로젝트에서 mybatis 사용을 위해서는 기본적으로 mybatis-spring-boot-starter 라이브러리만 추가하면 된다.
-mybatis starter 라이브러리는 내부에 
+mybatis starter 라이브러리는 내부에
+
 ### version 호환성
 springframework '3.2.2' 버전에는 mybatis starter '3.0.3' 버전이 호환된다.
 호환 버전이 맞지 않으면 다음의 오류가 발생할 수 있다.

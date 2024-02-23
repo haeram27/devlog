@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "dev/spring mybatis postgres.md",
+                "file": "dev/spring.mybatis.postgres.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "dev/spring mybatis postgres.md",
+                "file": "dev/spring.mybatis.postgres.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "dev/spring mybatis postgres.md",
+                "file": "dev/spring.mybatis.postgres.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "dev/spring mybatis postgres.md"
+                "file": "dev/spring.mybatis.postgres.md"
               }
             }
           }
@@ -146,9 +146,9 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "cdbf867c8cc9292f",
+  "active": "062a994d6466b8bc",
   "lastOpenFiles": [
     "dev/Hello.md",
-    "dev/spring mybatis postgres.md"
+    "dev/spring.mybatis.postgres.md"
   ]
 }
