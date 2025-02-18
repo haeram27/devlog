@@ -167,3 +167,83 @@ public class RedisService {
 ## **3. 결론**
 
 `RedisTemplate`을 사용하면 **String, Hash, List, Set, Sorted Set** 등 다양한 Redis 데이터 타입을 쉽게 다룰 수 있습니다. 위에서 설명한 메서드를 활용하면 원하는 방식으로 데이터를 저장하고 관리할 수 있습니다! 🚀
+
+### **📌 `RedisTemplate` vs `StringRedisTemplate` 차이점**
+
+| 항목 | `RedisTemplate<K, V>` | `StringRedisTemplate` |
+|------|--------------------|--------------------|
+| **데이터 타입** | Generic 타입 (`K`, `V` 자유롭게 설정) | `String, String` 고정 |
+| **직렬화 방식** | 기본적으로 **JDK 직렬화** 사용 (`JdkSerializationRedisSerializer`) | 기본적으로 **String 직렬화** 사용 (`StringRedisSerializer`) |
+| **성능** | JDK 직렬화로 인해 **메모리 사용량 증가, 속도 저하** 가능 | **가볍고 빠름 (String 기반)** |
+| **사용 용도** | 객체 저장 (Hash, List, Set 등 복잡한 데이터) | 단순 문자열(String) 데이터 저장 |
+| **추천 사용 사례** | JSON, HashMap 등 객체 저장 필요 시 | 일반적인 문자열 캐싱, 간단한 Key-Value 저장 |
+
+---
+
+## **1. `RedisTemplate<K, V>`**
+➡️ **Generic 타입**을 사용할 수 있어 `Object`, `List`, `Map` 등 다양한 자료형 저장 가능  
+➡️ 하지만 **기본 직렬화 방식이 JDK 직렬화**(`JdkSerializationRedisSerializer`)이므로 비효율적일 수 있음
+
+### **✅ `RedisTemplate` 예제 (객체 저장)**
+```java
+@Configuration
+public class RedisConfig {
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+
+        // JSON 직렬화 설정 (Jackson)
+        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        template.setValueSerializer(serializer);
+        template.setKeySerializer(new StringRedisSerializer());
+
+        template.afterPropertiesSet();
+        return template;
+    }
+}
+```
+
+```java
+// 데이터 저장
+redisTemplate.opsForValue().set("user:1001", new User("Alice", 25));
+
+// 데이터 조회
+User user = (User) redisTemplate.opsForValue().get("user:1001");
+```
+
+---
+
+## **2. `StringRedisTemplate`**
+➡️ **Key, Value를 무조건 String으로 저장**  
+➡️ **기본 직렬화 방식이 `StringRedisSerializer`**이므로 **속도가 빠르고 메모리 효율적**
+
+### **✅ `StringRedisTemplate` 예제 (문자열 저장)**
+```java
+@Autowired
+private StringRedisTemplate stringRedisTemplate;
+
+// 데이터 저장
+stringRedisTemplate.opsForValue().set("greeting", "Hello, Redis!");
+
+// 데이터 조회
+String greeting = stringRedisTemplate.opsForValue().get("greeting"); // "Hello, Redis!"
+```
+
+---
+
+## **📌 주요 차이점 요약**
+| 비교 항목 | `RedisTemplate<K, V>` | `StringRedisTemplate` |
+|----------|--------------------|--------------------|
+| **직렬화 방식** | 기본적으로 JDK 직렬화 (`JdkSerializationRedisSerializer`) | 기본적으로 String 직렬화 (`StringRedisSerializer`) |
+| **데이터 타입** | `K, V`의 Generic 타입 지정 가능 | **Key, Value 모두 String** |
+| **성능** | JDK 직렬화로 인해 느릴 수 있음 | **빠르고 메모리 효율적** |
+| **사용 용도** | 객체 저장 (`User`, `Map`, `List` 등) | 단순한 Key-Value 캐싱 |
+
+---
+
+## **🚀 결론**
+✅ **`StringRedisTemplate`** → 단순 문자열 캐싱이 필요할 때  
+✅ **`RedisTemplate<K, V>`** → 객체를 저장할 때 (`JSON`, `HashMap`, `List` 등)  
+
+**🚀 최적의 설정**: `RedisTemplate`을 사용할 경우 **Jackson(JSON) 직렬화**를 설정하면 성능과 활용도를 높일 수 있음! 🎯
