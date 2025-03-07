@@ -7,6 +7,20 @@
 ***원본 stream의 각 요소는 작은 단위로 분해가 가능한 자료이어야 한다. (String, Array, Collection(list, set, map) 등)***
 
 
+### default definition
+```java
+public interface Stream<T> extends BaseStream<T, Stream<T>> {
+	default <R> Stream<R> mapMulti(BiConsumer<? super T, ? super Consumer<R>> mapper) {
+        Objects.requireNonNull(mapper);
+        return flatMap(e -> {
+            SpinedBuffer<R> buffer = new SpinedBuffer<>();
+            mapper.accept(e, buffer);
+            return StreamSupport.stream(buffer.spliterator(), false);
+        });
+    }
+}
+```
+
 ### 예제: `List<Map<String, String>` -> `List<String>`
 ```java
 List<Map<String, String> mapList = ...
@@ -21,7 +35,7 @@ mapList.stream().<String>mapMulti((map, consumer) -> map.values().forEach(v -> c
   : mapMulti()의 반환 stream을 List로 변환
 
 
-### 예제
+#### 코드
 ```java
     <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
     default <R> Stream<R> mapMulti(BiConsumer<? super T, ? super Consumer<R>> mapper) {
