@@ -1,15 +1,15 @@
 
 # mount
-1. [mount](#mount)
-   1. [mount 방식의 종류](#mount-방식의-종류)
-   2. [일반 마운트와 바인드 마운트의 원본 저장소의 차이](#일반-마운트와-바인드-마운트의-원본-저장소의-차이)
-      1. [일반 마운트 대상](#일반-마운트-대상)
-   3. [명령어 예제](#명령어-예제)
-      1. [normal mount 예제](#normal-mount-예제)
-      2. [bind mount 예제](#bind-mount-예제)
-   4. [mount propagation(전파) 옵션](#mount-propagation전파-옵션)
-      1. [옵션 설명](#옵션-설명)
-      2. [예제](#예제)
+* [mount](#mount)
+   * [mount 방식의 종류](#mount-방식의-종류)
+   * [일반 마운트와 바인드 마운트의 원본 저장소의 차이](#일반-마운트와-바인드-마운트의-원본-저장소의-차이)
+      * [일반 마운트 대상](#일반-마운트-대상)
+   * [명령어 예제](#명령어-예제)
+      * [normal mount 예제](#normal-mount-예제)
+      * [bind mount 예제](#bind-mount-예제)
+   * [mount propagation(전파) 옵션](#mount-propagation전파-옵션)
+      * [옵션 설명](#옵션-설명)
+      * [예제](#예제)
 ---
 mount 명령은 임의의 디렉토리로 파티션이나 다른 디렉토리를 연결하기 위해서 사용한다.
 
