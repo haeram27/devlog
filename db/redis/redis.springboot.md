@@ -1,10 +1,12 @@
-https://redis.io/docs/latest/develop/data-types/
+<https://redis.io/docs/latest/develop/data-types/>
 
-## java redis client library
+# java redis client library
+
 lettuce: async client  
 jedis: sync client
 
 ## configuration
+
 ```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

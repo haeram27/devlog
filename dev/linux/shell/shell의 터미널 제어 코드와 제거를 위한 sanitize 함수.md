@@ -1,8 +1,6 @@
 
 # 공백/ANSI Control Sequence 포함 확인
 
----
-
 - [공백/ANSI Control Sequence 포함 확인](#공백ansi-control-sequence-포함-확인)
   - [공백 포함 여부 확인](#공백-포함-여부-확인)
   - [터미널 제어 코드 포함 여부 확인](#터미널-제어-코드-포함-여부-확인)
