@@ -28,7 +28,7 @@ shell의 어떤 데이터에 공백 또는 터미널 제어 시퀀스 포함 여
 - ***터미널 제어 시퀀스 포함 여부 확인***은 `hd(hexdump -C)` 또는 `hexdump -c` 명령으로 출력
 
 ```bash
-cat [${VAR}] | hexdump -c
+echo -n "[${VAR}]" | hexdump -c
 ```
 
 ## 공백 포함 여부 확인
