@@ -17,6 +17,8 @@
 - [터미널 제어 시퀀스 (TODO)](#터미널-제어-시퀀스-todo)
   - [표준 문서](#표준-문서)
   - [대표적인 터미널 제어 시퀀스 종류](#대표적인-터미널-제어-시퀀스-종류-1)
+    - [C1 (8-bit) Control Charaters](#c1-8-bit-control-charaters)
+    - [자주 사용되는 Control Character](#자주-사용되는-control-character)
   - [대표적인 OSC 시퀀스](#대표적인-osc-시퀀스)
   - [참고](#참고-1)
     - [ST (String Terminator)](#st-string-terminator)
@@ -135,6 +137,7 @@ echo "$cleaned"
 | **XTerm ctlseqs** | 터미널에서의 ANSI 제어 시퀀스 실제 구현 내용 (시퀀스별 ASCII값 확인) | [ctlseqs.html](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html) |
 
 ### character class:  \[\[:print:\]\]
+
 <https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.html#tag_07_03_01>
 터미널에 출력 가능한 문자 클래스(눈으로 볼 수 있는 문자만 포함하는 클래스)
 upper, lower, alpha, digit, xdigit, punct, graph 클래스와 \<space\>(0x20) 포함
@@ -234,14 +237,25 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 
 ## 대표적인 터미널 제어 시퀀스 종류
 
-* OSC (OPERATING SYSTEM COMMAND)
-- DCS (DEVICE CONTROL STRING)
-- APC (APPLICATION PROGRAM COMMAND)
-- PM (PRIVACY MESSAGE)
-- SGR (SELECT GRAPHIC RENDITION)
-- CSI (CONTROL SEQUENCE INTRODUCER)
-- SOS (START OF STRING)
-- ST (STRING TERMINATOR)
+### C1 (8-bit) Control Charaters
+
+| Pair code | HEX code | Seq ABBR | Seq Full Name |
+|:---|:---|:---|:---|
+| ESC D | 0x84 | IND | Index |
+| ESC E | 0x85 | NEL | Next Line |
+| ESC H | 0x88 | HTS | Tab Set |
+| ESC M | 0x8d | RI  | Reverse Index |
+| ESC N | 0x8e | SS2 | Single Shift Select of G2 Character Set |
+| ESC O | 0x8f | SS3 | Single Shift Select of G3 Character Set |
+| ESC P | 0x90 | DCS | Device Control String |
+| ESC V | 0x96 | SPA | Start of Guarded Area |
+| ESC W | 0x97 | EPA | End of Guarded Area |
+| ESC X | 0x98 | SOS | Start of String |
+| ESC [ | 0x9b | * CSI | Control Sequence Introducer |
+| ESC \ | 0x9c | * ST  | String Terminator |
+| ESC ] | 0x9d | * OSC | Operating System Command |
+| ESC ^ | 0x9e | PM  | Privacy Message |
+| ESC _ | 0x9f | APC | Application Program Command |
 
 | Parameter | 예시 | 설명 |
 |-------------|------|------|
@@ -250,13 +264,14 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 | Pm | Any number of single numeric parameters, separated by ; character(s).  Individual values for the parameters are listed with Ps |
 | Pt | A text parameter composed of printable characters. |
 
+### 자주 사용되는 Control Character
+
 | 시퀀스 종류 | 예시 | 설명 |
 |-------------|------|------|
-| OSC | `ESC ] 0;title BEL` or "OSC *Ps* ; *Pt* ST" | 윈도우 제목 설정 |
-| DCS | `ESC [31m` | 글자 색, 스타일 등 |
-| APC | `ESC ( B` | 문자 세트 전환 |
-| **DCS/APC/PM/SOS** | `ESC P...ESC \` | 디바이스 제어 시퀀스 등 |
-| **기타** | `ESC ^...ESC \` | 다양한 확장 시퀀스 |
+| OSC | `ESC ]0;title BEL` or "OSC *Ps* ; *Pt* ST" | 윈도우 제목 설정 |
+| CSI(SGR) | `ESC [31m` | 글자 색, 스타일 등 |
+| DCS | `ESC P...ESC \` | 디바이스 제어 시퀀스 등 |
+| 기타 | `ESC ^...ESC \` | 다양한 확장 시퀀스 |
 
 | 시퀀스 종류 | 예시 | 설명 |
 |-------------|------|------|
@@ -270,9 +285,9 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 
 | 시퀀스 코드 | 의미                         |
 |-------------|------------------------------|
-| `ESC ] 0;<TITLE-VALUE> BEL` | 윈도우/탭 타이틀 설정        |
-| `ESC ] 1;<NAME-VALUE> BEL` | 아이콘 이름 설정 (GUI용)    |
-| `ESC ] 8;;<URI-VALUE> ST` | 하이퍼링크 (iTerm2, Kitty 등) |
+| `ESC [ 0;<TITLE-VALUE> BEL` | 윈도우/탭 타이틀 설정        |
+| `ESC [ 1;<NAME-VALUE> BEL` | 아이콘 이름 설정 (GUI용)    |
+| `ESC [ 8;;<URI-VALUE> ESC \` | 하이퍼링크 (iTerm2, Kitty 등) |
 
 ## 참고
 
