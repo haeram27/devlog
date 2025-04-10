@@ -1,9 +1,9 @@
 
-# 공백/터미널 제어 시퀀스스 포함 확인
+# 공백/ANSI Control Sequence 포함 확인
 
 ---
 
-- [공백/터미널 제어 시퀀스스 포함 확인](#공백터미널-제어-시퀀스스-포함-확인)
+- [공백/ANSI Control Sequence 포함 확인](#공백ansi-control-sequence-포함-확인)
   - [공백 포함 여부 확인](#공백-포함-여부-확인)
   - [터미널 제어 코드 포함 여부 확인](#터미널-제어-코드-포함-여부-확인)
   - [예](#예)
@@ -131,6 +131,11 @@ echo "$cleaned"
 
 ## 참고
 
+| 표준 | 설명 | 링크 |
+|------|------|------|
+| **ECMA-48** | ANSI 제어 시퀀스 정의 및 의미 | [ecma-international.org](https://ecma-international.org/publications-and-standards/standards/ecma-48/) |
+| **XTerm ctlseqs** | 터미널에서의 ANSI 제어 시퀀스 실제 구현 내용 (시퀀스별 ASCII값 확인) | [ctlseqs.html](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html) |
+
 ### character class:  \[\[:print:\]\]
 <https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.html#tag_07_03_01>
 터미널에 출력 가능한 문자 클래스(눈으로 볼 수 있는 문자만 포함하는 클래스)
@@ -226,7 +231,7 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 |------|------|------|
 | **ECMA-48** | ANSI 제어 시퀀스 정의 및 의미 | [ecma-international.org](https://ecma-international.org/publications-and-standards/standards/ecma-48/) |
 | **ISO/IEC 6429** | ECMA-48의 국제판 | 상업용 구매 또는 일부 기술문서 사이트에서 가능 |
-| **XTerm ctlseqs** | 터미널에서의 시퀀스 실제 구현 목록 (시퀀스별 ASCII값 확인) | [ctlseqs.html](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html) |
+| **XTerm ctlseqs** | 터미널에서의 ANSI 제어 시퀀스 실제 구현 내용 (시퀀스별 ASCII값 확인) | [ctlseqs.html](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html) |
 | **VT100/DEC docs** | 전통적 터미널 시퀀스 | 여러 오픈소스 아카이브에서 제공 |
 
 ## 대표적인 터미널 제어 시퀀스 종류

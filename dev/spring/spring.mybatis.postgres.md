@@ -1,28 +1,44 @@
----
+# Mybatis: postgres 연동
+
+- [Mybatis: postgres 연동](#mybatis-postgres-연동)
+  - [build.gradle](#buildgradle)
+    - [dependency](#dependency)
+    - [version 호환성](#version-호환성)
+  - [application.yml](#applicationyml)
+  - [Model :: ActorDto.java](#model--actordtojava)
+  - [Controller :: DvdRentalController.java](#controller--dvdrentalcontrollerjava)
+  - [Service :: ActorService.java](#service--actorservicejava)
+  - [DAO(Mapper:Java) :: DvdRentalDao.java](#daomapperjava--dvdrentaldaojava)
+  - [Mapper(Xml) :: resource/mapper/DvdRentalDao.xml](#mapperxml--resourcemapperdvdrentaldaoxml)
+  - [참고](#참고)
 
 ---
+
 ## build.gradle
 
 ```gradle
 plugins {
-	id 'org.springframework.boot' version '3.2.2'
+ id 'org.springframework.boot' version '3.2.2'
 }
 
 dependencies {
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+ implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 }
 ```
 
 ### dependency
+
 springboot 프로젝트에서 mybatis 사용을 위해서는 기본적으로 mybatis-spring-boot-starter 라이브러리만 추가하면 된다.
-mybatis starter 라이브러리는 mybatis 사용에 필요한 라이브러리 dependency를 자동으로 추가하도록하는 auto-configuration이 포함되어 있다. 
+mybatis starter 라이브러리는 mybatis 사용에 필요한 라이브러리 dependency를 자동으로 추가하도록하는 auto-configuration이 포함되어 있다.
 
 ### version 호환성
+
 springframework '3.2.2' 버전에는 mybatis starter '3.0.3' 버전이 호환된다.
 호환 버전이 맞지 않으면 다음의 오류가 발생할 수 있다.
 > java.lang.IllegalArgumentException: Invalid value type for attribute 'factoryBeanObjectType'
 
 ## application.yml
+
 ```yml
 mybatis:
   configuration:
@@ -39,6 +55,7 @@ spring:
 ```
 
 ## Model :: ActorDto.java
+
 ```java
 package com.example.springwebex.model;
 
@@ -55,6 +72,7 @@ public class ActorDto {
 ```
 
 ## Controller :: DvdRentalController.java
+
 ```java
 package com.example.springwebex.controller;
 
@@ -99,6 +117,7 @@ public class DvdRentalController {
 ```
 
 ## Service :: ActorService.java
+
 ```java
 package com.example.springwebex.service;
 
@@ -131,6 +150,7 @@ public class ActorService {
 ```
 
 ## DAO(Mapper:Java) :: DvdRentalDao.java
+
 ```java
 package com.example.springwebex.dao;
 
@@ -153,32 +173,29 @@ public interface DvdRentalDao {
 ```
 
 ## Mapper(Xml) :: resource/mapper/DvdRentalDao.xml
+
 ```xml
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.springwebex.dao.DvdRentalDao">
 
-	<select id="selectActors">
-		SELECT * FROM actor
-	</select>
+ <select id="selectActors">
+  SELECT * FROM actor
+ </select>
 
-	<insert id="insertActor" parameterType="com.example.springwebex.model.ActorDto">
-		INSERT INTO
-		    actor (
-				first_name
-				, last_name)
-		VALUES (
-		        #{firstName},
-				#{lastName})
-	</insert>
+ <insert id="insertActor" parameterType="com.example.springwebex.model.ActorDto">
+  INSERT INTO
+      actor (first_name , last_name)
+  VALUES (#{firstName}, #{lastName})
+ </insert>
 
 </mapper>
 ```
 
-
 ## 참고
-* mybatis starter github 
-  https://github.com/mybatis/spring-boot-starter
-* mybatis docs
-  https://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure
-* mybatis starter maven repos page
-  https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter/3.0.3
+
+- mybatis starter github
+  <https://github.com/mybatis/spring-boot-starter>
+- mybatis docs
+  <https://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure>
+- mybatis starter maven repos page
+  <https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter/3.0.3>
