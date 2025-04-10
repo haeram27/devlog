@@ -1,12 +1,32 @@
-# javax.sql.DataSource
+# hikariCP
+
+- [hikariCP](#hikaricp)
+  - [javax.sql.DataSource](#javaxsqldatasource)
+  - [hikariCP datasource 생성](#hikaricp-datasource-생성)
+    - [방법1. application.properties, application.yml에서 설정하기](#방법1-applicationproperties-applicationyml에서-설정하기)
+    - [방법2. hikari 전용 별도의 properties 파일(resource/hikari.properties)을 이용하여 생성](#방법2-hikari-전용-별도의-properties-파일resourcehikariproperties을-이용하여-생성)
+      - [hikari.properties](#hikariproperties)
+    - [방법3. Configuration Bean을 이용한 설정](#방법3-configuration-bean을-이용한-설정)
+  - [구조](#구조)
+  - [HikariConfig:: default values](#hikariconfig-default-values)
+  - [HikariConfig 초기화 로그 보기](#hikariconfig-초기화-로그-보기)
+    - [com.zaxxer.hikari package 이하에 포함되는 모든 클래스 로깅 레벨 설정](#comzaxxerhikari-package-이하에-포함되는-모든-클래스-로깅-레벨-설정)
+    - [com.zaxxer.hikari.HikariConfig 클래스 로깅 레벨 설정](#comzaxxerhikarihikariconfig-클래스-로깅-레벨-설정)
+    - [실행시 환경변수로 설정(대소문자 구분X)](#실행시-환경변수로-설정대소문자-구분x)
+  - [HikariCP 추천 설정](#hikaricp-추천-설정)
+
+---
+
+## javax.sql.DataSource
 
 database url, id, password와 기타 접속 관련 메타 정보를 포함하는 클래스
 datasource는 RDB와 연결하기 위한 정보를 가진 설정 클래스이며 기본 JDBC이외에도 connetion-pool(hikari, DBCP, DBCP2 등) 라이브러리들이 DataSource 클래스 인스턴스를 생성한다.
 
-# hikariCP datasource 생성
+## hikariCP datasource 생성
+
 <https://escapefromcoding.tistory.com/712>
 
-## 방법1. application.properties, application.yml에서 설정하기
+### 방법1. application.properties, application.yml에서 설정하기
 
 "spring.datasource.hikari" 접두사를 이용해서 속성 설정
 
@@ -17,11 +37,11 @@ spring.datasource.hikari.idleTimeout=600000
 spring.datasource.hikari.maxLifetime=1800000
 ```
 
-## 방법2. hikari 전용 별도의 properties 파일(resource/hikari.properties)을 이용하여 생성
+### 방법2. hikari 전용 별도의 properties 파일(resource/hikari.properties)을 이용하여 생성
 
-### hikari.properties
+#### hikari.properties
 
-```
+```plain
 driverClassName=com.mysql.jdbc.Driver
 jdbcUrl=jdbc:mysql://localhost:3306/testdb?useSSL=false
 maximumPoolSize=20
@@ -34,7 +54,7 @@ dataSource.prepStmtCacheSqlLimit=2048
 
 properties를 가져와서 설정할 수도 있습니다.
 
-```
+```java
 @Configuration
 public class HikariCPConfig {
     @Bean(destroyMethod = "close")
@@ -47,9 +67,9 @@ public class HikariCPConfig {
 }
 ```
 
-## 방법3. Configuration Bean을 이용한 설정
+### 방법3. Configuration Bean을 이용한 설정
 
-```
+```java
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -68,7 +88,7 @@ public DataSource dataSource(){
 }
 ```
 
-# 구조
+## 구조
 
 SqlSessionFactoryBean > DataSource(Hikari
 
@@ -77,18 +97,18 @@ spring 2.x 부터 HikariCP는 spring-boot의 기본 Connection Pool로 설정되
 
 단, RDB와 연결하려면 최소한의 jdbc를 위한 기본 datasource 설정은 반드시 필요함
 
-```
+```plain
 spring.datasource.driver-class-name: org.postgresql.Driver
 spring.datasource.url: jdbc:postgresql://localhost:5432/dvdrental
 spring.datasource.username: postgres
 spring.datasource.password: postgres
 ```
 
-# HikariConfig:: default values
+## HikariConfig:: default values
 
 HikariCP의 로그를 활성화하면 최초 DB 연결 동작시 초기화 로그를 볼 수 있다.
 
-```
+```plain
 HikariPool-1 - configuration:
 allowPoolSuspension.............false
 autoCommit......................true
@@ -127,27 +147,30 @@ username........................"postgres"
 validationTimeout...............5000
 ```
 
-# HikariConfig 초기화 로그 보기
+## HikariConfig 초기화 로그 보기
 
 application.yml 이나 환경변수에 logging.level.{package-path} 설정을 하면 해당 패키지 또는 클래스의 로그 레벨 설정이 가능한다.
 
 HikariConfig 클래스의 로그 레벨을 DEBUG 이상으로 설정하면 최초 DB 연결시 HikariConfig의 설정값을 확인할 수 있다.
 
-## com.zaxxer.hikari package 이하에 포함되는 모든 클래스 로깅 레벨 설정
+### com.zaxxer.hikari package 이하에 포함되는 모든 클래스 로깅 레벨 설정
 
 위치: resource/application.yaml
 설정: logging.level.com.zaxxer.hikari: TRACE
 
-## com.zaxxer.hikari.HikariConfig 클래스 로깅 레벨 설정
+### com.zaxxer.hikari.HikariConfig 클래스 로깅 레벨 설정
 
 위치: resource/application.yaml
 설정: logging.level.com.zaxxer.hikari.HikariConfig: TRACE
 
-## 실행시 환경변수로 설정(대소문자 구분X)
+### 실행시 환경변수로 설정(대소문자 구분X)
 
-$ logging_level_com_zaxxer_hikari_hikariconfig=debug gradle bootRun
+```bash
+logging_level_com_zaxxer_hikari_hikariconfig=debug gradle bootRun
+```
 
-# HikariCP 추천 설정
+## HikariCP 추천 설정
+
 <https://netmarble.engineering/hikaricp-options-optimization-for-game-server/>
 autoCommit......................true
 maximumPoolSize == minimumIdle
