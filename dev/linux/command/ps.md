@@ -12,6 +12,7 @@
 | -w | Wide output.  Use this option twice for unlimited width. |
 
 To see every process on the system using standard syntax:
+
 ```bash
 ps -ef
 ```
@@ -25,31 +26,37 @@ ps -efly
 ```
 
 To print a process tree:
+
 ```bash
 ps -ejH
 ```
 
 To get info about threads:
+
 ```bash
 ps -eLf
 ```
 
 To see favorite items only or use `top` command
+
 ```bash
 ps -eo pid,ppid,user,group,%cpu,%mem,etime,stat,args
 ```
 
 To get security info:
+
 ```bash
 ps -eo euser,ruser,suser,fuser,f,comm,label
 ```
 
 To see every process with a user-defined format:
+
 ```bash
 ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,comm
 ```
 
 ---
+
 ## 예시
 
 ```bash
@@ -57,7 +64,8 @@ ps -ef | grep bash
 ```
 
 출력:
-```
+
+````
 UID        PID  PPID  C STIME TTY          TIME CMD
 user      1234  1220  0 10:23 pts/0    00:00:00 bash
 ```
