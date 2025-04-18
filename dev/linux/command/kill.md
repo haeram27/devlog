@@ -4,28 +4,28 @@ $ kill -l
 $ man 7 signal
 ```
 
-| No | ABBR | catchable | USAGE | purpose|
+| No | ABBR | catchable | terminal<br>key | purpose|
 |:---:|:---|:---|:---|:---|
 | 1  | SIGHUP      |   |   | disconnected from terminal |
-| 2  | SIGINT      |   | ctrl+c | terminate by terminal |
+| 2  | SIGINT      |   | ctrl+c | terminate by user |
 | 3  | SIGQUIT     |   | ctrl+\ | terminate and coredump |
 | 4  | SIGILL      |   |   |    |
 | 5  | SIGTRAP     |   |   |    |
 | 6  | SIGABRT     |   |   |    |
 | 7  | SIGBUS      |   |   |    |
 | 8  | SIGFPE      |   |   |    |
-| 9  | SIGKILL     | x | `kill -KILL` | force terminate |
+| 9  | SIGKILL     | x |   | forceful terminate |
 | 10 | SIGUSR1     |   |   |    |
 | 11 | SIGSEGV     |   |   |    |
 | 12 | SIGUSR2     |   |   |    |
 | 13 | SIGPIPE     |   |   |    |
 | 14 | SIGALRM     |   |   |    |
-| 15 | SIGTERM     |   | `kill -TERM` | graceful terminate |
+| 15 | SIGTERM     |   |   | graceful terminate |
 | 16 | SIGSTKFLT   |   |   |    |
 | 17 | SIGCHLD     |   |   |    |
 | 18 | SIGCONT     |   |   |    |
-| 19 | SIGSTOP     | x |   | stop force by system |
-| 20 | SIGTSTP     |   | ctrl+z | stop by terminal |
+| 19 | SIGSTOP     | x |   | forceful stop by system |
+| 20 | SIGTSTP     |   | ctrl+z | stop by user |
 | 21 | SIGTTIN     |   |   |    |
 | 22 | SIGTTOU     |   |   |    |
 | 23 | SIGURG      |   |   |    |
