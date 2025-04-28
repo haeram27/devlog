@@ -65,7 +65,7 @@ ps -ef | grep bash
 
 출력:
 
-````
+```
 UID        PID  PPID  C STIME TTY          TIME CMD
 user      1234  1220  0 10:23 pts/0    00:00:00 bash
 ```
