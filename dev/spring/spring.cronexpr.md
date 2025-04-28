@@ -70,20 +70,23 @@ Some cron-expression implementations use '?' as other purpose (e.g. cron daemon 
 
 ### Comma ( , )
 
-"하나의 timeunit에서 연속되지 않은 값 리스트의 구분자
-"MON,WED,FRI" (day of week)
- "1,2,3,10-20" (day of month)
+separator for non-conseutive value list in a timeunit
+
+- "MON,WED,FRI" (day of week)
+- "1,2,3,10-20" (day of month)
 
 ### Hyphen ( - )
 
-    "ranges"
- "2000-2010" (year) = every year between 2000 and 2010, inclusive.
+"ranges"
+
+- "2000-2010" (year) = every year between 2000 and 2010, inclusive.
 
 ### Slash ( / )
 
-    interval or increments or step
- For example "0/15" in the seconds field means "the seconds 0, 15, 30, and 45".
- And "5/15" in the seconds field means "the seconds 5, 20, 35, and 50
+"interval or increments or step"
+
+- "0/15" in the seconds field = "the seconds 0, 15, 30, and 45"
+- "5/15" in the seconds field = "the seconds 5, 20, 35, and 50"
 
 ### 'L' - `dom, dow`
 
