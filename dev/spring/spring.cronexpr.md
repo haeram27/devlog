@@ -68,7 +68,7 @@ dow = day of week only
 '?' can be used instead of '*' in day-of-week and day-of-month
 Some cron-expression implementations use '?' as other purpose (e.g. cron daemon start-up time) so that if both '*' and '?' are available in program then it is recommended to use not '?' but '*'
 
-### Comma ( , )
+### Comma (\<unit1\> ,\<unit2\>,... )
 
 separator for non-conseutive value list in a timeunit
 
@@ -81,7 +81,7 @@ separator for non-conseutive value list in a timeunit
 
 - "2000-2010" (year) = every year between 2000 and 2010, inclusive.
 
-### Slash ( / )
+### Slash ( \<start\>/\<interval\> )
 
 "interval or increments or step"
 
@@ -101,13 +101,13 @@ short-hand for "last"
 
 - L-3 = from 3rd to the last day in the month
 
-### 'DDDL' - `dow`
+### '\<DDD\>L' - `dow`
 
 "the last day of week d (or DDD) in the month"
 
 - THUL = last Thursday of the month
 
-### 'nthW' - `dom`
+### '\<nth\>W' - `dom`
 
 "the nearest weekday(Mon-Fri, no SAT/SUN) from nth day"
 
@@ -123,7 +123,7 @@ short-hand for "last"
 
 "last weekday of the month".
 
-### sharp( dow#nth ) - `dom`
+### sharp( \<dow\>#\<nth\> ) - `dom`
 
 "nth day-of-week"
 
