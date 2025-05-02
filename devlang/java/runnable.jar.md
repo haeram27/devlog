@@ -1,6 +1,6 @@
 # How to run jar
 
-
+실행 가능한 jar는 main() 메소드를 포함하는 
 
 
 $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true
