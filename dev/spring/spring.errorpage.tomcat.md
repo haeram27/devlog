@@ -1,7 +1,7 @@
 
-# tomcat http error page configuration
+# setup custom error page of spring buitin tomcat and Netty
 
-## add common-error.html
+## add error.html
 
 path: `{project.basedir}/resource/public/error/error.html`
 
@@ -34,12 +34,16 @@ path: `{project.basedir}/resource/public/error/error.html`
 </html>
 ```
 
-## disable whitelabel error page on spring-boot-web application
+## disable spring-boot whitelabel(default) error page
+
+만약 spring에 error handling 루틴이 enable 되어있으면, http 에러처리를 http 서버(tomcat 또는 netty) 보다 spring이 우선 응답하게 된다.
+spring의 default error page는 whitelabel error 페이지이며, default로 enable 되어 있으므로 custom error page를 적용해야하는 경우 이 whitelabel error page를 disable 해야한다.
 
 If error-page settings are enabled in both of `tomcat` and `spring-boot-web` then spring-boot-web handle error firstly. so if tomcat needs to handle error-page then `spring-boot-web` http error handling SHOLD be disabled.
 
 - application.yml
 ```yml
+# 스프링 기본 에러 페이지 비활성화
 server:
   error:
     whitelabel:
@@ -50,11 +54,13 @@ server:
 
 ## configure error-page settings programatically (jar)
 
-Spring Boot의 실행 가능한 JAR(내장 Tomcat) 환경에서는 더 이상 `WEB-INF/web.xml`을 사용하지 않고, 다음 두 가지 방법으로 에러 페이지를 대체합니다.
+Spring Boot Web의 내장 Tomcat 환경에서는 더 이상 `WEB-INF/web.xml`을 사용하지 않고, 다음 세 가지 방법으로 에러 페이지를 대체합니다.
+하기 방법은 내장 Netty 환경에서도 동일합니다.
+정적 HTML 배치나 Java Config로 커스터마이징 하는 것을 추천합니다.
 
 ---
 
-## 1. 정적 HTML 배치로 간단히 처리하기
+### 1. 정적 HTML 배치로 간단히 처리하기 (`recommended`)
 
 Spring Boot는 기본적으로 **`/error`** 경로로 들어오는 요청을 처리하며, `src/main/resources/{static,public,resources,META-INF/resources}` 아래에 다음과 같은 위치에 HTML 파일을 두면 자동으로 매핑해 줍니다. 즉, `src/main/resources/static/error/error.html` 로 파일을 두면, 외부에서 `/error/error.html` URL 로 접근할 수 있어야 합니다.
 
@@ -87,7 +93,7 @@ server.error.whitelabel.enabled=false
 
 ---
 
-## 2. Java Config로 커스터마이징 (ErrorPage 등록)
+### 2. Java Config로 커스터마이징 (`recommended`)
 
 더 세밀하게 상태코드나 예외별로 경로를 매핑하고 싶다면, `WebServerFactoryCustomizer<ConfigurableServletWebServerFactory>` 빈을 등록해서 `ErrorPage` 를 직접 추가할 수 있습니다.
 
@@ -187,7 +193,8 @@ public class GlobalExceptionHandler {
 - **세밀한 코드 매핑** 이 필요하면 `WebServerFactoryCustomizer` 를 이용해 `ErrorPage` 를 등록하세요.
 - **예외별 로직** 이 복잡하면 `@ControllerAdvice` + `@ExceptionHandler` 조합을 사용하시면 됩니다.
 
-## configure error-page settings in web.xml (war only)
+
+## 참고: spring 외부 tomcat 사용시 custom error page 설정
 
 path: /WEB-INF/web.xml
 
@@ -299,6 +306,7 @@ path: /WEB-INF/web.xml
     <location>/resources/public/error/error.html</location>
 </error-page>
 
+<!--java exeception error page-->
 <error-page>
     <exception-type>java.lang.Throwable</exception-type>
     <location>/resources/public/error/error.html</location>

@@ -1,9 +1,9 @@
 
-# nginx http error page configuration
+# nginx custom error page
 
 
-## add common-error.html
-path: `${NGINX_HOME}\html\common-error.html`
+## add error.html
+path: `${NGINX_HOME}\html\error.html`
 
 ```html
 <!DOCTYPE html>
@@ -43,10 +43,13 @@ https://nginx.org/en/docs/http/ngx_http_core_module.html#error_page
 error_page <http-error-code> <uri>
 ```
 error_page 설정은 http 또는 server 블럭에 작성할 수 있다.
-하지만 server 블럭 당 작성하는 것이 location 설정을 함께 할 수 있기 때문에 가장 안전한 설정을 할 수 있다.
-http 블럭에 error_page 설정을 하게 되면 uri를 파일 시스템상 html과 매칭하는데 어려움이 있으며, internal 설정을 할 수 없어서 외부에서 html 파일에 직접 접근할 수 있게 된다.
+http 블럭에 error_page 설정을 정의한 경우 error_page 설정의 uri에 해당하는 실제 html파일을 root 설정으로 지정해야하며, server 블럭에 error_page 설정을 정의된 경우 error_page 설정의 uri에 해당하는 실제 html파일을 location 설정으로 좀 더 상세히 지정할 수 있다.
 
-http 블럭에 정의된 경우 root 설정, server 블럭에 정의된 경우 location 설정에서 지정된 경로 이하에서 uri로 지정된 html 파일을 찾게 된다.
+http 블럭 보다 server 블럭 당 작성하는 것이 location 설정을 사용할 수 있기 때문에 좀 더더 안전한 설정을 할 수 있다.
+http 블럭에 error_page 설정을 하게 되면 다음과 같은 단점이 있을수 있다.
+-  error_page 설정의 마지막 uri에 지정되는 html 파일을 FS의 html과 매칭할 때 root (html등의 file resource root 경로) 설정만 사용할 수 있다. root 설정은 상속이 가능한 설정이기 때문에 server 블럭 등 http 블럭의 하위 블럭에서 root를 재정의 하면 http 블럭의 root 설정이 무시 되어 html을 찾을 수 없는 경우가 생길수 있다. 다시말하면 uri의 html 파일을 server 블럭 별로 접근할 수 있도록 설계를 고려해야 한다.
+- http 블럭에는 location 설정을 지정 할 수 없기 alias와 internal 설정을 할 수 없어서 상세 설정이 불가능하다. alias 설정은 uri별로 직접 html을 지정할 수 있게 해주며, internal 설정은 location으로 지정하는 경로의 uri를 외부에서 접근할 수 없도록 하여 보안에 도움이 된다. 
+ 
 
 ### http 블럭에 작성할 경우 
 ```yml
@@ -55,7 +58,7 @@ http {
 	error_page
 		400 401 402 403 404 405 406 408 409 410 411 412 413 414 415 416 421 429 497
 		500 501 502 503 504 505 507
-		/common-error.html;
+		/error.html;
 }
 ```
 `root /permanent/etc/nginx/html;`
@@ -96,7 +99,7 @@ http {
     - 서버 블록마다 따로 설정할 필요 없이, 전역 한 번만 선언으로 모든 가상호스트에 적용
 
 
-### server 블럭에 작성할 경우 
+### server 블럭에 작성할 경우 (recommended)
 ```
 http {
     server {
@@ -111,7 +114,7 @@ http {
 			
 		location = /common-error.html {
 			internal;
-			alias /permanent/etc/nginx/html/common-error.html;
+			alias /permanent/etc/nginx/html/error.html;
 		}
     }
 }
