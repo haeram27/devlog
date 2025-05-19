@@ -18,10 +18,11 @@ $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.ski
 
 
 
-java로 jar 실행 시 main class 지정 방법
+## java로 jar 실행 시 main class 지정 방법
 
+```bash
 java -jar -Xms4096m -Xmx4096m -Dmax.threads=512 -Dapp.processor.id=myapp /path/to/application.jar &
-
+```
 
 ## "java -jar"로 실행 시 manifest 생성
 "java -jar"를 사용하면 매니페스트 파일(META-INF/MANIFEST.MF)에 지정된 mainClass를 실행한다.
