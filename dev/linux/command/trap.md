@@ -1,8 +1,61 @@
 # trap
 
-`trap` 명령어에서 `ERR`과 `EXIT`는 **특수한 시그널**로, 다른 시스템 신호와는 다르게 **Bash 스크립트의 오류나 종료**와 관련된 이벤트를 처리할 수 있게 해줍니다. 이들에 대해 설명하겠습니다.
+`trap` 명령어는 Bash 스크립트에서 특정 **신호(signal)**가 발생할 때 실행할 동작을 지정하는 데 사용됩니다. 예를 들어, 사용자가 스크립트를 종료하거나 시스템 신호가 전달되면 특정 작업을 처리하도록 설정할 수 있습니다.
 
-### 1. **ERR (Error)**
+`sigspec`은 **신호의 종류**를 나타내며, 시스템에서 발생하는 다양한 신호들에 대응할 수 있습니다.
+
+Syntax:
+
+```bash
+trap <command> <sigspec>...
+trap -p
+trap -l 또는 'bash -c "trap -l"'
+```
+
+sigspec을 명시할 때 signal 이름은 case insesitive 이며, `SIG` prefix 사용은 optional이다.
+-p 옵션은 현재 trap에 설정된 sigspec과 매치되는 명령을 출력하낟.
+-l 옵션은 지정 가능한 시스템 시그널 리스트를 출력한다.
+
+## 특수 sigspec
+
+- DEBUG : 각 단일 명령(simple command), 함수 호출, '!'(논리부정)으로 시작 하지 않은 모든 명령 실행 직전에
+- ERR : 각 단일 명령(simple command), 함수 호출이 비정상 종료값(0이 아닌 값)을 반환했을 때
+- EXIT : 스크립트가 종료되기 직전, 스크립트는 전체 실행을 마치거나 exit 명령에 등에 의해서 종료될 수 있으며 EXIT 트랩 발동시 종료의 원인은 고려하지 않음
+
+### 1. **DEBUG (Command Debug)**
+
+- **의미**: `DEBUG`는 **명령어 또는 함수 실행 직전에** 발생되는 시그널입니다.
+
+- **주의사항**: `DEBUG`는 `!` (논리 부정, reserved word) 예약어로 시작하는 명령에는 발생되지 않습니다. `!`가 직접 명시된 명령어/함수의 실행 시점에는 발생하지 않지만 해당 명령어/함수의 내부에서 실행되는 명령어/함수에는 적용이 됩니다.
+
+- **주요용도**:
+  - 명령 추적(logging): 어떤 명령이 어떤 순서로, 어떤 인자와 함께 호출되는지 실시간 로그 남기기
+  - 프로파일링/계측(monitoring): 특정 명령 앞뒤에 타임스탬프나 성능 측정 코드 삽입
+  - 커맨드 검증: 실행 전 커맨드를 검사해서, 위험한 옵션이 있으면 중단하거나 사용자에게 확인 요청
+  - “마지막 명령” 기록: DEBUG 트랩 내에서 이전 $BASH_COMMAND 값을 저장해 두었다가, EXIT 트랩에서 에러 상황 보고
+
+- **예시**: 스크립트 종료 직전 마지막 으로 실행한 명령을 로그로 남기기
+
+```bash
+# 1) Debug 옵션 설정: -e = "set -o errexit", 명령/함수가 비정상 종료코드를 반환시 스크립트 종료
+set -e
+
+# 2) DEBUG 트랩: 각 명령 실행 직전에 발생되어 실행 대상 명령을 변수에 저장
+prev_cmd="none"
+current_cmd="none"
+trap 'prev_cmd=$current_cmd; current_cmd=$BASH_COMMAND' DEBUG
+
+# 3) EXIT 트랩에서 기록된 명령어 출력
+destructor() {
+    echo "### Print last executed commands"
+    echo "prev_cmd: ${prev_cmd}"
+    echo "current_cmd: ${current_cmd}"
+}
+trap destructor EXIT
+``` 
+
+
+### 2. **ERR (Error)**
 
 - **의미**: `ERR`는 **명령어 실행이 실패했을 때** 실행되는 트랩입니다. 특정 명령어가 **비정상 종료(비영향 오류)** 되면 지정된 동작을 실행할 수 있습니다.
 - **조건**: `trap`에 `ERR`을 지정하면, **스크립트 내에서 명령어가 실패했을 때** 이 트랩이 발생합니다.
@@ -26,15 +79,15 @@
 
 ---
 
-### 2. **EXIT (Script Exit)**
+### 3. **EXIT (Script Exit)**
 
 - **의미**: `EXIT`는 스크립트가 종료될 때 실행됩니다. **스크립트가 정상적으로 종료되거나 종료 코드가 반환될 때** 트랩이 실행됩니다.
 - **조건**: `EXIT`은 스크립트의 **종료 시점**에 호출됩니다. 오류 코드와 상관없이 스크립트가 종료될 때 실행됩니다.
 - **주요 용도**: 스크립트가 종료되기 전에 정리 작업을 수행하거나 로그를 기록하는 데 유용합니다.
 
-   ```bash
-   trap 'echo "Script is exiting."' EXIT
-   ```
+    ```bash
+    trap 'echo "Script is exiting."' EXIT
+    ```
 
    위의 예시는 스크립트가 종료될 때마다 `"Script is exiting."` 메시지를 출력합니다.
 
@@ -47,45 +100,16 @@
 
    이 스크립트는 실행이 끝나면 `"Script finished."`라는 메시지를 출력하고 종료됩니다.
 
----
+   EXIT는 대부분 script 종료시 처리해야하는 로직을 명시할 때 많이 사용됩니다.
 
-### `ERR`과 `EXIT`의 차이점
-
-- `ERR`는 **명령어 실패**에 반응하고, `EXIT`는 **스크립트 종료** 시 실행됩니다.
-- `ERR`은 특정 명령어가 **실패**했을 때만 실행되며, `EXIT`은 스크립트가 **정상 종료**되거나 **비정상 종료**되었을 때 모두 실행됩니다.
-
----
-
-### 예시: `ERR`과 `EXIT`을 함께 사용하는 경우
-
-```bash
-#!/bin/bash
-
-trap 'echo "An error occurred. Exiting."' ERR
-trap 'echo "Script is about to exit."' EXIT
-
-echo "Starting the script"
-
-# 예시 명령어 - 실패하는 명령어
-non_existent_command
-
-echo "This line will not be reached"
-```
-
-- 이 스크립트는 `non_existent_command`가 실패할 때 `ERR` 트랩을 실행하고, 이후 스크립트가 종료될 때 `EXIT` 트랩이 실행됩니다.
+    ```bash
+    cleanup() {
+        rm -rf temporaryfiles
+    }
+    trap 'cleanup &>/dev/null' EXIT
+   ```
 
 ---
-
-### 결론
-
-- **`ERR`**: 명령어가 실패할 때 실행되는 트랩입니다.
-- **`EXIT`**: 스크립트가 종료될 때 실행되는 트랩입니다.
-
-이 두 가지를 적절하게 사용하면, 스크립트에서 오류 처리 및 종료 작업을 보다 효율적으로 처리할 수 있습니다.
-
-`trap` 명령어는 Bash 스크립트에서 특정 **신호(signal)**가 발생할 때 실행할 동작을 지정하는 데 사용됩니다. 예를 들어, 사용자가 스크립트를 종료하거나 시스템 신호가 전달되면 특정 작업을 처리하도록 설정할 수 있습니다.
-
-`sigspec`은 **신호의 종류**를 나타내며, 시스템에서 발생하는 다양한 신호들에 대응할 수 있습니다.
 
 ### 주요 `sigspec` 종류와 의미
 

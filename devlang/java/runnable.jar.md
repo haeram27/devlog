@@ -16,7 +16,76 @@ $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.ski
 | **별도 JAR 생성** | `maven-shade`, `gradle shadowJar` | 두 실행 파일을 각각의 fat-jar로 만들어 배포. |
 | **모듈 방식(9+)** | `java -p . -m my.mod/foo.Bar` | 모듈화 프로젝트라면 `module-info.java`에 `Main-Class`를 쓰지 않고 `--module` 옵션으로 구동. |
 
+---
+## java -cp 옵션 사용법법
 
+`-cp`(또는 `-classpath`) 옵션에는 “Java가 클래스(.class)나 리소스를 찾을 때 뒤져야 할 경로”를 지정합니다. 
+`-cp` 옵션 값에는 **“클래스를 포함한 폴더”**, **“JAR/ZIP 파일”**, **“와일드카드 확장”** 을 조합하여 지정할 수 있으며, OS의 경로 구분자를 지켜 나열하면 됩니다.
+
+지정할 수 있는 값의 종류는 크게 다음과 같습니다.
+
+1. **디렉터리**
+
+   * 컴파일된 `.class` 파일이 들어 있는 폴더를 지정
+   * 예: `-cp /home/user/myapp/bin`
+
+2. **JAR 파일(또는 ZIP 파일)**
+
+   * 내부에 `.class`와 리소스가 들어 있는 압축 파일
+   * 예: `-cp lib/mylib.jar`
+
+3. **여러 경로의 조합**
+
+   * OS별 구분자(`:` on UNIX/Linux/macOS, `;` on Windows)로 나열
+   * 예 (Linux/macOS):
+
+     ```bash
+     java -cp bin:lib/a.jar:lib/b.jar com.example.Main
+     ```
+   * 예 (Windows):
+
+     ```cmd
+     java -cp bin;lib\a.jar;lib\b.jar com.example.Main
+     ```
+
+4. **와일드카드 패턴** (Java 6 이후)
+
+   * 디렉터리 내 모든 JAR/ZIP 파일을 한꺼번에 포함
+   * 문법: `<디렉터리>/*`
+   * 예:
+
+     ```bash
+     java -cp "bin:lib/*" com.example.Main
+     ```
+   * 주의: 하위 디렉터리까지 재귀적으로 검색하지는 않으며, 오직 지정한 디렉터리의 최상위에 있는 `*.jar`·`*.zip` 만 포함됩니다.
+
+5. **상대 경로·절대 경로 혼용**
+
+   * `.`(현재 디렉터리), `../` 등 상대경로도 가능
+   * 예: `-cp .:../common/lib/*.jar`
+
+6. **매니페스트(Class-Path) 무시**
+
+   * JAR 내부 `META-INF/MANIFEST.MF` 의 `Class-Path` 선언 대신, `-cp` 에 지정된 값이 우선 적용됩니다.
+
+
+### 예시
+
+```bash
+# 1) 단일 디렉터리
+java -cp build/classes com.myapp.App
+
+# 2) 디렉터리 + 개별 JAR
+java -cp build/classes:lib/foo.jar:lib/bar.jar com.myapp.App
+
+# 3) 디렉터리 + lib 디렉터리의 모든 JAR
+java -cp build/classes:lib/* com.myapp.App
+
+# 4) Windows 환경
+java -cp build\classes;lib\* com.myapp.App
+```
+
+---
 
 ## java로 jar 실행 시 main class 지정 방법
 

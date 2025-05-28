@@ -1,7 +1,8 @@
 # SIGNAL
+
 ```bash
-$ kill -l
-$ man 7 signal
+kill -l
+man 7 signal
 ```
 
 | No | ABBR | catchable | terminal<br>key | purpose|
