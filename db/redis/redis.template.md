@@ -1,4 +1,5 @@
 # RedisTemplate
+
 - [RedisTemplate](#redistemplate)
   - [**1. RedisTemplate 주요 메서드 리스트 및 설명**](#1-redistemplate-주요-메서드-리스트-및-설명)
     - [**1.1. Key 관련 메서드**](#11-key-관련-메서드)
@@ -11,9 +12,9 @@
   - [**3. 결론**](#3-결론)
     - [**`RedisTemplate` vs `StringRedisTemplate` 차이점**](#redistemplate-vs-stringredistemplate-차이점)
   - [**1. `RedisTemplate<K, V>`**](#1-redistemplatek-v)
-    - [**✅ `RedisTemplate` 예제 (객체 저장)**](#-redistemplate-예제-객체-저장)
+    - [**`RedisTemplate` 예제 (객체 저장)**](#redistemplate-예제-객체-저장)
   - [**2. `StringRedisTemplate`**](#2-stringredistemplate)
-    - [**✅ `StringRedisTemplate` 예제 (문자열 저장)**](#-stringredistemplate-예제-문자열-저장)
+    - [**`StringRedisTemplate` 예제 (문자열 저장)**](#stringredistemplate-예제-문자열-저장)
   - [**주요 차이점 요약**](#주요-차이점-요약)
   - [**결론**](#결론)
 
@@ -206,7 +207,7 @@ public class RedisService {
 ➡️ **Generic 타입**을 사용할 수 있어 `Object`, `List`, `Map` 등 다양한 자료형 저장 가능  
 ➡️ 하지만 **기본 직렬화 방식이 JDK 직렬화**(`JdkSerializationRedisSerializer`)이므로 비효율적일 수 있음
 
-### **✅ `RedisTemplate` 예제 (객체 저장)**
+### **`RedisTemplate` 예제 (객체 저장)**
 
 ```java
 @Configuration
@@ -239,10 +240,10 @@ User user = (User) redisTemplate.opsForValue().get("user:1001");
 
 ## **2. `StringRedisTemplate`**
 
-➡️ **Key, Value를 무조건 String으로 저장**  
-➡️ **기본 직렬화 방식이 `StringRedisSerializer`**이므로 **속도가 빠르고 메모리 효율적**
+**Key, Value를 무조건 String으로 저장**  
+**기본 직렬화 방식이 `StringRedisSerializer`**이므로 **속도가 빠르고 메모리 효율적**
 
-### **✅ `StringRedisTemplate` 예제 (문자열 저장)**
+### **`StringRedisTemplate` 예제 (문자열 저장)**
 
 ```java
 @Autowired
