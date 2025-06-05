@@ -84,10 +84,6 @@ if (rs.next()) {
 
 ---
 
-## 참고: JAVA에서 RDB
-
----
-
 ## 참고: `JDBC 4.2 미만 + JAVA 8 미만` 환경경에서 RDB의 timestamptz를 timestamp로 변환 맵핑하는 과정
 
 * JDBC 4.2 미만 버전에서서는 RDB의 timestamptz(timestamp with timezone) 타입을 맵핑할 데이터 타입이 없다.
@@ -98,3 +94,59 @@ if (rs.next()) {
 * 현재 세션의 timezone은 별도의 사용자 설정이 없는 경우 RDB 설정 파일의 기본 값을 사용하게 되는데, 보통 `UTC`이다.
 * RDB의 기본 timezone은 각 RDB 어플리케이션의 공식 문서 또는 설정을 확인한다.
 * JDBC를 통해서 읽어온 timestamp 값은 클라이언트 JVM 어플리케이션에서 필요한 timezone으로 변화하여 사용하여야 한다.
+
+---
+
+## 참고: JDB(클라이언트 드라이버) <-> RDB(서버) 사이의 세션 타임존 설정 우선순위
+
+JDBC 연결시 별도의 명시적적 설정이 없으면, 서버 기본 설정이 적용됨
+
+| 우선순위  | 설정 위치                        | 설명                                       |
+| --------- | -------------------------------- | ------------------------------------------ |
+| ① (가장 우선) | **세션 내 명시적 설정**                  | `SET TIME ZONE 'Asia/Seoul';` |
+| ②         | **JDBC URL 파라미터**                        | `?options=-c%20TimeZone=Asia/Seoul` |
+| ③ (가장 낮음) | **서버 기본 설정** (`postgresql.conf`)   | `timezone = 'UTC'` 등, 명시 설정이 없을 때만 사용됨 |
+
+---
+
+## 참고: JDBC와 RDB의 세션 timezone 확인하기
+
+Postgresql 기준:
+
+```java
+import java.sql.*;
+
+public class JdbcTimezoneCheck {
+    public static void main(String[] args) {
+        String url = "jdbc:postgresql://localhost:5432/mydb?options=-c%20TimeZone=Asia/Seoul";
+        String user = "myuser";
+        String password = "mypassword";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SHOW TimeZone")) {
+
+            if (rs.next()) {
+                String sessionTimeZone = rs.getString(1);
+                System.out.println("JDBC 세션의 PostgreSQL TimeZone: " + sessionTimeZone);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+```yaml
+JDBC 세션의 PostgreSQL TimeZone: Asia/Seoul
+```
+
+---
+
+## 참고: JVM 타임존 확인 (RDB 서버가 아닌 Java JVM 측)
+
+```java
+System.out.println("JVM default TimeZone: " + java.util.TimeZone.getDefault().getID());
+```
