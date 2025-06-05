@@ -60,7 +60,7 @@ if (rs.next()) {
 ```
 
 * 출력 결과는 정확한 **오프셋(+09:00)** 정보 포함
-* `java.sql.Timestamp`가 **아님**
+* `java.sql.Timestamp`가 아닌 java.time.OffsetDateTime 이나 ZonedDateTime 사용
 
 ## JDBC 동작 설명
 
