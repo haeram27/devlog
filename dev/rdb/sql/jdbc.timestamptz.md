@@ -1,7 +1,17 @@
 # JDBC의 timestamptz 읽기
 
-JDBC가 RDB 로 부터 timestamp(ts)/timstamptz(tstz)를 읽을 때, 세션의 timezone 설정을 기준으로, ts와 tstz는 값이 변환 된다.
+JDBC가 RDB 로 부터 /timstamptz(tstz)를 읽을 때, 세션의 timezone 설정을 기준으로 그 값이 자동 변환 된다.
 JDBC 연결시 별도의 timezone 설정이 없으면, 세션 timezone은 RDB의 기본 설정(설정 파일)을 따르게 되고 기본값은 `UTC`이다.
+
+## JDBC의 의 timestamp와 timestamptz의 세션 timezone 기반 자동변환 여부
+
+timestamptz는 세션 tiemzone 기준으로 시간 값이 자동 변환되고 <br>
+timestamp는 자동 변환 되지 않지 않고 값 그대로 전달(시간 숫자 기준) 된다.
+
+|RDB 타입|JAVA 타입|자동변환여부|
+|---|---|---|
+|timestamp|LocalDateTime|`X`|
+|timestamptz|OffsetDateTime<br>ZonedDateTime|`O`|
 
 ## JDBC가 RDB의 timestamptz를 timestamp로 변환 맵핑하는 과정 (Java 8+, JDBC 4.2+)
 
