@@ -1,18 +1,25 @@
+# Window와 PARTITION BY
+
+
+
 ## `GROUP BY`와 `PARTITION BY` 차이이
 
 
-* `GROUP BY`: 집계 함수 사용용도, 그룹별 ROW 1개만 남음
+* `GROUP BY`: 그룹별 집계 함수 사용 용도, SELECT 결과로 그룹별 ROW 1개만 남음
+
+그룹별 스코어의 평균 값
 
 ```sql
-SELECT SUM(col2) as 
-FROM tb_
-GROUP BY group
+SELECT group_id, avg(score) FROM table GROUP BY group_id
 ```
 
-* `PARTITION BY`: 윈도우 함수와 함께 사용해서, **원본 행을 유지한 채** 그룹별 계산 → 결과 **그대로 유지**
+* `PARTITION BY`:
+  * 윈도우 함수와 함께 사용해서, SELECT 결과에서 그룹별 모든 행 **그대로 유지**
+  * 윈도우란 table에서 삭제되지 않은 
 
-
-
+```sql
+SELECT group_id, dense_rank(score) FROM table GROUP BY group_id
+```
 
 | 항목         | `GROUP BY`                 | `PARTITION BY` (윈도우 함수 용)                        |
 | ---------- | -------------------------- | ------------------------------------------------ |

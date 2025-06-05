@@ -16,13 +16,11 @@ timestamp는 자동 변환 되지 않지 않고 값 그대로 전달(시간 숫�
 |timestamp|java.time.LocalDateTime|`X`|
 |timestamptz|java.time.OffsetDateTime<br>java.time.ZonedDateTime|`O`|
 
-
 **Table.** JDBC(4.1-) + java(7-) 조합 환경에서 timestamp 시간 값의 세션 timezone 기준 자동 변환
 
 |RDB 타입|JAVA 맵핑 타입|시간값 자동변환 여부|
 |---|---|---|
 |timestamp|java.sql.Timestamp|`O`|
-
 
 ## JDBC가 RDB의 timestamptz를 timestamp로 변환 맵핑하는 과정 (Java 8+, JDBC 4.2+)
 

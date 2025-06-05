@@ -160,15 +160,15 @@ FROM employees;
 
 ### 사용 가능한 범위 옵션
 
-| 범위 문법                 | 의미          |
+| 범위 문법             | 의미        |
 | --------------------- | ----------- |
-| `UNBOUNDED PRECEDING` | 맨 처음 행부터    |
-| `1 PRECEDING`         | 현재 행에서 1행 앞 |
-| `CURRENT ROW`         | 현재 행만       |
-| `1 FOLLOWING`         | 현재 행에서 1행 뒤 |
+| `UNBOUNDED PRECEDING` | 맨 처음 행부터     |
+| `<offset> PRECEDING`  | 현재 행에서 \<offset\>행 앞 |
+| `CURRENT ROW`         | 현재 행만          |
+| `<offset> FOLLOWING`  | 현재 행에서 \<offset\>행 뒤 |
 | `UNBOUNDED FOLLOWING` | 맨 마지막 행까지   |
 
-* offset: 
+* offset: 정수 n (n > 0)
 * CURRENT ROW는 현재 연산 대상인 행을 의미한다.
 
 ---

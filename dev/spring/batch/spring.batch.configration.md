@@ -1,12 +1,14 @@
 # batch configuration
+
 |Class|Members|
 |---|---|
-|TriggerFactory(Trigger)	  | JobDetail, StartTime, Delay, Interval, RepeatCount |
+|TriggerFactory(Trigger)   | JobDetail, StartTime, Delay, Interval, RepeatCount |
 |JobDetailFactory(JobDetail)  | JobClass, Durability(bool), RequestRecovery(bool), JobData(Job, JobParameters) |
-|Job	                      | JobParametersIncrementer, Step, Listener |
-|Step	                      | {ItemReader, ItemProcessor, ItemWriter}, Tasklet, Listener |
+|Job                          | JobParametersIncrementer, Step, Listener |
+|Step                         | {ItemReader, ItemProcessor, ItemWriter}, Tasklet, Listener |
 
 ----------
+
 * JobDetail
   * JobClass(QuartzJobBean == job executor, launch jobs)
   * Durability(boolean)
