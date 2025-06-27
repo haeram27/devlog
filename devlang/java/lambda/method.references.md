@@ -91,5 +91,4 @@ Arrays.sort(rosterAsArray, Person::compareByAge);
 
 이러한 메서드 참조를 사용하면 코드가 더 간결하고 읽기 쉬워지며, 기존 메서드를 재사용하여 코드의 재사용성과 유지보수성을 향상시킬 수 있습니다.
 
-
 ---

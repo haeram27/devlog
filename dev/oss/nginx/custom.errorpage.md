@@ -47,7 +47,7 @@ http 블럭에 error_page 설정을 정의한 경우 error_page 설정의 uri에
 
 http 블럭 보다 server 블럭 당 작성하는 것이 location 설정을 사용할 수 있기 때문에 좀 더더 안전한 설정을 할 수 있다.
 http 블럭에 error_page 설정을 하게 되면 다음과 같은 단점이 있을수 있다.
--  error_page 설정의 마지막 uri에 지정되는 html 파일을 FS의 html과 매칭할 때 root (html등의 file resource root 경로) 설정만 사용할 수 있다. root 설정은 상속이 가능한 설정이기 때문에 server 블럭 등 http 블럭의 하위 블럭에서 root를 재정의 하면 http 블럭의 root 설정이 무시 되어 html을 찾을 수 없는 경우가 생길수 있다. 다시말하면 uri의 html 파일을 server 블럭 별로 접근할 수 있도록 설계를 고려해야 한다.
+-  error_page 설정의 마지막 uri에 지정되는 html 파일을 FileSystem의 html과 매칭할 때 root (html등의 file resource root 경로) 설정만 사용할 수 있다. root 설정은 상속이 가능한 설정이기 때문에 server 블럭 등 http 블럭의 하위 블럭에서 root를 재정의 하면 http 블럭의 root 설정이 무시 되어 html을 찾을 수 없는 경우가 생길수 있다. 다시말하면 uri의 html 파일을 server 블럭 별로 접근할 수 있도록 설계를 고려해야 한다.
 - http 블럭에는 location 설정을 지정 할 수 없기 alias와 internal 설정을 할 수 없어서 상세 설정이 불가능하다. alias 설정은 uri별로 직접 html을 지정할 수 있게 해주며, internal 설정은 location으로 지정하는 경로의 uri를 외부에서 접근할 수 없도록 하여 보안에 도움이 된다. 
  
 
@@ -67,8 +67,7 @@ http {
     아래에 위치한 모든 `server`·`location` 블록에서 기본으로 사용할 파일 시스템 경로가 `/permanent/etc/nginx/html`로 통일됩니다.
     
 - **스코프 우선순위**
-    - 만약 개별 `server` 또는 `location` 블록에서 별도 `root`를 선언하지 않았다면,  
-        HTTP 레벨 `root`가 그대로 적용됩니다.
+    - 만약 개별 `server` 또는 `location` 블록에서 별도 `root`를 선언하지 않았다면, HTTP 레벨 `root`가 그대로 적용됩니다.
     - 반대로, 더 좁은 컨텍스트(`server`나 `location`)에 `root`가 있으면 그 값이 우선합니다.
 
 

@@ -55,6 +55,15 @@ http_port 0.0.0.0:3128
 
 [ACLs](https://www.squid-cache.org/Versions/v7/cfgman/acl.html)
 
+ACL(Access Control List)은 Access Control의 대상을 표현하는 rule이다.
+ip, port를 베이스로 대상을 지정할 수 있으며, acl의 묶음 또한 하나의 acl이 될 수 있다.
+
+acl 지시자를 사용한 ACL 선언은 단지 조건을 정의하는 것이며, 어떤 것도 차단하거나 허용하지 않는다.
+http_access 등의 명령에서 ACL을 사용해야 실제 효과가 있다.
+
+
+ex: ACL 선언 및 http_access로 등록
+
 ```bash
 # ACL: Example rule allowing access from your local networks.
 # Adapt to list your (internal) IP networks from where browsing
@@ -91,7 +100,18 @@ http_access allow localhost
 http_access deny all
 ```
 
+### request와 acl의 매칭 순서
+
+http_access 명령으로 등록된 ACL의 순서가 중요하다.
+squid는 접속 요청이 왔을 때, ACL이 등록된 순서에 따라 매칭을 시도하기 때문이다.
+http_access 규칙은 등록된 순서대로 매칭 시도되며, 처음 매칭되는 규칙이 실행되고 이후 규칙은 무시된다.
+
+Squid는 `위에서 아래로 차례대로` http_access 규칙을 검사한다.
+`처음으로 조건에 부합하는 룰`이 발견되면, 그에 따라 허용(allow) 또는 차단(deny)되고, `이후 규칙은 무시`됩니다.
+
 ### access control configuration order
+
+일반적으로 테스트 상황이 아닌 실제 서비스 환경에서는 http_access 사용시 deny를 먼저, allow를 나중에, 마지막은 deny all로 설정하는 방식이 보편적입니다.
 
 1. deny specific acl
 2. allow specific acl
@@ -109,34 +129,4 @@ http_access deny all
 
 ```bash
 start /B ssh -fCN -L 3128:<http.proxy.host.ip>:3128 <gateway.remote.sshd> -o ExitOnForwardFailure=yes -o ServerAliveInterval=60 -o ServerAliveCountMax=10
-```
-
-## logs
-
-### configuration
-
-```text
-cache_access_log /usr/local/squid/logs/access.log
- - 접근로그를 기록하는 파일을 설정한다.
-```
-
-```text
-cache_log /usr/local/squid/logs/cache.log
- - 캐쉬설정에 관한 로그를 기록하는 파일을 설정한다.
-```
-
-```text
-cache_store_log /usr/local/squid/logs/store.log
- - 저장되는 로그(이미지, 아이콘 등)를 기록하는 파일을 설정한다.
-```
-
-```text
-debug_options ALL,1
- - 스퀴드가 동작할 때 오류체크 기능을 사용하여 로그파일에 기록할 수 있게 하는 옵션이다.
- - 현재 설정은 모든 항목에 대해 기본적인 값만 로그에 남도록 설정한 것이다.
-```
-
-```text
-buffered_logs on
- - 로그 기록시 사용되는 시스템 자원을 절약함으로써 약간의 속도 향상을 기대할 수 있는 옵션이다.
 ```
