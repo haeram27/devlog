@@ -1,6 +1,6 @@
-# hikariCP
+# hikariCP (TODO)
 
-- [hikariCP](#hikaricp)
+- [hikariCP (TODO)](#hikaricp-todo)
   - [javax.sql.DataSource](#javaxsqldatasource)
   - [hikariCP datasource 생성](#hikaricp-datasource-생성)
     - [방법1. application.properties, application.yml에서 설정하기](#방법1-applicationproperties-applicationyml에서-설정하기)
@@ -90,7 +90,7 @@ public DataSource dataSource(){
 
 ## 구조
 
-SqlSessionFactoryBean > DataSource(Hikari
+SqlSessionFactoryBean > DataSource(HikariCP)
 
 spring 2.x 부터 HikariCP는 spring-boot의 기본 Connection Pool로 설정되어 있음
 별다른 hikaricp 설정 없어도 hikaricp는 RDB 연결시 사용되고 이때 초기 설정은 default 값으로 자동 생성됨
@@ -172,6 +172,8 @@ logging_level_com_zaxxer_hikari_hikariconfig=debug gradle bootRun
 ## HikariCP 추천 설정
 
 <https://netmarble.engineering/hikaricp-options-optimization-for-game-server/>
+
+```config
 autoCommit......................true
 maximumPoolSize == minimumIdle
 maximumPoolSize=<CPU 코어수>로 테스트 시작하여 하기 기준에 맞도록 설정
@@ -191,3 +193,4 @@ keepaliveTime=30000ms
 StatementTimeout=1000ms
 ConnectionTimeout=3000ms
 ConnectionTimeout=13000ms (DNS 사용시)
+```

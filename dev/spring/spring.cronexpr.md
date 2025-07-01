@@ -6,15 +6,15 @@
   - [Allowed Special Characters](#allowed-special-characters)
     - [Asterisk ( \* )](#asterisk---)
     - [Questionmark ( ? ) - dow, dom](#questionmark------dow-dom)
-    - [Comma ( , )](#comma---)
+    - [Comma (\<unit1\> ,\<unit2\>,... )](#comma-unit1-unit2-)
     - [Hyphen ( - )](#hyphen----)
-    - [Slash ( / )](#slash---)
+    - [Slash ( \<start\>/\<interval\> )](#slash--startinterval-)
     - ['L' - `dom, dow`](#l---dom-dow)
     - ['L-nth'  - `dom`](#l-nth----dom)
-    - ['DDDL' - `dow`](#dddl---dow)
-    - ['nthW' - `dom`](#nthw---dom)
+    - ['\<DDD\>L' - `dow`](#dddl---dow)
+    - ['\<nth\>W' - `dom`](#nthw---dom)
     - ['LW' - `dom`](#lw---dom)
-    - [sharp( dow#nth ) - `dom`](#sharp-downth----dom)
+    - [sharp( \<dow\>#\<nth\> ) - `dom`](#sharp-downth----dom)
   - [Example expressions](#example-expressions)
 
 ---
@@ -132,6 +132,7 @@ short-hand for "last"
 
 ## Example expressions
 
+```text
     "0 0 * * * *" = the top of every hour of every day
     "*/10 * * * * *" = every ten seconds
     "0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day
@@ -147,3 +148,4 @@ short-hand for "last"
     "0 0 0 * * THUL" = last Thursday(4) of the month at midnight
     "0 0 0 ? * 5#2" = the 2nd Friday(5) in the month at midnight
     "0 0 0 ? * MON#1" = the 1st Monday in the month at midnight
+```
