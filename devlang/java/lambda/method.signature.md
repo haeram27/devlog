@@ -53,7 +53,7 @@ public class OverloadingExample {
 }
 ```
 
-✔️ **각 메서드 시그니처가 다르므로 오버로딩이 가능**합니다.
+ **각 메서드 시그니처가 다르므로 오버로딩이 가능**합니다.
 
 ---
 
@@ -68,7 +68,7 @@ class Parent {
 
 class Child extends Parent {
     @Override
-    void show(int x) { } // ✅ 오버라이딩: 시그니처 동일
+    void show(int x) { } // 오버라이딩: 시그니처 동일
 }
 ```
 
@@ -77,11 +77,11 @@ class Child extends Parent {
 ```java
 class Child extends Parent {
     @Override
-    int show(int x) { return x; } // ❌ 오류: 반환 타입이 다르면 오버라이딩 불가능
+    int show(int x) { return x; } // 오류: 반환 타입이 다르면 오버라이딩 불가능
 }
 ```
 
-✔️ **반환 타입은 시그니처에 포함되지 않지만, 오버라이딩 시에는 일치해야 합니다.**
+ **반환 타입은 시그니처에 포함되지 않지만, 오버라이딩 시에는 일치해야 합니다.**
 
 ---
 
@@ -92,7 +92,7 @@ class Child extends Parent {
 ```java
 class Example {
     public int getValue() { return 0; }
-    public double getValue() { return 0.0; } // ❌ 오류 (시그니처 중복)
+    public double getValue() { return 0.0; } // 오류 (시그니처 중복)
 }
 ```
 
@@ -103,7 +103,7 @@ class Example {
 ```java
 class Example {
     public void method(int x) throws IOException { }
-    public void method(int x) throws SQLException { } // ❌ 오류 (시그니처 동일)
+    public void method(int x) throws SQLException { } // 오류 (시그니처 동일)
 }
 ```
 

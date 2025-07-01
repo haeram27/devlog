@@ -11,7 +11,6 @@ ON CONFLICT (id) DO UPDATE
 SET
     name = EXCLUDED.name,
     score = EXCLUDED.score;
-	
 ```
 
 - ON CONFLICT는 반드시 B 테이블에 유니크 제약(primary key or unique index) 이 있어야 작동, 예제의 경우 B의 id는 primary 이거나 uniq 속성

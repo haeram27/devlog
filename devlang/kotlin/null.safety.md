@@ -16,7 +16,7 @@ indicate variable CAN be `nullable`
 
 syntax :
 
-```
+```text
 <type>?
 ```
 
@@ -35,7 +35,7 @@ use `safe-call` for `<nullable-var>` and want NPE when `<nullable-var>` is null
 
 syntax :
 
-```
+```text
 <nullable-var>?.<member>
 ```
 
@@ -59,7 +59,7 @@ use `elvis operator` for `<nullable-var>.<value-expr >` and do NOT want `NPE` wh
 
 syntax :
 
-```
+```text
 <nullable-var>.<value-expr> ?: `<value>
 ```
 

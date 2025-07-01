@@ -1,9 +1,6 @@
 # Window와 PARTITION BY
 
-
-
 ## `GROUP BY`와 `PARTITION BY` 차이이
-
 
 * `GROUP BY`: 그룹별 집계 함수 사용 용도, SELECT 결과로 그룹별 ROW 1개만 남음
 
@@ -21,11 +18,11 @@ SELECT group_id, avg(score) FROM table GROUP BY group_id
 SELECT group_id, dense_rank(score) FROM table GROUP BY group_id
 ```
 
-| 항목         | `GROUP BY`                 | `PARTITION BY` (윈도우 함수 용)                        |
-| ---------- | -------------------------- | ------------------------------------------------ |
-| **용도**     | 집계 (SUM, AVG, COUNT 등)     | 행(row)별 계산을 위해 그룹 내에서 연산 (누적합, 순위 등)             |
-| **출력 행 수** | 그룹당 1행 (그룹된 결과만 남음)        | 원본 행 수 그대로 유지됨                                   |
-| **어디에 사용** | 일반 SQL의 `SELECT` 절에서 사용    | `OVER (...)` 구문을 사용하는 윈도우 함수에서 사용                |
+| 항목 | `GROUP BY` | `PARTITION BY` (윈도우 함수 용) |
+| --- | --- | --- |
+| **용도** | 집계 (SUM, AVG, COUNT 등)     | 행(row)별 계산을 위해 그룹 내에서 연산 (누적합, 순위 등) |
+| **출력 행 수** | 그룹당 1행 (그룹된 결과만 남음) | 원본 행 수 그대로 유지됨 |
+| **어디에 사용** | 일반 SQL의 `SELECT` 절에서 사용 | `OVER (...)` 구문을 사용하는 윈도우 함수에서 사용 |
 | **함수 예시**  | `COUNT(*)`, `SUM(sales)` 등 | `ROW_NUMBER()`, `RANK()`, `SUM(...) OVER(...)` 등 |
 
 ---

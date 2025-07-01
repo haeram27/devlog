@@ -1,4 +1,5 @@
 # Method References (TODO)
+
 [Oracle Java 튜토리얼: 메서드 참조](https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html)
 
 람다 표현식을 사용하면 익명 메서드를 생성할 수 있습니다. 하지만 때로는 람다 표현식이 기존 메서드를 호출하는 것 외에는 아무 작업도 하지 않을 때가 있습니다. 이러한 경우 기존 메서드를 이름으로 참조하는 것이 더 명확할 수 있습니다. 메서드 참조를 사용하면 이미 이름이 있는 메서드에 대해 간결하고 읽기 쉬운 람다 표현식을 작성할 수 있습니다.
@@ -70,9 +71,8 @@ Arrays.sort(rosterAsArray, Person::compareByAge);
 `Person::compareByAge` 메서드 참조는 람다 표현식 `(a, b) -> Person.compareByAge(a, b)`와 의미적으로 동일합니다. 각각의 특징은 다음과 같습니다:
 
 - 형식 매개변수 목록은 `Comparator<Person>.compare`에서 복사된 `(Person, Person)`입니다.
-    
+
 - 본문은 `Person.compareByAge` 메서드를 호출합니다.
-    
 
 ---
 

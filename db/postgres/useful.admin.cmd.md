@@ -29,6 +29,7 @@ SELECT rolcanlogin FROM pg_roles WHERE rolname = 'postgres';
 ```
 
 ## psql
+
 ### psql syntax
 
 ```bash

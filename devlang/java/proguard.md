@@ -12,71 +12,73 @@ shrink, optimize, obfuscate 처리를 통해서 jar 파일의 경량화와 난�
 따라서 -dontshrink를 넣어도 -dontobfuscate를 넣지 않는 한 난독화는 그대로 진행됩니다.
 
 ## proguard 설정 예:
+
 - jdk version = 17
 - proguard-maven-plugin version = 2.7.0 (nested proguard version 7.4.1)
+
 ```xml
 <project>
     <properties>
         <version.plugin.proguard>2.7.0</version.plugin.proguard>
     </properties>
-	<plugin>
-		<groupId>com.github.wvengen</groupId>
-		<artifactId>proguard-maven-plugin</artifactId>
-		<version>${version.plugin.proguard}</version>
-		<executions>
-			<execution>
-				<phase>package</phase>
-				<goals>
-					<goal>proguard</goal>
-				</goals>
-				<configuration>
-					<skip>false</skip>
-					<libs>
-						<!-- <lib>${java.home}/jmods/</lib> -->
-						<lib>${java.home}/jmods/java.base.jmod</lib>
-						<lib>${java.home}/jmods/java.datatransfer.jmod</lib>
-						<lib>${java.home}/jmods/java.instrument.jmod</lib>
-						<lib>${java.home}/jmods/java.logging.jmod</lib>
-						<lib>${java.home}/jmods/java.management.jmod</lib>
-						<lib>${java.home}/jmods/java.management.rmi.jmod</lib>
-						<lib>${java.home}/jmods/java.naming.jmod</lib>
-						<lib>${java.home}/jmods/java.net.http.jmod</lib>
-						<lib>${java.home}/jmods/java.prefs.jmod</lib>
-						<lib>${java.home}/jmods/java.rmi.jmod</lib>
-						<lib>${java.home}/jmods/java.scripting.jmod</lib>
-						<lib>${java.home}/jmods/java.se.jmod</lib>
-						<lib>${java.home}/jmods/java.security.jgss.jmod</lib>
-						<lib>${java.home}/jmods/java.security.sasl.jmod</lib>
-						<lib>${java.home}/jmods/java.sql.jmod</lib>
-						<lib>${java.home}/jmods/java.sql.rowset.jmod</lib>
-						<lib>${java.home}/jmods/java.transaction.xa.jmod</lib>
-						<lib>${java.home}/jmods/java.xml.crypto.jmod</lib>
-						<lib>${java.home}/jmods/java.xml.jmod</lib>
-					</libs>
-					<includeDependency>true</includeDependency>
-					<includeDependencyInjar>true</includeDependencyInjar>
-					<outjar>${project.build.finalName}-obf.jar</outjar>
-					<options>
-				        <!-- ### GENERAL OPTIONS -->
-						<option>-dontshrink</option>
-						<option>-dontoptimize</option>
-						<!-- <option>-dontobfuscate</option> -->
-					    <!-- !!! do NOT ignore warnings when it needs to debug -->
-						<option>-ignorewarnings</option>
-					    <!-- ### KEEP OPTIONS -->
-						<!-- !!! keep public/protected members only for making library jar -->
-						<!-- <option>-keep public class * { public protected *; }</option> -->
-					    <!-- !!! keep main() only for making runnable jar -->
-						<option>-keepclassmembers public class * { public static void main(java.lang.String[]); }</option>
-						<option>-keepattributes *</option>
-						<!-- ### DEBUG OPTIONS -->
-						<option>-verbose</option>
-						<!-- <option>-dontwarn</option> -->
-					</options>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
+    <plugin>
+        <groupId>com.github.wvengen</groupId>
+        <artifactId>proguard-maven-plugin</artifactId>
+        <version>${version.plugin.proguard}</version>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>proguard</goal>
+                </goals>
+                <configuration>
+                    <skip>false</skip>
+                    <libs>
+                        <!-- <lib>${java.home}/jmods/</lib> -->
+                        <lib>${java.home}/jmods/java.base.jmod</lib>
+                        <lib>${java.home}/jmods/java.datatransfer.jmod</lib>
+                        <lib>${java.home}/jmods/java.instrument.jmod</lib>
+                        <lib>${java.home}/jmods/java.logging.jmod</lib>
+                        <lib>${java.home}/jmods/java.management.jmod</lib>
+                        <lib>${java.home}/jmods/java.management.rmi.jmod</lib>
+                        <lib>${java.home}/jmods/java.naming.jmod</lib>
+                        <lib>${java.home}/jmods/java.net.http.jmod</lib>
+                        <lib>${java.home}/jmods/java.prefs.jmod</lib>
+                        <lib>${java.home}/jmods/java.rmi.jmod</lib>
+                        <lib>${java.home}/jmods/java.scripting.jmod</lib>
+                        <lib>${java.home}/jmods/java.se.jmod</lib>
+                        <lib>${java.home}/jmods/java.security.jgss.jmod</lib>
+                        <lib>${java.home}/jmods/java.security.sasl.jmod</lib>
+                        <lib>${java.home}/jmods/java.sql.jmod</lib>
+                        <lib>${java.home}/jmods/java.sql.rowset.jmod</lib>
+                        <lib>${java.home}/jmods/java.transaction.xa.jmod</lib>
+                        <lib>${java.home}/jmods/java.xml.crypto.jmod</lib>
+                        <lib>${java.home}/jmods/java.xml.jmod</lib>
+                    </libs>
+                    <includeDependency>true</includeDependency>
+                    <includeDependencyInjar>true</includeDependencyInjar>
+                    <outjar>${project.build.finalName}-obf.jar</outjar>
+                    <options>
+                        <!-- ### GENERAL OPTIONS -->
+                        <option>-dontshrink</option>
+                        <option>-dontoptimize</option>
+                        <!-- <option>-dontobfuscate</option> -->
+                        <!-- !!! do NOT ignore warnings when it needs to debug -->
+                        <option>-ignorewarnings</option>
+                        <!-- ### KEEP OPTIONS -->
+                        <!-- !!! keep public/protected members only for making library jar -->
+                        <!-- <option>-keep public class * { public protected *; }</option> -->
+                        <!-- !!! keep main() only for making runnable jar -->
+                        <option>-keepclassmembers public class * { public static void main(java.lang.String[]); }</option>
+                        <option>-keepattributes *</option>
+                        <!-- ### DEBUG OPTIONS -->
+                        <option>-verbose</option>
+                        <!-- <option>-dontwarn</option> -->
+                    </options>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
 </project>
 ```
 
