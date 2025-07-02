@@ -1,4 +1,4 @@
-# Docker Compose에서 사용 가능한 환경변수 확장 표현들
+# Docker Compose에서 사용 가능한 compose 환경변수 확장 표현들
 
 Docker Compose (`docker-compose` 및 `Compose V2`)는 `.env` 파일 또는 셸 환경에 정의된 변수들을 docker-compose.yml 파일 내에서 `${...}` 형태로 참조하며, **일부 Bash 스타일의 확장 문법도 지원**합니다.
 
