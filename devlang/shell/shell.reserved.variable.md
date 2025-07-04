@@ -36,7 +36,7 @@
 | IFS | 입력 필드 구분자(기본값: - 빈칸) |
 | VISUAL | VISUAL 편집기 이름 |
 | EDITOR | 기본 편집기 이름 |
-| COLUMNS | 현재 터미널이나 윈도우 터미널의 컬럼 수 |
+| COLUMNS | 현재 터미널이나 윈도우 터미널의 컬럼 수 <br> `printf "%*s" ${COLUMNS:-$(tput cols)} '' \| tr ' ' '-'` |
 | LINES | 터미널의 라인 수 |
 | LS_COLORS | ls 명령의 색상 관련 옵션 |
 | PS1 | 기본 프롬프트 변수(기본값: bash\\$) |
