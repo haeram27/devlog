@@ -1,5 +1,10 @@
 # Reserved variables
 
+## refs
+- [Bash: Shell Variables](https://www.gnu.org/software/bash/manual/html_node/Shell-Variables.html)
+- [ZSH: Parameters-Set-By-The-Shell](https://zsh.sourceforge.io/Doc/Release/Parameters.html#Parameters-Set-By-The-Shell)
+- [ZSH: Parameters-Used-By-The-Shell](https://zsh.sourceforge.io/Doc/Release/Parameters.html#Parameters-Used-By-The-Shell)
+
 | 문자 | 설명 |
 | --- | --- |
 | HOME | 사용자의 홈 디렉토리 |
@@ -9,12 +14,12 @@
 | FUNCNAME | 현재 함수 이름 |
 | SECONDS | 스크립트가 실행된 초 단위 시간 |
 | SHLVL | 쉘 레벨(중첩된 깊이를 나타냄) |
-| SHELL | 로그인해서 사용하는 쉘 |
+| SHELL | 현재 로그인해서 사용하는 쉘 |
 | PPID | 부모 프로세스의 PID |
 | BASH | BASH 실행 파일 경로 |
 | BASH_ENV | 스크립트 실행시 BASH 시작 파일을 읽을 위치 변수 |
 | BASH_VERSION | 설치된 BASH 버전 |
-| BASH_VERSINFO | BASH_VERSINFO[0]~BASH_VERSINFO[5]배열로 상세정보 제공 |
+| BASH_VERSINFO | BASH_VERSINFO[0]~BASH_VERSINFO[5] <br>배열로 상세정보 제공 |
 | MAIL | 메일 보관 경로 |
 | MAILCHECK | 메일 확인 시간 |
 | OSTYPE | 운영체제 종류 |
@@ -24,7 +29,7 @@
 | MACHTYPE | 머신 종류(HOSTTYPE과 같은 정보지만 조금더 상세하게 표시됨) |
 | LOGNAME | 로그인 이름 |
 | UID | Real User ID <br>사용자 구분 목적의 ID <br>uid=$(id -ru) |
-| EUID | Effective User ID <br>사용자가 실행한 프로세스의 권한 평가 목적의 ID <br>사용자가 어떤 프로세스를 실행했을 때 실행된 프로세스는 자신을 실행한 유저의 EUID를 기반으로 시스템 리소스(파일 등)에 대한 접근 권한(rwx)을 평가 받는다. <br>EUID 확인 명령어 <br>echo ${EUID} <br>euid=$(id -u) |
+| EUID | Effective User ID <br>사용자가 실행한 프로세스의 권한 평가 목적의 ID <br>사용자가 어떤 프로세스를 실행했을 때 실행된 프로세스는 자신을 실행한 유저의 EUID를 기반으로 시스템 리소스(파일 등)에 대한 접근 권한(rwx)을 평가 받는다. <br>EUID 확인 명령어 <br>`echo ${EUID}` <br>`euid=$(id -u)` |
 | USER | 사용자의 이름 |
 | USERNAME | 사용자 이름 |
 | GROUPS | 사용자 그룹(/etc/passwd 값을 출력) |
