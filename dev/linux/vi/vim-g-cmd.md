@@ -1,10 +1,12 @@
+# vim - gcommand
+
 `vi`의 `g` 명령 또는 **`g` command**는 **전역 명령 (global command)** 를 뜻하며,**특정 패턴과 일치하는 줄에 대해 반복적으로 명령을 실행**할 수 있는 기능입니다.
 
 ---
 
 ## 기본 문법
 
-```
+```bash
 :g/pattern/command
 ```
 
@@ -135,6 +137,20 @@ syntax: :g/pattern/cmd
 ---
 
 ## gcommand와 `%` 차이
+
+`%`는 파일의 전체 라인을 의미하는 line range expression 이다.
+
+:s command는 기본적으로 1 라인 단위로 동작하는 명령어이다.
+그러므로 :s command를 `파일 전체 라인`에 적용하려면 `%s` 로 명시해야한다.
+
+:g command는 기본적으로 파일 전체 라인을 대상으로 하는 명령어이므로 별도로 `%` 를 적용할 필요가 없다.
+반대로 g command를 일부 라인 범위로 국한하여 적용하고 싶다면 line range expression을 적용하여야 한다.
+
+예:
+
+```bash
+:10,20g/foo/d
+```
 
 ### :g — command
 
