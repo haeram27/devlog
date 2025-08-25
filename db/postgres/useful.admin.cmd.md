@@ -23,7 +23,7 @@ example:
 ALTER ROLE postgres NOLOGIN;
 ```
 
-hot to check status of login permit of roles:
+how to check status of login permit of roles:
 
 ```sql
 SELECT rolcanlogin FROM pg_roles WHERE rolname = 'postgres';
