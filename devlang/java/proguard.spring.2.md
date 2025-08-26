@@ -66,7 +66,6 @@ application source module의 root directory에 위치
                 <configuration>
                     <source>${version.jdk}</source>
                     <target>${version.jdk}</target>
-                    <parameters>true</parameters>
                 </configuration>
             </plugin>
 
@@ -114,6 +113,9 @@ application source module의 root directory에 위치
                 <configuration>
                     <source>${version.jdk}</source>
                     <target>${version.jdk}</target>
+
+                    <!-- Java 코드 컴파일 시 소스 코드의 매개변수(파라미터) 이름을 유지:
+                         리플렉션을 통해 매개변수 정보 획득 가능 -->
                     <parameters>true</parameters>
                 </configuration>
             </plugin>
@@ -156,7 +158,8 @@ application source module의 root directory에 위치
                                 <lib>${java.home}/jmods</lib>
                             </libs>
 
-                            <!-- dependency(3rd party = spring 등)은 '라이브러리'로만 취급하고, 난독화 입력(InJar)에 포함하지 않음 -->
+                            <!-- dependency(3rd party = spring 등)은 '라이브러리'로만 취급하고,
+                                 난독화 입력(InJar)에 포함하지 않음 -->
                             <includeDependency>true</includeDependency>
                             <includeDependencyInjar>false</includeDependencyInjar>
 
@@ -305,6 +308,11 @@ proguard에 지정할 option을 명시한다.
 # --- 예외 패키지 하위의 '모든' 내부 enum 을 보존 ---
 -keep enum com.myapp.enum.exception.**$* { *; }
 ```
+
+참고: proguard configuaration manual - keep 설정 관련 option
+
+- [Keep Options](https://www.guardsquare.com/manual/configuration/usage#keepoptions)
+- [Class Specification](https://www.guardsquare.com/manual/configuration/usage#classspecification)
 
 ## 난독화 결과 확인
 
