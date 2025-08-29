@@ -1,6 +1,174 @@
 # RestTemplate: spring에서 http client 사용하기
 
+## trustAllRestTemplate Bean Exmaple (apache httpclient 5.3.1)
+
+for org.apache.httpcomponents.client5:httpclient5:jar:5.3.1
+
+```java
+import java.security.GeneralSecurityException;
+import java.time.Duration;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class HttpClientConfig {
+
+    @Bean
+    public RestTemplate trustAllRestTemplate() {
+        try {
+            var sslContext = SSLContexts.custom()
+                .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+                .build();
+
+            var sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+            .setSslContext(sslContext)
+            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+            .build();
+
+            // var cm = new BasicHttpClientConnectionManager(socketFactoryRegistry);
+            var cm = PoolingHttpClientConnectionManagerBuilder.create()
+                .setSSLSocketFactory(sslSocketFactory)
+                // read timeout
+                .setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(Timeout.ofSeconds(5)).build())
+                .build();
+
+            var httpClient = HttpClients.custom()
+                .setConnectionManager(cm)
+                .evictExpiredConnections()
+                .build();
+
+            var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
+            rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
+            rf.setConnectTimeout(Duration.ofSeconds(2)); // time to establish tcp connection
+
+            return new RestTemplate(rf);
+        } catch (GeneralSecurityException e) {
+            throw new org.springframework.beans.factory.BeanCreationException(
+                "trustAllRestTemplate", "Failed to build SSL trust-all RestTemplate", e);
+        }
+    }
+}
+```
+
+## trustAllRestTemplate Bean Exmaple httpclient5 5.4+
+
+for org.apache.httpcomponents.client5:httpclient5:jar:5.4+
+
+```java
+    import java.security.GeneralSecurityException;
+    import java.time.Duration;
+    import org.apache.hc.client5.http.impl.classic.HttpClients;
+    import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+    import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+    import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+    import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+    import org.apache.hc.core5.ssl.SSLContexts;
+    import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+    import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class HttpClientConfig {
+
+    // register RestTemplate as Spring Bean to be singleton
+    @Bean
+    public RestTemplate trustAllRestTemplate() {
+        try {
+            var sslContext = SSLContexts.custom()
+                .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+                .build();
+
+            var tls = ClientTlsStrategyBuilder.create()
+                .setSslContext(sslContext)
+                .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .build();
+
+            // use connection pool
+            var cm = PoolingHttpClientConnectionManagerBuilder.create()
+                .setTlsSocketStrategy(tls)   
+                .build();
+
+            // use BasicHttpClientConnectionManager for one-time connection
+            /*
+                var cm = BasicHttpClientConnectionManager.create()
+                    .setTlsSocketStrategy(tls)   
+                    .build();
+            */
+
+            var httpClient = HttpClients.custom()
+                .setConnectionManager(cm)
+                .evictExpiredConnections()
+                .build();
+
+            var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
+            rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
+            rf.setConnectTimeout(Duration.ofSeconds(2)); // time to establish tcp connection
+            rf.setReadTimeout(Duration.ofSeconds(5)); // time to wait response against http request from http server
+
+            return new RestTemplate(rf);
+        } catch (GeneralSecurityException e) {
+            throw new org.springframework.beans.factory.BeanCreationException(
+                "trustAllRestTemplate", "Failed to build SSL trust-all RestTemplate", e);
+        }
+    }
+}
+```
+
 ## RestTemplate Example
+
+### Controller
+
+```java
+import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(value = "/api/v1",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+public class RestTemplateTestController {
+
+    private final RestTemplateTestService service;
+
+    @PostMapping("/cve/search")
+    public String searchCve(@RequestBody Map<String, Object> requestJson) {
+        log.info("## AtipController::searchCve - request : {}", requestJson);
+
+        var paramMap = requestJson.getParamMap();
+        var cveId = Optional.ofNullable(paramMap.get("cveId"))
+                            .filter(String.class::isInstance)
+                            .map(String.class::cast)
+                            .orElse("");
+        log.debug("requested cveId: {}", cveId);
+        if (StringUtils.isEmpty(cveId)) {
+            log.error("Error: {}", "invalid cveId");
+        }
+
+        return service.searchCve(cveId);
+    }
+}
+```
+
+### Service
 
 ```java
 import java.net.URI;
@@ -185,56 +353,4 @@ public class RestTemplateTestService {
         return new RestTemplate(rf);
     }
 }
-```
-
-## RestTemplate for apache httpclient5 5.4+
-
-```java
-    import java.security.GeneralSecurityException;
-    import java.time.Duration;
-    import org.apache.hc.client5.http.impl.classic.HttpClients;
-    import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
-    import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
-    import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-    import org.apache.hc.client5.http.ssl.TrustAllStrategy;
-    import org.apache.hc.core5.ssl.SSLContexts;
-    import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-    import org.springframework.web.client.RestTemplate;
-
-    // for org.apache.httpcomponents.client5:httpclient5:jar:5.4+
-    private RestTemplate createRestTemplate() throws GeneralSecurityException {
-        var sslContext = SSLContexts.custom()
-            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
-            .build();
-
-        var tls = ClientTlsStrategyBuilder.create()
-            .setSslContext(sslContext)
-            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-            .build();
-
-
-        var cm = BasicHttpClientConnectionManagerBuilder.create()
-            .setTlsSocketStrategy(tls)   
-            .build();
-
-        // if it needs to use http connection pool then
-        // use PoolingHttpClientConnectionManager instead of BasicHttpClientConnectionManager
-        // and register RestTemplate as Spring Bean to be singleton
-        /*
-            var cm = PoolingHttpClientConnectionManagerBuilder.create()
-                .setTlsSocketStrategy(tls)   
-                .build();
-        */
-
-        var httpClient = HttpClients.custom()
-            .setConnectionManager(cm)
-            .evictExpiredConnections()
-            .build();
-
-        var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
-        rf.setConnectTimeout(Duration.ofSeconds(5));
-        rf.setConnectionRequestTimeout(Duration.ofSeconds(5));
-
-        return new RestTemplate(rf);
-    }
 ```
