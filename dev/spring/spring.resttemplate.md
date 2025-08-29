@@ -6,6 +6,9 @@
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
@@ -23,12 +26,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 /*
  * RestAPI Client GET Test
  */
@@ -36,14 +46,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AtipService {
+public class RestTemplateTestService {
+
+    private final ObjectMapper mapper = JsonMapper.builder()
+                                        .addModule(new JavaTimeModule())
+                                        .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                                        .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+                                        .build();
 
     // https://api.cvesearch.com/search?q=CVE-2023-1234
     private static final String URL_DOMAIN_PORTAL = "api.cvesearch.com";
     private static final String URL_API_PATH_CVE_SEARCH = "/search";
 
-    private static final String TEST_BEARER_AUTH_TOKEN =
-            "my-access-token";
+    private static final String TEST_BEARER_AUTH_TOKEN = "my-access-token";
 
     public String searchCve(String cveId) {
 
@@ -60,6 +75,9 @@ public class AtipService {
 
         HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
         ResponseEntity<String> responseEntity;
+        String result;
+        ObjectNode responseJsonObject = mapper.createObjectNode();
+
         try {
             RestTemplate restTemplate = createRestTemplate();
 
@@ -67,39 +85,75 @@ public class AtipService {
 
             responseEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
 
-            // Access information from the ResponseEntity
+            // ResponseEntity
             log.debug("Response Body: " + responseEntity.getBody());
             log.debug("Status Code: " + responseEntity.getStatusCode());
             log.debug("Headers: " + responseEntity.getHeaders());
 
-            log.debug("ti response http code: {}, reason: {}",
+            log.debug("Response http code: {}, reason: {}",
                     responseEntity.getStatusCode().value(),
                     HttpStatus.valueOf(responseEntity.getStatusCode().value()).getReasonPhrase());
 
             if (responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-                return (String) responseEntity.getBody();
+                var responseBody = responseEntity.getBody();
+
+                if (responseBody == null || responseBody.isEmpty()) {
+                    log.error("Error: Empty Body");
+                }
+
+                if (responseBody.isObject()) {
+                    ObjectNode node = (ObjectNode) responseBody;
+
+                    // ObjectNode to Map<String, Object>
+                    Map<String, Object> map = mapper.convertValue(node,
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
+                    // var map = mapper.treeToValue(node, Map.class);
+                    responseJsonObject.set("responseJsonObject", map);
+
+                    // ObjectNode to String
+                    result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+                } else if (responseBody.isArray()) {
+                    ArrayNode node = (ArrayNode) responseBody;
+
+                    // ArrayNode to List<Map<String, Object>>
+                    List<Map<String, Object>> list = mapper.convertValue(node,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String,Object>>>() {});
+                    responseJsonObject.set("responseJsonObject", list);
+
+                    // ArrayNode to String
+                    result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+                } else {
+                    log.error("Error: Response content type is NOT applicable");
+                }
+            } else {
+                // TODO: Http response OK, but there is NO information
+                log.error("Error: Response have NO information");
             }
         } catch (RestClientResponseException ex) {
             log.error("Error: {}", ex.getMessage());
 
             var status = ex.getStatusCode();
             log.debug("Status Code: " + status);
-            log.debug("Status Code value: " + status.value());
-            log.debug("Status Code: " + ex.getStatusText());
+            // log.debug("code value: " + status.value());
+            // log.debug("status text: " + ex.getStatusText());
             log.debug("Response Body: " + ex.getResponseBodyAsString());
             log.debug("Headers: " + ex.getResponseHeaders());
 
-            // used inappropriate access-key: try to exchange ti domain between portal and bundle  
-            if (status.equals(HttpStatus.I_AM_A_TEAPOT)) {
-                log.warn("inappropriate TI access key is used.");
-                return "";
+            // used inappropriate access-key: try to exchange ti domain between portal and bundle
+            if (ex.getStatusCode().is4xxClientError()) {
+                log.error("Error: {}", ex.getResponseBodyAsString());    
+            } else if (ex.getStatusCode().is5xxServerError()) {
+                log.error("Error: {}", ex.getResponseBodyAsString());    
+            } else {
+                log.error("Error: {}", ex.getResponseBodyAsString());    
             }
-        } catch (Exception e) {
-            log.error("Error: {}", e.getMessage());
-            return "";
+        } catch (ResourceAccessException ex) {
+            log.error("Error: {}", ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Error: {}", ex.getMessage());
         }
 
-        return "";
+        return result;
     }
 
     // for org.apache.httpcomponents.client5:httpclient5:jar:5.3
