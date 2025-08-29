@@ -1,9 +1,9 @@
-<https://redis.io/docs/latest/develop/data-types/>
-
 # java redis client library
 
 lettuce: async client  
 jedis: sync client
+
+[redist data types](https://redis.io/docs/latest/develop/data-types)
 
 ## configuration
 
