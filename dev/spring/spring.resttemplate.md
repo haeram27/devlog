@@ -216,6 +216,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RestTemplateTestService {
 
+    private final RestTemplate trustAllRestTemplate;
+
     private final ObjectMapper mapper = JsonMapper.builder()
                                         .addModule(new JavaTimeModule())
                                         .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
@@ -228,36 +230,23 @@ public class RestTemplateTestService {
 
     private static final String TEST_BEARER_AUTH_TOKEN = "my-access-token";
 
-    public String searchCve(String cveId) {
+    public List<Map<String, Object>> send(HttpMethod method, URI uri, HttpEntity<Void> httpEntity) {
+        ResponseEntity<JsonNode> responseEntity;
+        List<Map<String, Object>> list;
 
-        URI uri = UriComponentsBuilder.newInstance()
-                    .scheme("https")
-                    .host(URL_DOMAIN_PORTAL)
-                    .path(URL_API_PATH_CVE_SEARCH)
-                    .queryParam("q", cveId)
-                    .encode().build().toUri();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(TEST_BEARER_AUTH_TOKEN);
-
-        HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
-        ResponseEntity<String> responseEntity;
-        String result;
-        ObjectNode responseJsonObject = mapper.createObjectNode();
+        if (StringUtils.isEmpty(method.name())) {
+            log.error("Error: No content");
+            return null;
+        }
 
         try {
-            RestTemplate restTemplate = createRestTemplate();
+            log.debug("## Request to get CVE info. uri : {}", uri);
 
-            log.debug("## Request RestAPI GET Method : {}", uri);
+            responseEntity = trustAllRestTemplate.exchange(uri, method, httpEntity, JsonNode.class);
 
-            responseEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
-
-            // ResponseEntity
             log.debug("Response Body: " + responseEntity.getBody());
             log.debug("Status Code: " + responseEntity.getStatusCode());
             log.debug("Headers: " + responseEntity.getHeaders());
-
             log.debug("Response http code: {}, reason: {}",
                     responseEntity.getStatusCode().value(),
                     HttpStatus.valueOf(responseEntity.getStatusCode().value()).getReasonPhrase());
@@ -271,31 +260,20 @@ public class RestTemplateTestService {
 
                 if (responseBody.isObject()) {
                     ObjectNode node = (ObjectNode) responseBody;
-
-                    // ObjectNode to Map<String, Object>
-                    Map<String, Object> map = mapper.convertValue(node,
-                        new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
+                    Map<String, Object> map = mapper.convertValue(node, new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
                     // var map = mapper.treeToValue(node, Map.class);
-                    responseJsonObject.set("responseJsonObject", map);
-
-                    // ObjectNode to String
-                    result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+                    list = new ArrayList<Map<String, Object>>();
+                    list.add(map);
                 } else if (responseBody.isArray()) {
                     ArrayNode node = (ArrayNode) responseBody;
-
-                    // ArrayNode to List<Map<String, Object>>
-                    List<Map<String, Object>> list = mapper.convertValue(node,
-                        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String,Object>>>() {});
-                    responseJsonObject.set("responseJsonObject", list);
-
-                    // ArrayNode to String
-                    result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+                    list = mapper.convertValue(node, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String,Object>>>() {});
                 } else {
                     log.error("Error: Response content type is NOT applicable");
                 }
+            } else if (responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+                log.error("Error: No content");
             } else {
-                // TODO: Http response OK, but there is NO information
-                log.error("Error: Response have NO information");
+                log.error("Error: Atip Internal Error");
             }
         } catch (RestClientResponseException ex) {
             log.error("Error: {}", ex.getMessage());
@@ -309,11 +287,11 @@ public class RestTemplateTestService {
 
             // used inappropriate access-key: try to exchange ti domain between portal and bundle
             if (ex.getStatusCode().is4xxClientError()) {
-                log.error("Error: {}", ex.getResponseBodyAsString());    
+                log.error("Error: {}", ex.getResponseBodyAsString());
             } else if (ex.getStatusCode().is5xxServerError()) {
-                log.error("Error: {}", ex.getResponseBodyAsString());    
+                log.error("Error: {}", ex.getResponseBodyAsString());
             } else {
-                log.error("Error: {}", ex.getResponseBodyAsString());    
+                log.error("Error: {}", ex.getResponseBodyAsString());
             }
         } catch (ResourceAccessException ex) {
             log.error("Error: {}", ex.getMessage());
@@ -321,36 +299,33 @@ public class RestTemplateTestService {
             log.error("Error: {}", ex.getMessage());
         }
 
-        return result;
+        return list;
     }
 
-    // for org.apache.httpcomponents.client5:httpclient5:jar:5.3
-    private RestTemplate createRestTemplate() throws GeneralSecurityException {
-        var sslContext = SSLContexts.custom()
-            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
-            .build();
+    public void searchCve(String cveId, ResponseJsonObject responseJsonObject) {
 
-        var socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
-            .register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
-            .register("http", new PlainConnectionSocketFactory())
-            .build();
+        var uri = UriComponentsBuilder.newInstance()
+                    .scheme("https")
+                    .host(URL_DOMAIN_PORTAL)
+                    .path(URL_API_PATH_CVE_SEARCH)
+                    .queryParam("q", cveId)
+                    .encode().build().toUri();
 
-        var cm = new BasicHttpClientConnectionManager(socketFactoryRegistry);
-        // if it needs to use http connection pool then
-        // use PoolingHttpClientConnectionManager instead of BasicHttpClientConnectionManager
-        // and register RestTemplate as Spring Bean to be singleton
-        // var cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(TEST_BEARER_AUTH_TOKEN);
 
-        var httpClient = HttpClients.custom()
-            .setConnectionManager(cm)
-            .evictExpiredConnections()
-            .build();
+        var httpEntity = new HttpEntity<Void>(headers);
+        var responseBody = send(HttpMethod.GET, uri, httpEntity);
 
-        var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
-        rf.setConnectTimeout(Duration.ofSeconds(5));
-        rf.setConnectionRequestTimeout(Duration.ofSeconds(5));
-
-        return new RestTemplate(rf);
+        try {
+            log.debug("## response: {}",
+                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseBody));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            log.error("## invalid response");
+        }
     }
 }
 ```
