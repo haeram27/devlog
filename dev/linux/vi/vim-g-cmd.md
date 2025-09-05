@@ -1,6 +1,7 @@
 # vim - gcommand
 
-`vi`의 `g` 명령 또는 **`g` command**는 **전역 명령 (global command)** 를 뜻하며,**특정 패턴과 일치하는 줄에 대해 반복적으로 명령을 실행**할 수 있는 기능입니다.
+* g command는 문서내에서 특정 패턴을 포함하는 문서 내 `라인`을 찾아 지정된 명령을 수행한다.
+* g command는 `패턴`을 이용한 라인 선택기로 이해하면 편리하다.
 
 ---
 
@@ -58,11 +59,15 @@ syntax: :g/pattern/cmd
 
 ### 특정 줄에만 치환 적용
 
+* `DEBUG`가 있는 줄에서만 `foo`를 `bar`로 치환
+
 ```vim
-:g/DEBUG/s/foo/bar/
+:g/DEBUG/s/foo/bar/   # s command는 기본적으로 라인내 매칭 되는 첫번째 단어만 교체함
+:g/DEBUG/s/foo/bar/g  # s command에 g 옵션 사용시 라인내 매칭 되는 전체 단어를 교체하도록 함
 ```
 
-* `DEBUG`가 있는 줄에서만 `foo`를 `bar`로 치환
+* g command는 라인 선택자로써 동작하며, s command가 라인 내에서 교체 작업을 수행
+* g command는 문서내 라인에 대해서 global matching을 수행, s command의 g 옵션은 라인내에서 단어에 대해서 global matching을 지정함
 
 ---
 
