@@ -2,6 +2,8 @@
 
 ## shell 별 옵션 입력 포맷
 
+powershell의 경우 각 옵션에 대해서 sigle-quoting을 적용해야 한다.
+
 ```text
 sh$ mvn -e -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install
 cmd> mvn -e install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install
@@ -11,8 +13,24 @@ PS> mvn -e install '-Dcheckstyle.skip' '-Dpmd.skip=true' '-Dcpd.skip=true' '-Dma
 ## build 및 local repo에 package 설치(install)
 
 ```bash
-mvn -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true install
+mvn -e -T $(nproc) -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true install
 ```
+
+* `-D,--define <arg>` Define a system property
+* `-e,--errors` Produce execution error messages
+* `-T,--threads <arg>` Thread count
+
+
+### Jar 실행 명령
+
+```bash
+java -jar -Xms512m -Xmx2048m -Dmax.threads=512 -Dspring.profiles.active=debug  ${RUNNALBE_JAR} | tee /tmp/debug-run-${RUNNALBE_JAR}-$(date -u +%Y%m%d%H%M%S%N).log
+```
+
+* `-D<name>=<value>` set a system property
+* `-Xms<size>` set initial Java heap size
+* `-Xmx<size>` set maximum Java heap size
+
 
 ## 현재 모듈의 최종 pom 보기
 
@@ -52,7 +70,7 @@ mvn dependency:list
 mvn help:effective-pom
 ```
 
-## remote repository로 부터 특정 artifact(jar) 만 local repository로 다운로드 하기
+## Maven remote repo로 부터 특정 artifact(jar) 만 local repo로 다운로드 하기
 
 ```bash
 mvn -U -X dependency:get -Dartifact=com.github.wvengen:proguard-maven-plugin:2.7.0
