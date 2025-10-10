@@ -15,14 +15,12 @@
 * 공유자원(data 값)에 대한 read/write lock을 사용하지 않는다.
 * "first-commiter-win" 방식: 2개 이상의 transaction에서 동일한 데이터를 수정하면 먼저 commit된 트랜잭션이 적용되고 충돌이 발생한 다른 transaction은 에러와 함께 rollback 된다.
   * rdb는 트랜잭션 단위로 변경사항 적용 여부를 결정한다.
-  *트랜잭션의 최소 단위는 하나의 sql statement이다.
- 
+  * 트랜잭션의 최소 단위는 단일 sql statement이다.
 
 ### MVCC 방식에서 트랜잭션의 가시성 문제
 
 * RDB는 트랜잭션을 시작할 때 SQL 문에서 참조되는 table 들의 스냅샷을 생성하고 트랜잭션 종료 시까지 스냅샷을 유지한다.
 * RDB는 트랜잭션 내 SQL 처리을 할 때 데이터에 대해 READ(SELECT)는 실제 디스크가 아닌 스냅샷으로 부터 읽으며 변경(INSERT/UPDATE/DELETE) 사항은 따로 UP
-
 
 ## batch job clean
 
@@ -32,7 +30,7 @@
         target_job_execution_ids AS (
             SELECT je.job_execution_id, je.job_instance_id
             FROM batch_job_execution je
-            WHERE je.end_time <![CDATA[<]]> (NOW() - (INTERVAL '1 minute' * #{retentionInterval}))
+            WHERE je.end_time <![CDATA[<]]> (NOW() - (INTERVAL '1 day' * #{retentionInterval}))
         ),
         survivor_job_instance_ids AS (
             SELECT DISTINCT je.job_instance_id
@@ -56,7 +54,6 @@
             USING target_step_execution_ids t
             WHERE se.step_execution_id = t.step_execution_id
         ),
-        -- 3, delete batch_job_execution
         del_jec AS (
             DELETE FROM batch_job_execution_context jec
             USING target_job_execution_ids t

@@ -1,4 +1,4 @@
-#
+# haproxy configuration - http-request
 
 ## [http-request](https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/#4.2-http-request)
 

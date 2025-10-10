@@ -1,4 +1,4 @@
-# haproxy [acl](https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/#7) configuration
+# haproxy configuration - [acl](https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/#7)
 
 ## [ACL basics](https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/#7.1)
 
