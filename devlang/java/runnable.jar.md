@@ -1,6 +1,6 @@
 # How to run jar
 
-실행 가능한 jar는 main() 메소드를 포함하는
+실행 가능한 jar란 단순히 main() 메소드를 포함하는 class 파일을 가진 jar 파일이다.
 
 $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true
 
