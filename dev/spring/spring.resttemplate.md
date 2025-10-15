@@ -1,5 +1,11 @@
 # RestTemplate: spring에서 http client 사용하기
 
+RestTemplate 은 블로킹 방식의 http request를 사용하기 위하여 설계되었다.
+블로킹 방식은 request 당 1 thread, 1 socket을 사용한다.
+
+Async 방식의 http client pool을 사용하려면 WebClient를 사용하라.
+Async 방식의 request 처리는 많은 requets에서도 더 적은 thread와 socket을 사용할 수 있지만, 응답 처리를 위한 listener 구조를 별도로 구현해야 한다.
+
 ## trustAllRestTemplate Bean Exmaple (apache httpclient 5.3.1)
 
 for org.apache.httpcomponents.client5:httpclient5:jar:5.3.1
@@ -60,19 +66,25 @@ public class HttpClientConfig {
 }
 ```
 
-## trustAllRestTemplate Bean Exmaple httpclient5 5.4+
+## trustAllRestTemplate Bean Exmaple httpclient5 5.5+
 
-for org.apache.httpcomponents.client5:httpclient5:jar:5.4+
+for org.apache.httpcomponents.client5:httpclient5:jar:5.5+
+
+* RestTemplate is designed for blocking method if async request method is needed use `org.springframework.web.reactive.function.client.WebClient`
+* HttpComponentsClientHttpRequestFactory designed by spring scope sets timeout settings per request of httpclient if default request config for HttpClient then use `RequestConfig`
 
 ```java
     import java.security.GeneralSecurityException;
     import java.time.Duration;
     import org.apache.hc.client5.http.impl.classic.HttpClients;
-    import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+    import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
     import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
     import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
     import org.apache.hc.client5.http.ssl.TrustAllStrategy;
     import org.apache.hc.core5.ssl.SSLContexts;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.ComponentScan;
+    import org.springframework.context.annotation.Configuration;
     import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
     import org.springframework.web.client.RestTemplate;
 
@@ -90,11 +102,11 @@ public class HttpClientConfig {
             var tls = ClientTlsStrategyBuilder.create()
                 .setSslContext(sslContext)
                 .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                .build();
+                .buildClassic();
 
             // use connection pool
             var cm = PoolingHttpClientConnectionManagerBuilder.create()
-                .setTlsSocketStrategy(tls)   
+                .setTlsSocketStrategy(tls)
                 .build();
 
             // use BasicHttpClientConnectionManager for one-time connection
@@ -109,6 +121,7 @@ public class HttpClientConfig {
                 .evictExpiredConnections()
                 .build();
 
+            // set timeout setting per request in RestTemplate (Spring driven)
             var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
             rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
             rf.setConnectTimeout(Duration.ofSeconds(2)); // time to establish tcp connection
@@ -123,9 +136,9 @@ public class HttpClientConfig {
 }
 ```
 
-## RestTemplate Example
+### Example: How to use RestTemplate
 
-### Controller
+#### Controller
 
 ```java
 import java.util.Optional;
@@ -168,7 +181,7 @@ public class RestTemplateTestController {
 }
 ```
 
-### Service
+#### Service
 
 ```java
 import java.net.URI;
@@ -326,6 +339,76 @@ public class RestTemplateTestService {
             e.printStackTrace();
             log.error("## invalid response");
         }
+    }
+}
+```
+
+## WebClient (Async mechanism HttpClient for Spring)
+
+```java
+import java.security.GeneralSecurityException;
+import java.time.Duration;
+
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.client5.http.impl.async.PoolingAsyncClientConnectionManager;
+import org.apache.hc.client5.http.impl.async.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
+import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+
+import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
+
+public WebClient trustAllWebClient() {
+    try {
+        var sslContext = SSLContexts.custom()
+            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+            .build();
+
+        // TLS 전략: 비동기용
+        TlsStrategy tls = ClientTlsStrategyBuilder.create()
+            .setSslContext(sslContext)
+            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+            .buildAsync();
+
+        // 커넥션 풀: 비동기용
+        PoolingAsyncClientConnectionManager cm =
+            PoolingAsyncClientConnectionManagerBuilder.create()
+                .setTlsStrategy(tls)
+                // 필요 시 풀 한도 조정
+                .setMaxConnTotal(200)    // default: 25
+                .setMaxConnPerRoute(50)  // default: 5
+                .build();
+
+        // 요청/응답 타임아웃 등(비동기 클라이언트에도 적용 가능)
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // 풀에서 커넥션 임대 대기
+            .setConnectTimeout(Timeout.ofSeconds(2))           // TCP 연결 수립
+            .setResponseTimeout(Timeout.ofSeconds(5))          // 응답 대기
+            .build();
+
+        CloseableHttpAsyncClient asyncClient = HttpAsyncClients.custom()
+            .setConnectionManager(cm)
+            .setDefaultRequestConfig(requestConfig)
+            .evictExpiredConnections()
+            .build();
+
+        // WebClient 커넥터에 주입 (Spring이 lifecycle 관리)
+        var connector = new HttpComponentsClientHttpConnector(asyncClient);
+
+        return WebClient.builder()
+            .clientConnector(connector)
+            // 공통 타임아웃(선택): exchange 레벨에서 한번 더 안전망
+            .build();
+
+    } catch (GeneralSecurityException e) {
+        throw new org.springframework.beans.factory.BeanCreationException(
+            "trustAllWebClient", "Failed to build SSL trust-all WebClient", e);
     }
 }
 ```
