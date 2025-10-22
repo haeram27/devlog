@@ -1,5 +1,9 @@
-syntax : \<major\>.\<minor\>.\<patch-level\>.\<state-string\>\<release-count\> (Build \<build-number\>)
-example: 1.2.3.H1 (Build 123)
+# versionning
+
+## product version
+
+- syntax : \<major\>.\<minor\>.\<patch-level\>.\<state-string\>\<release-count\> (Build \<build-number\>)
+- example: 1.2.3.H1 (Build 123)
 
 - MM.NN.PP.ssssss 의 형태로 표시함
 - 상위 레벨이 변경되면 하위 레벨은 기본값으로 리셋됨
@@ -11,3 +15,17 @@ example: 1.2.3.H1 (Build 123)
 |Patch|PP|숫자|0~99|0|- 버그 수정<br>- 기능의 변경|
 |State String|ssssss|문자 + 숫자|||- 안정성의 상태를 표시하는 문자: dev, alpha, beta, RC, H<br>- "숫자"는 "1"에서 시작하여 "1"씩 증가<br>- "숫자"는 상태값이 변경되면 "1"로 리셋됨<br>- "RC" 상태일 때는 "RC"문자를 생략함<br>- dev: 개발자 수준의 통합 테스트가 가능한 수준<br>- alpha: 모든 기능 요구사항이 구현되어 QA의 시스템 테스트가 가능한 수준<br>- beta: 심각하거나 주요한 버그(block, major, crash)들이 모두 해결되었고,  <br>    필드 테스트나 사용자 테스트를 할 수 있는 수준<br>- RC(Release Candidate): 릴리즈가 가능한 수준<br>- H(Hotfix): 릴리즈 이후에 특정 사용자에게 발생한 특정 이슈를 임시 수정한 버전|
 |Build No.|BBBB|숫자|1~무제한|1|-  "1"에서 시작하여, 빌드를 시도할 때마다 1씩 증가함|
+
+## file version
+
+- MM.NN.PP.BBBB 의 형태로 표시함
+- 파일정보에 버전 값 표시
+- 빌드번호를 포함함
+- 상위 레벨이 변경되면 하위 레벨은 기본값으로 리셋됨
+
+|구분|약어|데이터 형식|범위|기본값|
+|---|---|---|---|---|
+|Build No.|BBBB|숫자|1~9999|1|
+|Major|MM|숫자|1~99|1|
+|Minor|NN|숫자|0~99|0|
+|Patch|PP|숫자|0~99|0|
