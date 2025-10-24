@@ -157,8 +157,8 @@ en_US.UTF-8과 en_US.utf8은 동일한 로케일
 ## 커널 변수 수정
 
 ```bash
-echo fs.inotify.max_user_watches=1048576 | sudo tee -a /etc/sysctl.d/99-fs.conf
-echo vm.max_map_count=1048576 | sudo tee -a /etc/sysctl.d/99-vm.conf
+echo fs.inotify.max_user_watches=1048576 | sudo tee -a /etc/sysctl.d/99-sysctl.conf
+echo vm.max_map_count=1048576 | sudo tee -a /etc/sysctl.d/99-sysctl.conf
 sudo sysctl --system
 ```
 

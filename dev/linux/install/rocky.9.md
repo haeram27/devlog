@@ -6,7 +6,7 @@ Rocky 9.x
 
 ## 설정
 
-### sudoers 설정
+### sudoers 설정 (non root 사용자인 경우)
 
 ```bash
 $ sudo vi /etc/sudoers
@@ -33,9 +33,51 @@ nmtui
 
 - https://public-dns.info/
 
-### yum repo list
+### yum repo url
 
-TBD
+- rocky default repo url
+  - http://dl.rockylinux.org
+
+- mirror list
+  - https://mirrors.rockylinux.org/mirrormanager/mirrors/Rocky
+    - KR
+      - http://ftp.kaist.ac.kr/pub/rocky
+
+```text
+[AppStream]
+name=Rocky Linux $releasever - AppStream
+baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/AppStream/$basearch/os/
+enabled=1
+gpgcheck=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+ 
+[BaseOS]
+name=Rocky Linux $releasever - BaseOS
+baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/BaseOS/$basearch/os/
+enabled=1
+gpgcheck=0
+ 
+[extras]
+name=Rocky Linux $releasever - extras
+baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/extras/$basearch/os/
+enabled=1
+gpgcheck=0
+ 
+[devel]
+name=Rocky Linux $releasever - devel
+baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/devel/$basearch/os/
+enabled=1
+gpgcheck=0
+ 
+[docker-ce-stable]
+name=Docker CE Stable - $basearch
+baseurl=https://download.docker.com/linux/rhel/$releasever/$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://download.docker.com/linux/rhel/gpg
+```
+
+- gpgcheck가 반드시 필요한 경우가 아니면 `gpgcheck=0` 설정
 
 #### update packages
 
@@ -97,8 +139,8 @@ en_US.UTF-8과 en_US.utf8은 동일한 로케일
 ## 커널 변수 수정
 
 ```bash
-echo fs.inotify.max_user_watches=1048576 | sudo tee -a /etc/sysctl.d/99-fs.conf
-echo vm.max_map_count=1048576 | sudo tee -a /etc/sysctl.d/99-vm.conf
+echo fs.inotify.max_user_watches=1048576 | sudo tee -a /etc/sysctl.d/99-sysctl.conf
+echo vm.max_map_count=1048576 | sudo tee -a /etc/sysctl.d/99-sysctl.conf
 sudo sysctl --system
 ```
 
