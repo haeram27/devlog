@@ -50,25 +50,25 @@ baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/AppStream/$basearch/os/
 enabled=1
 gpgcheck=0
 gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
- 
+
 [BaseOS]
 name=Rocky Linux $releasever - BaseOS
 baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/BaseOS/$basearch/os/
 enabled=1
 gpgcheck=0
- 
+
 [extras]
 name=Rocky Linux $releasever - extras
 baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/extras/$basearch/os/
 enabled=1
 gpgcheck=0
- 
+
 [devel]
 name=Rocky Linux $releasever - devel
 baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/devel/$basearch/os/
 enabled=1
 gpgcheck=0
- 
+
 [docker-ce-stable]
 name=Docker CE Stable - $basearch
 baseurl=https://download.docker.com/linux/rhel/$releasever/$basearch/stable
