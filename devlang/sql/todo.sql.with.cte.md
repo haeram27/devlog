@@ -1,6 +1,5 @@
 # WITH CTE(Common Table Expression)
 
-
 * WITH CTE(Common Table Expression)는 단일 SQL 문(statement) 에서만 유효하다. 달리 말하면 CTE가 사용되는 단일 SQL statement 이다.
 * WITH CTE는 되도록 조회(SELECT) 용도로만 사용한다.
   * WITH CTE로 작성된 SELECT 문에 의해 생성된 임시 table은 연결된 다음 CTE나 최종 statement에서 참조 가능하다.
@@ -10,7 +9,6 @@
 ## WITH CTE문으로 생성된 읽기와 쓰기의 
 
 WITH CTE에서 SELECT 문으로 읽을 수 있는 table 데이터는 트랜잭션 시작시 캡쳐된 스냅샷 상태의 내용이며 상위 CTE에서 사용한 데이터 변경 SQL문(INSERT/UPDATE/DELETE)이 적용된 table의 상태를 하위 CTE나 최종 SQL 문에서 참조(FROM 등)할 수 없다.
-
 
 ## MVCC (Multi Version Concurrency Control)
 
