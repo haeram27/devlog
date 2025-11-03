@@ -85,6 +85,17 @@ gpgkey=https://download.docker.com/linux/rhel/gpg
 dnf update && dnf upgrade -y
 ```
 
+## firewalld disable
+
+rocky는 기본적으로firewalld 가 구동 되며, 이 경우 서버에 http/https 서버 구동시, 접속 요청 수신이 차단된다.
+
+```bash
+systemctl status firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl mask firewalld
+```
+
 ### SSHD 로그인 설정
 
 ```bash
