@@ -1,5 +1,5 @@
 
-# firewalld
+# firewalld (WIP)
 
 - firewalld는 zone 단위로 네트워크 방화벽 규칙(rule) 세트를 정의하여 NIC에 적용하는 방식으로 동작하는 방화벽 서비스 이다.
 - zone은 네트워크 인터페이스에 적용되는 신뢰 수준별 방화벽 규칙 세트이다.
