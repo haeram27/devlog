@@ -7,7 +7,7 @@
 * `docker-compose.yaml`: 공통 설정
 * `docker-compose.override.yaml`: 개발/테스트용 설정 자동 병합
 
-### 예:
+*예제:*
 
 ```yaml
 # docker-compose.override.yaml

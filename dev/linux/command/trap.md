@@ -52,8 +52,7 @@ destructor() {
     echo "current_cmd: ${current_cmd}"
 }
 trap destructor EXIT
-``` 
-
+```
 
 ### 2. **ERR (Error)**
 

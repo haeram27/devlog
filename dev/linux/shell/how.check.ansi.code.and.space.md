@@ -9,19 +9,19 @@
   - [sanitize 함수](#sanitize-함수)
   - [참고](#참고)
     - [character class:  \[\[:print:\]\]](#character-class--print)
-- [터미널 제어 시퀀스 제거를 위한 sanitize 함수](#터미널-제어-시퀀스-제거를-위한-sanitize-함수)
-  - [터미널 제어 시퀀스](#터미널-제어-시퀀스)
-    - [대표적인 터미널 제어 시퀀스 종류](#대표적인-터미널-제어-시퀀스-종류)
-    - [예: 대표적인 OSC 시퀀스](#예-대표적인-osc-시퀀스)
-  - [sanitize 함수](#sanitize-함수-1)
-- [터미널 제어 시퀀스 (TODO)](#터미널-제어-시퀀스-todo)
-  - [표준 문서](#표준-문서)
-  - [대표적인 터미널 제어 시퀀스 종류](#대표적인-터미널-제어-시퀀스-종류-1)
-    - [C1 (8-bit) Control Charaters](#c1-8-bit-control-charaters)
-    - [자주 사용되는 Control Character](#자주-사용되는-control-character)
-  - [대표적인 OSC 시퀀스](#대표적인-osc-시퀀스)
-  - [참고](#참고-1)
-    - [ST (String Terminator)](#st-string-terminator)
+  - [터미널 제어 시퀀스 제거를 위한 sanitize 함수](#터미널-제어-시퀀스-제거를-위한-sanitize-함수)
+    - [터미널 제어 시퀀스](#터미널-제어-시퀀스)
+      - [대표적인 터미널 제어 시퀀스 종류](#대표적인-터미널-제어-시퀀스-종류)
+      - [예: 대표적인 OSC 시퀀스](#예-대표적인-osc-시퀀스)
+    - [sanitize 함수](#sanitize-함수-1)
+  - [터미널 제어 시퀀스 (TODO)](#터미널-제어-시퀀스-todo)
+    - [표준 문서](#표준-문서)
+    - [대표적인 터미널 제어 시퀀스 종류](#대표적인-터미널-제어-시퀀스-종류-1)
+      - [C1 (8-bit) Control Charaters](#c1-8-bit-control-charaters)
+      - [자주 사용되는 Control Character](#자주-사용되는-control-character)
+    - [대표적인 OSC 시퀀스](#대표적인-osc-시퀀스)
+    - [참고](#참고-1)
+      - [ST (String Terminator)](#st-string-terminator)
 
 ---
 shell의 어떤 데이터에 공백 또는 터미널 제어 시퀀스 포함 여부를 확인하려면 다음과 같은 방식을 사용한다.
@@ -85,7 +85,7 @@ $ echo -n "[$temp]" | hexdump -c
 ```bash
 $ temp="$(printf '\x1b\x5d\x30\x3b\x6d\x6f\x6e\x67\x6f\x73\x68\x20\x6d\x6f\x6e\x67\x6f\x64\x62\x3a\x2f\x2f\x3c\x63\x72\x65\x64\x65\x6e\x74\x69\x61\x6c\x73\x3e\x40\x31\x32\x37\x2e\x30\x2e\x30\x2e\x31\x3a\x32\x37\x30\x31\x37\x2f\x61\x64\x6d\x69\x6e\x3f\x64\x69\x72\x65\x63\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3d\x74\x72\x75\x65\x26\x73\x65\x72\x76\x65\x72\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e\x54\x69\x6d\x65\x6f\x75\x74\x4d\x53\x3d\x32\x30\x30\x30\x07\x36\x2e\x30\x0d\x0a')"
 
-$echo $temp
+$ echo $temp
 6.0
 
 $ echo -n "$temp" | hexdump -c
@@ -143,16 +143,16 @@ echo "$cleaned"
 upper, lower, alpha, digit, xdigit, punct, graph 클래스와 \<space\>(0x20) 포함
 cntrl (제어문자 클래스) 제외, \<space\>이외 tab,CR,LF 공백 문자도 제외
 
-# 터미널 제어 시퀀스 제거를 위한 sanitize 함수
+## 터미널 제어 시퀀스 제거를 위한 sanitize 함수
 
-## 터미널 제어 시퀀스
+### 터미널 제어 시퀀스
 
 터미널을 제어(화면 설정/하이퍼 링크 등)하기 위하여 사용되는 이진 시퀀스 데이터
 터미널에 제어 시퀀스 데이터가 전달되면 터미널 환경을 변경 할 수 있다.
 일부 어플리케이션에서 stdout이 터미널 장치(tty or Pseudo-TTY) 인 경우 터미널 제어 시퀀스 데이터를 응답에 한다.
 터미널 제어 시퀀스는 주로 터미널의 appearance(윈도우 타이틀, 텍스트 컬러)를 변경하여 사람에 대한 가독성/편의성을 추가 하거나 디바이스 제어를 하여 알림 소리 등을 발생시키는데 사용된다.
 
-### 대표적인 터미널 제어 시퀀스 종류
+#### 대표적인 터미널 제어 시퀀스 종류
 
 | 시퀀스 종류 | 예시 | 설명 |
 |-------------|------|------|
@@ -162,7 +162,7 @@ cntrl (제어문자 클래스) 제외, \<space\>이외 tab,CR,LF 공백 문자�
 | **DCS/APC/PM/SOS** | `ESC P...ESC \` | 디바이스 제어 시퀀스 등 |
 | **기타** | `ESC ^...ESC \` | 다양한 확장 시퀀스 |
 
-### 예: 대표적인 OSC 시퀀스
+#### 예: 대표적인 OSC 시퀀스
 
 | 시퀀스 코드 | 의미                         |
 |-------------|------------------------------|
@@ -170,7 +170,7 @@ cntrl (제어문자 클래스) 제외, \<space\>이외 tab,CR,LF 공백 문자�
 | `ESC ] 1;<NAME-VALUE> BEL` | 아이콘 이름 설정 (GUI용)    |
 | `ESC ] 8;;<URI-VALUE> ST` | 하이퍼링크 (iTerm2, Kitty 등) |
 
-## sanitize 함수
+### sanitize 함수
 
 다음은 터미널 제어 시퀀스 제거를 위한 sanitize 함수 이다.
 
@@ -215,7 +215,7 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 ``` sed 's/[^[:print:]]//g' ```
 표준입력으로 주어진 문자열에서 printable 문자클래스를 제외한 모든 문자를 제거
 
-# 터미널 제어 시퀀스 (TODO)
+## 터미널 제어 시퀀스 (TODO)
 
 터미널을 제어(화면 설정/하이퍼 링크 등)하기 위하여 사용되는  7-bit(C0)) 또는 8-bit(C1)로 표현되는 특정 이진 시퀀스 값.
 터미널 제어 시퀀스는 ANSI 제어 시퀀스에 포함되며 ASCII 코드의 \0x00 부터 \x1F 까지의 일부 제어 문자들도 ANSI 제어 시퀀스에서 정의된 내용이다. ANSI 제어 시퀀스는 printable하지 않으므로 실제로 터미널이 출력물에서 문자로 보여질 수는 없다.
@@ -226,7 +226,7 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 일부 어플리케이션에서 stdout이 터미널 장치(tty or Pseudo-TTY) 인 경우 터미널 제어 시퀀스 데이터를 응답에 포함시킨다. 이 경우 만약 어플리케이션의 응답을 수신처에서 재가공 하여 사용해야할 경우 제어 시퀀스가 문제를 일으키기도 한다. (이러한 상황에서 전문 용어로 "쓰레기 값"이라고 표현하기도 함)
 그러므로 쉘에서 어플리케이션의 응답 데이터를 재사용해야하는 경우에는 사실 어플리케이션을 실행할 때 tty 환경을 사용하지 않는 것이 최선이다.
 
-## 표준 문서
+### 표준 문서
 
 | 표준 | 설명 | 링크 |
 |------|------|------|
@@ -235,9 +235,9 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 | **XTerm ctlseqs** | 터미널에서의 ANSI 제어 시퀀스 실제 구현 내용 (시퀀스별 ASCII값 확인) | [ctlseqs.html](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html) |
 | **VT100/DEC docs** | 전통적 터미널 시퀀스 | 여러 오픈소스 아카이브에서 제공 |
 
-## 대표적인 터미널 제어 시퀀스 종류
+### 대표적인 터미널 제어 시퀀스 종류
 
-### C1 (8-bit) Control Charaters
+#### C1 (8-bit) Control Charaters
 
 | Pair code | HEX code | Seq ABBR | Seq Full Name |
 |:---|:---|:---|:---|
@@ -264,7 +264,7 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 | Pm | Any number of single numeric parameters, separated by ; character(s).  Individual values for the parameters are listed with Ps |
 | Pt | A text parameter composed of printable characters. |
 
-### 자주 사용되는 Control Character
+#### 자주 사용되는 Control Character
 
 | 시퀀스 종류 | 예시 | 설명 |
 |-------------|------|------|
@@ -281,7 +281,7 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 | **DCS/APC/PM/SOS** | `ESC P...ESC \` | 디바이스 제어 시퀀스 등 |
 | **기타** | `ESC ^...ESC \` | 다양한 확장 시퀀스 |
 
-## 대표적인 OSC 시퀀스
+### 대표적인 OSC 시퀀스
 
 | 시퀀스 코드 | 의미                         |
 |-------------|------------------------------|
@@ -289,6 +289,6 @@ sed 명령으로 시작하는 라인은 각 제어 시퀀스 구간을 제거 �
 | `ESC [ 1;<NAME-VALUE> BEL` | 아이콘 이름 설정 (GUI용)    |
 | `ESC [ 8;;<URI-VALUE> ESC \` | 하이퍼링크 (iTerm2, Kitty 등) |
 
-## 참고
+### 참고
 
-### ST (String Terminator)
+#### ST (String Terminator)
