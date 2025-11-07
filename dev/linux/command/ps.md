@@ -5,6 +5,7 @@
 
 | 항목 | 설명 |
 |:---:|:---|
+| -e | Select all processes.  Identical to -A. |
 | -f | Do full-format listing. |
 | -F | Extra full format. |
 | -l | Long format.  The -y option is often useful with this. |
