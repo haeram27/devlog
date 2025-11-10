@@ -11,7 +11,7 @@
     - [파티션 vs 윈도우 프레임 비교](#파티션-vs-윈도우-프레임-비교)
     - [윈도우 프레임 종류](#윈도우-프레임-종류)
     - [윈도우 프레임 정의 정의 방법 세가지](#윈도우-프레임-정의-정의-방법-세가지)
-    - [기본 윈도우 프레임 (중요)](#기본-윈도우-프레임-중요)
+    - [기본 윈도우 프레임 (⚠️)](#기본-윈도우-프레임-️)
     - [`BETWEEN`에 사용 가능한 범위 옵션](#between에-사용-가능한-범위-옵션)
       - [ROWS BETWEEN 예시](#rows-between-예시)
     - [RANGE vs ROWS vs GROUPS](#range-vs-rows-vs-groups)
@@ -292,17 +292,23 @@ RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW
 GROUPS BETWEEN 1 PRECEDING AND 1 FOLLOWING
 ```
 
-### 기본 윈도우 프레임 (중요)
+### 기본 윈도우 프레임 (⚠️)
 
-윈도우 프레임 정의를 생략하면 기본 적으로 아래의 `RANGE BETWEEN`으로 프레임이 정해짐
-`ORDER  BY`가 생략되면 ROWS와 RANGE의 차이가 없어 진다.
+- 윈도우 프레임 정의를 생략하면 기본 적으로 아래의 `RANGE BETWEEN`으로 프레임이 정해짐
+- ⚠️`ORDER  BY` 존재 여부에 따라 기본 윈도우 프레임 범위가 달라짐
+- `ORDER  BY`가 생략되면 ROWS와 RANGE의 차이가 없음
+
+| 조건 | 기본 프레임 모드 | 기본 프레임 범위 |
+|------|-----------------|-----------------|
+| ORDER BY 있음 | `RANGE` | `UNBOUNDED PRECEDING AND CURRENT ROW` |
+| ORDER BY 없음 | `RANGE` | `UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` |
 
 ```sql
--- ORDER BY가 있으면
+-- ORDER BY가 있으면 처음 부터 현재 ROW 까지
 OVER (PARTITION BY x ORDER BY y)
 -- 기본값: RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
 
--- ORDER BY가 없으면
+-- ORDER BY가 없으면 처음 부터 마지막 ROW 까지
 OVER (PARTITION BY x)
 -- 기본값: 전체 파티션 = RANGE|ROWS UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 ```
