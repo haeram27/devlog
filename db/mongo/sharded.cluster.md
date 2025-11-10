@@ -85,7 +85,7 @@ services:
       - mongo-cluster-shard1
       - mongo-cluster-shard2
     command: >
-      mongos --configdb csrs/mongo-cluster-config1:27019,mongo-cluster-config2:27019,mongo-cluster-config3:27019 --port 27017
+      mongos --configdb csrs/mongo-cluster-config1:27019,mongo-cluster-config2:27019 mongo-cluster-config3:27019 --port 27017
     container_name: mongo-cluster-mongos
     ports:
       - "27017:27017"
