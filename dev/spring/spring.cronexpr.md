@@ -90,7 +90,7 @@ separator for non-conseutive value list in a timeunit
 
 ### 'L' - `dom, dow`
 
-short-hand for "last"
+ℹ️ short-hand for "last"
 
 - 'L' in day-of-month = the last day of the month
 - 'L' in day-of-week = simply "7" or "SAT".

@@ -188,4 +188,89 @@ sysctl --system
 
 ### [docker 설치](https://docs.docker.com/engine/install/rhel/)
 
-TBD
+#### dnf를 이용한 설치 방법 안내
+
+- https://docs.docker.com/engine/install/fedora/
+
+#### 기존 버전 삭제
+
+```bash
+sudo dnf remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+```
+
+#### 최신 버전 설치
+
+```bash
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+#### docker 특정 버전 설치
+
+docker-ce version 확인
+
+```bash
+$ dnf list docker-ce --showduplicates | sort -r
+ 
+docker-ce.x86_64    3:28.5.1-1.fc41    docker-ce-stable
+docker-ce.x86_64    3:28.5.0-1.fc41    docker-ce-stable
+...
+CE_VERSION_STRING=28.5.0
+```
+
+docker-compose-plugin version 확인
+
+```bash
+$ dnf list docker-compose-plugin --showduplicates | sort -r
+docker-compose-plugin.x86_64    2.28.1-1.el9    abis-centos-docker-ce
+docker-compose-plugin.x86_64    2.27.1-1.el9    abis-centos-docker-ce
+...
+COMPOSE_VERSION_STRING=2.27.1
+```
+
+docker 특정 버전 설치
+
+```bash
+$ sudo dnf install docker-ce-<CE_VERSION_STRING> docker-ce-cli-<CE_VERSION_STRING> containerd.io docker-buildx-plugin docker-compose-plugin-<COMPOSE_VERSION_STRING>
+```
+
+runc 다른 버전 다운로드 방법
+- runc release page 에서 원하는 버전 다운로드(amd64)
+- 설치 경로: /usr/bin
+
+#### dockerd에서 사용할 registry 추가
+
+```bash
+$ vi /etc/docker/daemon.json
+{
+    "insecure-registries": ["registry.k8s.io", "quay.io", "registry-1.docker.io"]
+}
+```
+
+#### 사용자 docker group에 추가
+
+```bash
+$ sudo usermod -aG docker ${USER}
+```
+
+#### docker daemon 활성화 및 테스트
+
+```bash
+$ sudo systemctl enable --now docker
+$ systemctl status docker
+$ sudo docker run hello-world
+```
+
+#### 사용자 docker group에 추가
+
+```bash
+$ sudo usermod -aG docker ${USER}
+```
