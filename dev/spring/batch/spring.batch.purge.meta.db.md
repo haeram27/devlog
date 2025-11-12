@@ -35,7 +35,7 @@
   * `target_job_execution_ids`에 연관된 step_execution_id를 구함 (target_step_execution_ids)
   * `target_step_execution_ids`를 이용하여 step table을 삭제 (del_sec, del_se)
   * `target_job_execution_ids`를 이용하여 execution table을 삭제 (del_jec, del_jep, del_je)
-  * 마지막으로 `batch_job_instance` table에서 survivor가 아닌 모든 tuble 삭제
+  * 마지막으로 `batch_job_instance` table에서 survivor가 아닌 모든 tuple 삭제
 
 ```java
 import org.apache.ibatis.annotations.Mapper;

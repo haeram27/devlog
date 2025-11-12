@@ -8,6 +8,7 @@ Debugging 대상 스크립트의 최상에 다음과 같이 정의
 # set shell debugging options
 set -euvxo pipefail
 
+## print last command trap, use with "set -e" option
 # store last executed command
 prev_cmd="none"
 current_cmd="none"
