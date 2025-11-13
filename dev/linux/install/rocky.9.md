@@ -44,40 +44,97 @@ nmtui
       - http://ftp.kaist.ac.kr/pub/rocky
 
 ```text
-[AppStream]
+[rocky-kaist-appstream]
 name=Rocky Linux $releasever - AppStream
-baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/AppStream/$basearch/os/
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/AppStream/$basearch/os/
 enabled=1
 gpgcheck=0
+countme=0
 gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
 
-[BaseOS]
+[rocky-kaist-baseos]
 name=Rocky Linux $releasever - BaseOS
-baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/BaseOS/$basearch/os/
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/BaseOS/$basearch/os/
 enabled=1
 gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
 
-[extras]
-name=Rocky Linux $releasever - extras
-baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/extras/$basearch/os/
+[rocky-kaist-devel]
+name=Rocky Linux $releasever - Devel
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/devel/$basearch/os/
 enabled=1
 gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
 
-[devel]
-name=Rocky Linux $releasever - devel
-baseurl=http://ftp.kaist.ac.kr/$contentdir/$releasever/devel/$basearch/os/
+[rocky-kaist-extras]
+name=Rocky Linux $releasever - Extras
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/extras/$basearch/os/
 enabled=1
 gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
 
-[docker-ce-stable]
+[rocky-kaist-ha]
+name=Rocky Linux $releasever - HighAvailability
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/HighAvailability/$basearch/os/
+enabled=1
+gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+
+[rocky-kaist-nfv]
+name=Rocky Linux $releasever - NFV
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/NFV/$basearch/os/
+enabled=1
+gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+
+[rocky-kaist-plus]
+name=Rocky Linux $releasever - Plus
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/plus/$basearch/os/
+enabled=1
+gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+
+[rocky-kaist-rt]
+name=Rocky Linux $releasever - Realtime
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/RT/$basearch/os/
+enabled=1
+gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+
+[rocky-kaist-resilient-storage]
+name=Rocky Linux $releasever - ResilientStorage
+baseurl=https://ftp.kaist.ac.kr/$contentdir/$releasever/ResilientStorage/$basearch/os/
+enabled=1
+gpgcheck=0
+countme=0
+gpgkey=https://ftp.kaist.ac.kr/$contentdir/RPM-GPG-KEY-Rocky-$releasever
+
+[fedora-epel]
+name=Extra Packages for Enterprise Linux for RedHat based system
+baseurl=https://dl.fedoraproject.org/pub/epel/$releasever/Everything/$basearch/
+enabled=1
+gpgcheck=1
+countme=0
+gpgkey=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever
+
+[rhel-docker-ce-stable]
 name=Docker CE Stable - $basearch
 baseurl=https://download.docker.com/linux/rhel/$releasever/$basearch/stable
 enabled=1
 gpgcheck=1
+countme=0
 gpgkey=https://download.docker.com/linux/rhel/gpg
 ```
 
-- gpgcheck가 반드시 필요한 경우가 아니면 `gpgcheck=0` 설정
+- gpgcheck가 반드시 필요한 경우가 아니면 `gpgcheck=0` 설정 가능
+- baseurl은 mirrorlist와 함께 명시되면 대체 옵션 평가되어 동작하므로 주의
 
 #### update packages
 
