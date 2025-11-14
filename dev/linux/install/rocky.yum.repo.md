@@ -83,14 +83,66 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-$releasever
     - `gpgkey=https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-$releasever`  # for epel (Extra Packages for Enterprise Linux) of fedora project
     - `gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-$releasever`  # default gpg key installed with OS(Red Hat-based System) for rocky official repos
 
-### repo 파일 변경후 시스템 반영
+### variables in .repo file for rhel linux family
+
+- [Rockylinux-Software Management-DNF](https://docs.rockylinux.org/10/books/admin_guide/13-softwares/#dnf-dandified-yum)
+- [Variables in /etc/yum.repos.d/XXX.repo](https://unix.stackexchange.com/questions/19701/yum-how-can-i-view-variables-like-releasever-basearch-yum0)
+
+#### RHEL/CentOS 8 and 9
 
 ```bash
-rm -rf /var/cache/dnf    # 기존 다운로드된 패키지의 메타데이터 캐시 삭제
-dnf update -y            # 시스템 패키지를 최신으로 업데이트 및 의존성 정리. "dnf upgrade" 명령과 동일하며 내부적으로 upgrade로 처리됨
+/usr/libexec/platform-python -c '
+import dnf, json
+db = dnf.dnf.Base()
+db.conf.substitutions.update_from_etc("/")
+print(json.dumps(db.conf.substitutions, indent=2))'
+```
+
+#### Result Example
+
+- rocky9
+
+```bash
+{
+  "arch": "x86_64",
+  "basearch": "x86_64",
+  "releasever": "9",
+  "contentdir": "pub/rocky",
+  "rltype": "",
+  "sigcontentdir": "pub/sig",
+  "stream": "9-stream"
+}
+```
+
+#### RHEL/CentOS 6 and 7
+
+```bash
+python -c 'import yum, json; yb = yum.YumBase(); print json.dumps(yb.conf.yumvar, indent=2)'
+```
+
+#### RHEL/CentOS 4 and 5
+
+if you install python-simplejson
+
+```bash
+python -c 'import yum, simplejson as json; yb = yum.YumBase(); print json.dumps(yb.conf.yumvar, indent=2)'
+```
+
+#### otherwise
+
+```bash
+python -c 'import yum, pprint; yb = yum.YumBase(); pprint.pprint(yb.conf.yumvar, width=1)'
 ```
 
 ## rocky 9 사설 mirror respository 사용시 .repo 샘플 (/etc/yum.repos.d/kr.repos)
+
+- 필수 repository
+  - appstream
+  - baseos
+  - devel
+  - extras
+  - epel
+  - docker
 
 ```text
 [rocky-kaist-appstream]
@@ -180,4 +232,11 @@ enabled=1
 gpgcheck=1
 countme=0
 gpgkey=https://download.docker.com/linux/rhel/gpg
+```
+
+## repo 파일 변경후 시스템 반영
+
+```bash
+rm -rf /var/cache/dnf    # 기존 다운로드된 패키지의 메타데이터 캐시 삭제
+dnf update -y            # 시스템 패키지를 최신으로 업데이트 및 의존성 정리. "dnf upgrade" 명령과 동일하며 내부적으로 upgrade로 처리됨
 ```
