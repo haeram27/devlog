@@ -53,7 +53,7 @@ sudo dnf install socat -y
 syntax:
 
 ```bash
-socat TCP-LISTEN:<forwarded-port>,fork TCP:localhost:<bind-port>
+socat TCP-LISTEN:<forward-port>,fork TCP:localhost:<destination-port>
 ```
 
 * forwarded-port:
@@ -98,5 +98,3 @@ sudo iptables -t nat -L -n -v
 # 포트 리스닝 확인
 sudo ss -tlnp | grep -E '8080|3000'
 ```
-
-어떤 포트에서 어떤 포트로 포워딩하려고 하시나요? 구체적인 상황을 알려주시면 더 정확한 설정 방법을 안내해드리겠습니다.
