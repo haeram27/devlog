@@ -164,7 +164,7 @@ public class RestTemplateTestController {
 
     @PostMapping("/cve/search")
     public String searchCve(@RequestBody Map<String, Object> requestJson) {
-        log.info("## AtipController::searchCve - request : {}", requestJson);
+        log.info("## Controller::searchCve - request : {}", requestJson);
 
         var paramMap = requestJson.getParamMap();
         var cveId = Optional.ofNullable(paramMap.get("cveId"))
@@ -286,7 +286,7 @@ public class RestTemplateTestService {
             } else if (responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
                 log.error("Error: No content");
             } else {
-                log.error("Error: Atip Internal Error");
+                log.error("Error: Http Server Internal Error");
             }
         } catch (RestClientResponseException ex) {
             log.error("Error: {}", ex.getMessage());
@@ -298,10 +298,24 @@ public class RestTemplateTestService {
             log.debug("Response Body: " + ex.getResponseBodyAsString());
             log.debug("Headers: " + ex.getResponseHeaders());
 
-            // used inappropriate access-key: try to exchange ti domain between portal and bundle
-            if (ex.getStatusCode().is4xxClientError()) {
+            if (status.is4xxClientError()) {
                 log.error("Error: {}", ex.getResponseBodyAsString());
-            } else if (ex.getStatusCode().is5xxServerError()) {
+
+                // if required handle with exact 4XX Error
+                if (status.equals(HttpStatus.BAD_REQUEST)) {
+                    log.error("Error: BAD_REQUEST: {}", ex.getResponseBodyAsString());
+                } else if (status.equals(HttpStatus.UNAUTHORIZED)) {
+                    log.error("Error: UNAUTHORIZED: {}", ex.getResponseBodyAsString());
+                } else if (status.equals(HttpStatus.FORBIDDEN)) {
+                    log.error("Error: FORBIDDEN: {}", ex.getResponseBodyAsString());
+                } else if (status.equals(HttpStatus.NOT_FOUND)) {
+                    log.error("Error: NOT_FOUND: {}", ex.getResponseBodyAsString());
+                } else if (status.equals(HttpStatus.I_AM_A_TEAPOT)) {
+                    log.error("Error: I_AM_A_TEAPOT: {}", ex.getResponseBodyAsString());
+                } else if (status.equals(HttpStatus.TOO_MANY_REQUESTS)) {
+                    log.error("Error: TOO_MANY_REQUESTS: {}", ex.getResponseBodyAsString());
+                }
+            } else if (status.is5xxServerError()) {
                 log.error("Error: {}", ex.getResponseBodyAsString());
             } else {
                 log.error("Error: {}", ex.getResponseBodyAsString());
@@ -370,13 +384,13 @@ public WebClient trustAllWebClient() {
             .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
             .build();
 
-        // TLS 전략: 비동기용
+        // TlsStrategy: async client method
         TlsStrategy tls = ClientTlsStrategyBuilder.create()
             .setSslContext(sslContext)
             .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
             .buildAsync();
 
-        // 커넥션 풀: 비동기용
+        // connection pool: async client method
         PoolingAsyncClientConnectionManager cm =
             PoolingAsyncClientConnectionManagerBuilder.create()
                 .setTlsStrategy(tls)
@@ -385,11 +399,12 @@ public WebClient trustAllWebClient() {
                 .setMaxConnPerRoute(50)  // default: 5
                 .build();
 
-        // 요청/응답 타임아웃 등(비동기 클라이언트에도 적용 가능)
+        // request/response default timeout configuration (can apply to both async/sync client method)
+        // also timeouts can be changed at WebClient.exchange() per connection
         RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // 풀에서 커넥션 임대 대기
-            .setConnectTimeout(Timeout.ofSeconds(2))           // TCP 연결 수립
-            .setResponseTimeout(Timeout.ofSeconds(5))          // 응답 대기
+            .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // timeout while waiting for lent a connection from connection pool
+            .setConnectTimeout(Timeout.ofSeconds(2))           // timeout while waiting for TCP connection establishment
+            .setResponseTimeout(Timeout.ofSeconds(5))          // timeout while waiting for server response
             .build();
 
         CloseableHttpAsyncClient asyncClient = HttpAsyncClients.custom()
@@ -398,12 +413,11 @@ public WebClient trustAllWebClient() {
             .evictExpiredConnections()
             .build();
 
-        // WebClient 커넥터에 주입 (Spring이 lifecycle 관리)
+        // assign WebClient to HttpConnector (make Spring control connection lifecycle)
         var connector = new HttpComponentsClientHttpConnector(asyncClient);
 
         return WebClient.builder()
             .clientConnector(connector)
-            // 공통 타임아웃(선택): exchange 레벨에서 한번 더 안전망
             .build();
 
     } catch (GeneralSecurityException e) {

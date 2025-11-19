@@ -1,6 +1,36 @@
 # TypeReference in Jackson
 
-## `TypeReference` 클래스
+## jackson JsonNode를 java object로 mapping 하는 예제
+
+```java
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+ObjectMapper mapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .build();
+
+JsonNode jsonNode = ...
+
+if (node.isObject()) {
+    ObjectNode node = (ObjectNode) jsonNode;
+    Map<String, Object> map = mapper.convertValue(node,
+        new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
+    // var map = restClientObjectMapper.treeToValue(node, Map.class);
+    list = new ArrayList<Map<String, Object>>();
+    list.add(map);
+} else if (node.isArray()) {
+    ArrayNode node = (ArrayNode) jsonNode;
+    list = mapper.convertValue(node,
+        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String,Object>>>() {});
+}
+```
+
+## `com.fasterxml.jackson.core.type.TypeReference` 클래스
 
 * 제네릭 타입 정보를 담기 위한 빈 클래스
 * Jackson에서 제네릭 타입 정보를 런타임에 유지하려고 만든 클래스
@@ -26,7 +56,7 @@ new TypeReference<>() {};
 
 ---
 
-## 🔹 왜 {} 가 필요한가?
+## '{}' 사용 이유
 
 * 만약 이렇게 쓴다면:
 
@@ -47,7 +77,7 @@ new TypeReference<>() {};
 
 ---
 
-## 🔹 Jackson에서 쓰이는 이유
+## Jackson에서 쓰이는 이유
 
 Java의 **제네릭 타입은 런타임에 지워지기(타입 소거, type erasure)** 때문에, 보통은 구체적인 제네릭 정보를 얻을 수 없다
 
