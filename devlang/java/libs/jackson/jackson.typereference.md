@@ -3,15 +3,16 @@
 ## jackson JsonNode를 java object로 mapping 하는 예제
 
 ```java
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-ObjectMapper mapper = JsonMapper.builder()
+JsonMapper mapper = JsonMapper.builder()
             .addModule(new JavaTimeModule())
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .build();
 
 JsonNode jsonNode = ...
@@ -34,7 +35,7 @@ if (node.isObject()) {
 
 * 제네릭 타입 정보를 담기 위한 빈 클래스
 * Jackson에서 제네릭 타입 정보를 런타임에 유지하려고 만든 클래스
-* Jackson은 제네릭 타입을 정보를 런타임에 유지 하여 메소드 간 전달 및 reflection을 이용한 제너릭 타입 참조등에 사용한다.
+* Jackson은 제네릭 타입을 정보를 런타임에 유지 하여 메소드 간 전달 및 reflection을 이용한 제너릭 타입 참조등에 사용한다
 * 제네릭 타입 정보를 가지는 것 외에 TypeReference클래스는 어떤 정보나 특정 행위를 위한 메소드를 갖지 않는다
 * 그래서 TypeReference 클래스의 구현체에는 어떠한 내용도 상속하거나 구현할 필요가 없다
 * TypeReference 클래스는 제네릭 타입 정보를 메소드의 인자로 넘겨주기 용도로 자주 사용된다

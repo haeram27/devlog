@@ -213,7 +213,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -231,10 +230,11 @@ public class RestTemplateTestService {
 
     private final RestTemplate trustAllRestTemplate;
 
-    private final ObjectMapper mapper = JsonMapper.builder()
+    private final JsonMapper mapper = JsonMapper.builder()
                                         .addModule(new JavaTimeModule())
                                         .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
                                         .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+                                        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                                         .build();
 
     // https://api.cvesearch.com/search?q=CVE-2023-1234
