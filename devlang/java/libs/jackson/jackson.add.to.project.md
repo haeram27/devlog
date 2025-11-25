@@ -1,10 +1,11 @@
 # Jackson 라이브러리
 
-Java Object 형태의 데이터(VO, DTO)를 JSON 또는 XML 형식 데이터와 상호 변환을 지원하는 라이브러리
+Java Object 형태의 데이터(VO, DTO)를 JSON 형식 데이터와 상호 변환을 지원하는 라이브러리
 
-* XML/YAML/CSV 등 다양한 형식 지원
 * 스트림 방식으로 속도가 빠르며 유연하고, annotation 방식으로 메타 데이터를 기술할 수 있음
-* ObjectMapper API를 사용하여 객체에 데이터 세팅을 함
+* JsonMapper API를 사용하여 객체에 데이터 세팅을 함
+* Json 이외 XML/YAML/CSV 등 다양한 형식 지원할 수 있지만 별도의 dataformat 모듈 의존성을 추가 해야함
+  * [Group: FasterXML Jackson Dataformat](https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat)
 
 * jackson은 Java Object(DTO)를 Json Document로 직렬화/역직렬화 하기 위한 도구 이다.
   * DTO는 Java Object(POJO)이며, json 문서의 data와 object의 각 fileld를 맵핑하기 위해서 사용된다.
@@ -24,12 +25,12 @@ Java Object 형태의 데이터(VO, DTO)를 JSON 또는 XML 형식 데이터와 
 
 ```text
 ext {
-    jacksonVersion = '2.18.2'
+    jacksonVersion = '2.20.1'
 }
 
 dependencies {
     // ## jackson
-    // jackson base library (m): support ObjectMapper
+    // jackson base library (m): support JsonMapper
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     // jackson core library (m)
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"

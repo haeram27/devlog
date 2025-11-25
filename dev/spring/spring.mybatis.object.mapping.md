@@ -47,7 +47,8 @@ mybatis:
 ```java
     @Bean(name = "oltpSqlSessionFactory")
     @Primary
-    public SqlSessionFactory oltpSqlSessionFactory(@Qualifier("oltpDataSource") DataSource oltpDataSource,
+    public SqlSessionFactory oltpSqlSessionFactory(
+            @Qualifier("oltpDataSource") DataSource oltpDataSource,
             ApplicationContext applicationContext) {
         try {
             SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();

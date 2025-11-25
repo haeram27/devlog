@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-JsonMapper mapper = JsonMapper.builder()
+JsonMapper jsonMapper = JsonMapper.builder()
             .addModule(new JavaTimeModule())
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
@@ -21,7 +21,7 @@ if (node.isObject()) {
     ObjectNode node = (ObjectNode) jsonNode;
     Map<String, Object> map = mapper.convertValue(node,
         new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
-    // var map = restClientObjectMapper.treeToValue(node, Map.class);
+    // var map = jsonMapper.treeToValue(node, Map.class);
     list = new ArrayList<Map<String, Object>>();
     list.add(map);
 } else if (node.isArray()) {

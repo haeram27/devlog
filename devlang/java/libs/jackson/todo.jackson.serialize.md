@@ -18,7 +18,7 @@
 
 * writeValue
 
-## 주의: ObjectMapper.readValue() 호출시 `Class<T>` vs `TypeReference<T>` 사용 차이
+## 주의: JsonMapper.readValue() 호출시 `Class<T>` vs `TypeReference<T>` 사용 차이
 
 * Generic 파라미터를 가지는 ParamterizedType에 매핑하는 경우 TypeReference를 사용하라
   * TypeReference를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 ParameterizedType이 가져야하는 제너릭 타입에 대한 type check를 해준다.
@@ -50,8 +50,8 @@ T가 ParameterizedType 일지라도 Generic 타입을 Object로 처리해야 하
 json data: ["hello", 1, 2.4, true, "message"]
 
 ```java
-ObjectMapper.readValue(jsonString, List.class) ==
-ObjectMapper.readValue(jsonString, new TypeReference<List<Object>>(){})
+JsonMapper.readValue(jsonString, List.class) ==
+JsonMapper.readValue(jsonString, new TypeReference<List<Object>>(){})
 ```
 
 예) Map<String, Object>: json object 이고 값이 단일 타입이 아닌 경우 
@@ -66,8 +66,8 @@ json data:
 ```
 
 ```java
-ObjectMapper.readValue(jsonString, Map.class) ==
-ObjectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>(){})
+JsonMapper.readValue(jsonString, Map.class) ==
+JsonMapper.readValue(jsonString, new TypeReference<Map<String, Object>>(){})
 ```
 
 ## Non-ParameterizedType (제너릭 미사용 타입)의 readValue() 호출
@@ -83,22 +83,22 @@ UserVO userVO = mapper.readValue(jsonString, List.class); // Generic 타입을 O
 ### Map (json Object에 대응)
 
 ```java
-Map<String, Object> map = objectMapper.readValue(jsonString,
+Map<String, Object> map = jsonMapper.readValue(jsonString,
     new TypeReference<Map<String, Object>>(){});
-Map<String, Integer> map = objectMapper.readValue(jsonString,
+Map<String, Integer> map = jsonMapper.readValue(jsonString,
     new TypeReference<Map<String, UserVO>>(){});
 ```
 
 ### List (json array에 대응)
 
 ```java
-List<Map<String, Object>> list = objectMapper.readValue(jsonArrayString,
+List<Map<String, Object>> list = jsonMapper.readValue(jsonArrayString,
     new TypeReference<List<Map<String, Object>>>(){});
-List<String> list = objectMapper.readValue(jsonArrayString,
+List<String> list = jsonMapper.readValue(jsonArrayString,
     new TypeReference<List<Map<String, UserVO>>>(){});
 ```
 
-* jackson의 ObjectMapper 클래스에는 여러 버전의 readValue() Overload가 정의 되어 있다.
+* jackson의 JsonMapper 클래스에는 여러 버전의 readValue() Overload가 정의 되어 있다.
 * 일반적으로 Json String 역질렬화시 아래의 두 가지 readValue()가 사용된다.
 
 ```java
@@ -114,7 +114,6 @@ ParameterizedType은 Collection(List, Set), Map 등 Generic 파라미터를 사�
 List(json array 대응)나 Map(json pair 대응)의 경우에도 그냥 List.class, Map.class를 사용해도 오류는 없다.
 다만 컴파일 후에도 제너릭 타입의 정보를 컴파일된 코드에 남겨서 역직렬화시 "개발자가 의도한 제너릭 타입 정보"를 갖는ParameterizedType(List, Map 등)으로 정확히 databinding(mapping) 되도록 하기 위해서 사용된다.
 TypeReference를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 ParameterizedType이 가져야하는 제너릭 타입에 대한 type check를 해준다. 그래서 런타임에 json 데이터가 개발자가 의도한 타입이 아니라면 Exception을 발생시킨다.
-
 
 제너릭 표현은 컴파일 과정에서 Type Erasure(타입 소거)된다.
 Type Erasure는 컴파일러가 제너릭 파라미터를 실제 클래스로 변환하는 것을 의미하며 그래서 제너릭 정보는 컴파일 후에 손실된다. 그래서 런타임에는 ParameterizedType을 변수에 받으려면 Type Casting(형변환)을 해야만 한다.
@@ -189,14 +188,14 @@ public class Box {
 }
 ```
 
-## ObjectMapper를 이용한 직렬화/역직렬화 사용법
+## JsonMapper를 이용한 직렬화/역직렬화 사용법
 
 ### 역직렬화(deserialize) : Json(String) -> Java Object
 
-* ObjectMapper.readValue()
+* JsonMapper.readValue()
 
 ```java
-ObjectMapper mapper = new ObjectMapper();
+JsonMapper mapper = new JsonMapper();
 
 // JSON 파일에서 읽기
 UserVO userVO = mapper.readValue(new File("data.json"), userVO.class);
@@ -210,10 +209,10 @@ UserVO userVO = mapper.readValue("{\"id\":\"abc\", \"pw\":1234}", userVO.class);
 
 ### 역직렬화(deserialize) : Json(String) -> JsonNode(Object)
 
-* ObjectMapper.readTree()
+* JsonMapper.readTree()
 
 ```java 
-ObjectMapper mapper = new ObjectMapper();
+JsonMapper mapper = new JsonMapper();
 
 // JSON String 에서 읽기
 JsonNode rootNode = mapper.readTree(jsonString);
@@ -221,11 +220,16 @@ JsonNode rootNode = mapper.readTree(jsonString);
 
 ### 직렬화(serialize, write): Java Object -> Json(String)
 
-* ObjectMapper.writeValue(Model)
-* ObjectMapper.writeValueAsString(Model)
+* JsonMapper.writeValue(Model)
+* JsonMapper.writeValueAsString(Model)
 
 ```java
-ObjectMapper mapper = new ObjectMapper();
+JsonMapper mapper = JsonMapper.builder()
+    .addModule(new JavaTimeModule())
+    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+    .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    .build();
 
 // json 파일로 저장
 mapper.writeValue(new File("result.json"), userVO);
@@ -268,11 +272,16 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
 
         String jsonArrayString = "[{\"name\":\"John Doe\",\"age\":30,\"email\":\"john.doe@example.com\"},{\"name\":\"Jane Smith\",\"age\":25,\"email\":\"jane.smith@example.com\"}]";
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        JsonMapper jsonMapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
 
         try {
             // JSON 배열 문자열을 List로 변환
-            List<Map<String, Object>> list = objectMapper.readValue(jsonArrayString,
+            List<Map<String, Object>> list = jsonMapper.readValue(jsonArrayString,
                     new TypeReference<List<Map<String, Object>>>(){});
 
             // List에서 데이터 접근
@@ -316,11 +325,16 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
 
         String jsonString = "{\"name\":\"John Doe\",\"age\":30,\"email\":\"john.doe@example.com\",\"roles\":[\"admin\",\"user\"]}";
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        JsonMapper jsonMapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
 
         try {
             // JSON 문자열을 Map으로 변환
-            Map<String, Object> map = objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>(){});
+            Map<String, Object> map = jsonMapper.readValue(jsonString, new TypeReference<Map<String, Object>>(){});
 
             // Map에서 데이터 접근
             String name = (String) map.get("name");
@@ -341,8 +355,8 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
 ```
 
 ## json pointer expression을 사용하여 json 내부 값 변경 하기
-json의 특정 노드에 접근하기위한 표현식으로 일반적으로
-json path와 json point expression이 있는데, Jackson의 경우 json point expression을 사용한다.
+
+* json의 특정 노드에 접근하기위한 표현식으로 일반적으로 json path와 json point expression이 있는데, Jackson의 경우 json point expression을 사용한다.
 
 ```java
     @Test
@@ -383,10 +397,15 @@ json path와 json point expression이 있는데, Jackson의 경우 json point ex
                 + "}"
                 + "}";
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        JsonMapper jsonMapper = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
 
         try {
-            JsonNode rootNode = objectMapper.readTree(jsonString);
+            JsonNode rootNode = jsonMapper.readTree(jsonString);
 
             /*
              * read first category of book
@@ -421,7 +440,7 @@ json path와 json point expression이 있는데, Jackson의 경우 json point ex
             String modifiedJsonString;
             ((ObjectNode) rootNode.at("/store/book/0")).put("price", 10.99);
             ((ObjectNode) rootNode.at("/store/bicycle")).put("color", "blue");
-            modifiedJsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+            modifiedJsonString = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
             System.out.println("Modified JSON: " + modifiedJsonString);
             System.out.println("----------------------------------------------------------");
 
@@ -429,7 +448,7 @@ json path와 json point expression이 있는데, Jackson의 경우 json point ex
             if (bicycleNode.isObject()) {
                 ((ObjectNode) bicycleNode).put("color", "green");
             }
-            modifiedJsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+            modifiedJsonString = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
             System.out.println("Modified JSON: " + modifiedJsonString);
             System.out.println("----------------------------------------------------------");
 

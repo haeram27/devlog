@@ -15,12 +15,12 @@ public class JacksonConfig {
     @Bean
     @Primary
     public JsonMapper jsonMapper(){
-    return JsonMapper.builder()
-        .addModule(new JavaTimeModule())
-        .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-        .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .build();
+        return JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
     }
 }
 ```
