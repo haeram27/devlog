@@ -17,7 +17,7 @@ JsonTypeHandler.java
 ```java
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonMapper;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.postgresql.util.PGobject;
@@ -29,7 +29,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JsonMapper mapper = JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                    .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build();
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType)

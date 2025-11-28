@@ -81,7 +81,7 @@ Arrays.sort(rosterAsArray, Person::compareByAge);
 메서드 참조에는 네 가지 종류가 있습니다:
 
 |종류|문법|예시|
-|---|---|---|
+| ---------------- |---|---|
 |정적 메서드 참조|`ContainingClass::staticMethodName`|`Person::compareByAge`|
 |특정 객체의 인스턴스 메서드 참조|`containingObject::instanceMethodName`|`myComparisonProvider::compareByName`|
 |특정 타입의 임의 객체의 인스턴스 메서드 참조|`ContainingType::methodName`|`String::compareToIgnoreCase`|
