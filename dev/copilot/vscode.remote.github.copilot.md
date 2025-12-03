@@ -5,7 +5,7 @@
 vscode remote에서 github.copilot extension을 설치하거나 구동하지 않고,
 remote에서 사용하더라도 local에만 github.copilot extension을 설치하고 로그인
 
-##  remote에 github.copilot 관련 extension 제거(uninstall)
+## remote에 github.copilot 관련 extension 제거(uninstall)
 
 이미 remote vscode server에 github.copilot extension이 깔려 있으면 제거
 
