@@ -300,6 +300,7 @@ $ sudo dnf install docker-ce-<CE_VERSION_STRING> docker-ce-cli-<CE_VERSION_STRIN
 ```
 
 runc 다른 버전 다운로드 방법
+
 - [runc release page](https://github.com/opencontainers/runc/releases) 에서 원하는 버전 다운로드(runc.amd64)
 - 설치 경로: /usr/bin/runc
 - 원본 runc 백업하고 symlink로 '/usr/bin/runc'를 신규 바이너리로 지정 권장

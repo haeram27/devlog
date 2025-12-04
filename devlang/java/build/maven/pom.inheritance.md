@@ -3,7 +3,7 @@
 ---
 
 refs:
-<https://maven.apache.org/pom.html#Inheritance>
+- [maven pominheritance](https://maven.apache.org/pom.html#Inheritance)
 ---
 
 project.xxxManagement tag는 모듈화 maven 프로젝트에서 모듈간 element의 공통 속성을 정의하는 사용된다.

@@ -3,12 +3,12 @@
 Maven [POM](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)(Project Object Model)은 java 프로젝트를 빌드하기 위한 maven의 설정 내용을 정형화한한 형식의 xml 문서로 정의한 것을 말한다.
 
 참고:
-- https://maven.apache.org/guides/introduction/introduction-to-the-pom.html
-- https://maven.apache.org/pom.html#Introduction
+- [introduction-to-the-pom](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)
+- [pom-introduction](https://maven.apache.org/pom.html#Introduction)
 
 Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식으로 참조할 수 있습니다. (변수와 같이이 참조)
 
-1. **[POM 내 정의한 프로퍼티](https://maven.apache.org/pom.html#Properties)**
+## **[POM 내 정의한 프로퍼티](https://maven.apache.org/pom.html#Properties)**
 
     ```xml
     <properties>
@@ -18,7 +18,7 @@ Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식�
     ${my.prop}  <!-- → "hello" -->
     ```
 
-2. **커맨드라인 `-D` 로 넘긴 시스템 프로퍼티**
+## **커맨드라인 `-D` 로 넘긴 시스템 프로퍼티**
 
     ```
     mvn clean install -Denv=prod -Dtimeout=30
@@ -31,7 +31,7 @@ Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식�
     ${timeout}  <!-- → "30"  -->
     ```
 
-3. **환경 변수**
+## **환경 변수**
 
     ```xml
     ${env.HOME}       <!-- 사용자 홈 디렉터리 -->
@@ -39,7 +39,7 @@ Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식�
     ${env.MY_SETTING} <!-- OS 환경 변수 MY_SETTING -->
     ```
 
-4. **JVM·OS 기본 시스템 프로퍼티**
+## **JVM·OS 기본 시스템 프로퍼티**
 
     ```xml
     ${java.home}      <!-- JDK 홈 -->
@@ -52,7 +52,7 @@ Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식�
     ${os.version}     <!-- 운영체제 버전 -->
     ```
 
-5. **프로젝트 메타데이터 (Maven Project Object Model)**
+## **프로젝트 메타데이터 (Maven Project Object Model)**
 
     ```xml
     ${project.groupId}
@@ -63,17 +63,15 @@ Maven POM 안에서는 크게 다음 출처의 상수 값을 `${…}` 표현식�
     ${basedir}         <!-- POM 파일이 있는 디렉터리 -->
     ```
 
-6. **[Maven Settings / Session 정보](https://maven.apache.org/settings.html#Properties)**
+## **[Maven Settings / Session 정보](https://maven.apache.org/settings.html#Properties)**
 
     - `settings.xml` 에 `<profiles><profile><properties>` 으로 정의한 값
-
     - `${settings.localRepository}`
-
     - `${settings.activeProfiles}`
-
     - `${session.executionRootDirectory}` 등
 
-7. **플러그인·목표(Goal) 별 제공 프로퍼티**  
+## **플러그인·목표(Goal) 별 제공 프로퍼티**
+
     각 Maven 플러그인이 자체적으로 추가하는 프로퍼티(ex. `maven.compiler.source`, `maven.compiler.target` 등)도 `${…}`로 참조 가능합니다.
 
 ---

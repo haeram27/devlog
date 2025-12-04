@@ -1,6 +1,6 @@
 # Maven Project Standard Directory Layout
 
-https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
+[maven-standard-directory-layout](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html)
 
 |Directory|Note|
 |---|---|

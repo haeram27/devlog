@@ -20,7 +20,6 @@ mvn -e -T $(nproc) -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.tes
 * `-e,--errors` Produce execution error messages
 * `-T,--threads <arg>` Thread count
 
-
 ### Jar 실행 명령
 
 ```bash
@@ -30,7 +29,6 @@ java -jar -Xms512m -Xmx2048m -Dmax.threads=512 -Dspring.profiles.active=debug  $
 * `-D<name>=<value>` set a system property
 * `-Xms<size>` set initial Java heap size
 * `-Xmx<size>` set maximum Java heap size
-
 
 ## 현재 모듈의 최종 pom 보기
 
