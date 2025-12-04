@@ -62,7 +62,8 @@ type:glob ex. html:*.html
 
 command-line
 
-- command-line에서는 wildcard(`*`)문자가 shell의 특수 문자로 처리 될 수 있으므로 pattern에 quoting(`''`)을 사용 필요
+- pattern에 quoting(`''`) 사용 필요
+  - quoting 미사용시 wildcard(`*`)문자가 shell에서 확장되므로 syntax 오류 발생
 
 ```bash
 rg --type-add 'web:*.{html,css,js}' -tweb title
@@ -78,7 +79,7 @@ rg --type-add 'web:*.{html,css,js}' --type-list | grep web
 config-file
 
 - `option=value`와 같이 equal(`=`) 사용 필요
-- argument에 quoting(`''`)을 사용 금지
+- argument에 quoting(`''`) 사용 금지
 
 ```text
 --type-add=web:*.{html,css,js}
