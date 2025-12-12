@@ -75,9 +75,13 @@ bs=1G        # 1 GiB = 1,073,741,824 bytes
 
 ### Shared Memory 채우기 - /dev/shm 사용 (tmpfs)
 
+- /dev/shm은 `shared memory` 공간으로써 메모리 기반 파일시스템(tmpfs) 경로이다.
+- /dev/shm(tmpfs)에 파일을 생성하면, 디스크가 아닌 메모리에 파일이 상주한다
+- 메모리를 특정 사이즈 만큼 `사용` 상태로 만들기 위해서 사용한다
+
 ```bash
-# 메모리 기반 파일시스템에 데이터 쓰기
-dd if=/dev/zero of=/dev/shm/bigfile bs=10M count=512 # 5GB 파일 생성
+# tmpfs(메모리 기반 파일시스템)에 데이터 쓰기
+dd if=/dev/zero of=/dev/shm/bigfile bs=1G count=4 # 5GB 파일 생성
 
 # 확인
 df -h /dev/shm
@@ -88,7 +92,7 @@ free -h
 
 ```bash
 # 큰 파일 생성 및 읽기로 page cache 채우기
-dd if=/dev/zero of=/tmp/bigfile bs=1M count=4096  # 4GB 파일 생성
+dd if=/dev/zero of=/tmp/bigfile bs=1G count=4  # 4GB 파일 생성
 cat /tmp/bigfile > /dev/null  # page cache에 적재
 
 # 메모리 상태 확인
