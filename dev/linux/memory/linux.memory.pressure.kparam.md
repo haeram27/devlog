@@ -55,8 +55,8 @@ cat /proc/sys/vm/swappiness
 
 # 설정
 sysctl -w vm.swappiness=10
-
 ```
+
 - **역할**: 스왑 사용 경향 (0~100)
 - **값 의미**:
   - `0`: 스왑 최소화 (page cache 우선 회수)
