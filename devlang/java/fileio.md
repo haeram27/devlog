@@ -10,7 +10,7 @@
 
 - **NIO (java.nio)**는 **데이터 전송(Buffer, Channel)**과 성능에 초점을 맞춘 저수준 API
 - **NIO (java.nio.channels )**는 [`ByteBuffer`](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/ByteBuffer.html) 타입을 read/write 하며, 대용량/고성능 IO 용도임
-- ByteBuffer(JVM 힙(Heap))가 아닌, Direct ByteBuffer(OS의 Native Memory) 사용시 `JVM 버퍼 > OS Buffer` 과정 생략 가능
+- ByteBuffer(JVM 힙(Heap))가 아닌, Direct ByteBuffer(OS의 Native Memory) 사용시 `JVM 버퍼 > OS Buffer` 복사 과정 생략 가능하여 더 높은 퍼포먼스 
 
 ### `Direct ByteBuffer`
 

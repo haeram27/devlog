@@ -133,6 +133,16 @@ Cached:   파일 내용을 위한 페이지 캐시 (디스크 I/O 캐싱) (중�
 SwapCached:  스왑에서 다시 메모리로 불러왔지만 스왑에도 남아있는 메모리
 ```
 
+``` txt
+Cached = Page Cache (실제 파일 캐시)
+        + Shmem (tmpfs, 공유 메모리)
+        + SwapCached (Swap 캐시)
+
+File Page Cache
+       = Active(file) + Inactive(file)
+       = (Active Clean + Active Dirty) + (Inactive Clean + Inactive Dirty)
+```
+
 `Cached` 항목은 어플리케이션이 파일에 대해 read/write할 때, 디스크에 쓰기 전에 메모리상에 데이터를 상주 시킨 것을 의미, `한번 참조된 데이터는 다시 참조될 가능 성이 높음`의 캐싱원칙에 따라 OS가 메모리상에 저장 한 것
 
 ***`Cached`는 Memory
@@ -143,7 +153,7 @@ SwapCached:  스왑에서 다시 메모리로 불러왔지만 스왑에도 남�
 - Linux는 남는 메모리를 캐시로 사용 (성능 향상)
 - 메모리 부족 시 자동으로 해제되므로 "사용 가능한" 메모리로 간주
 
-### **활성/비활성 메모리**
+### **활성(Active)/비활성(InActive) 메모리**
 
 ```bash
 Active:          최근에 사용된 메모리 (회수 우선순위 낮음)
