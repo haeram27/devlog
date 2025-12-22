@@ -37,7 +37,7 @@
 
 ### 워터마크 기준
 
-- 리눅스 커널은 메모리 관리를 위해 세 가지 주요 page 워터마크를 사용하며 값의 단위는 `page`임
+- 리눅스 커널은 메모리 관리를 위해 세 가지 주요 `Page 워터마크`를 사용하며 값의 단위는 `page`임
   - High = 약 Min * 1.5 (또는 Min + (Min / 2))
     - `kswapd`에 의한 메모리 회수 중단 지점
     - FREE 메모리가 이 수치에 도달하면 `kswapd`가 메모리 회수를 중단
@@ -46,8 +46,9 @@
     - FREE 메모리가 이 수치보다 낮아지면 커널의 배경 프로세스인 `kswapd`가 깨어나 메모리 회수를 시작
     - Min 값을 기준으로 distance를 연산
   - Min = `vm.min_free_kbytes` 커널 변수에 의해 결정된 값
-    - `kswapd`만으로는 부족하여 `Direct Reclaim`이 강제로 발생하는 임계점
+    - 프로세스가 메모리 요청시 `Direct Reclaim`이 강제로 발생하는 임계점
 
+- `kswapd`는 Low, High가 기준이고, `Direct Reclaim`은 Min이 기준이다.
 - `kswapd`가 참조하는 임계값 (min, low, high)는 `/proc/zoneinfo` 에서 확인
 
 ### `/proc/zoneinfo`
