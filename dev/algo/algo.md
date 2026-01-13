@@ -70,9 +70,12 @@
 ### 언제 무엇을 선택해야 할까?
 
 1. 문제를 작은 문제로 나누었을 때, 그 **작은 문제들이 완전히 독립적인가?**
-  - **예 → 분할 정복**
+    - **예 → 분할 정복**
 
 2. 문제를 작은 문제로 나누었더니, **똑같은 작은 문제가 계속해서 나타나는가?**
-  - **예 → 동적 계획법**
+    - **예 → 동적 계획법**
 
-## [P vs NP](https://gazelle-and-cs.tistory.com/64)
+## [Theory of computation](https://gazelle-and-cs.tistory.com/category/%EC%88%98%ED%95%99%EC%A0%81%20%EB%8F%84%EA%B5%AC/Theory%20of%20computation)
+
+- [P vs NP](https://gazelle-and-cs.tistory.com/64)
+- [NP-Complete](https://gazelle-and-cs.tistory.com/74)
