@@ -26,6 +26,7 @@ java \
 ## Docker 환경 설정 예시
 
 ### 1. **Dockerfile**
+
 ```dockerfile
 FROM openjdk:17-slim
 
@@ -45,6 +46,7 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app.jar"]
 ```
 
 ### 2. **docker-compose.yml**
+
 ```yaml
 services:
   app:
@@ -64,6 +66,7 @@ services:
 ## jcmd 명령어 사용법
 
 ### 1. **PID 확인**
+
 ```bash
 # 컨테이너 내부에서
 docker exec <container-id> jcmd
@@ -73,6 +76,7 @@ docker exec <container-id> ps aux | grep java
 ```
 
 ### 2. **Native Memory 분석**
+
 ```bash
 # 기본 요약
 docker exec <container-id> jcmd <pid> VM.native_memory summary
@@ -88,6 +92,7 @@ docker exec <container-id> jcmd <pid> VM.native_memory summary.diff
 ```
 
 ### 3. **Heap Dump 수동 생성**
+
 ```bash
 # 힙 덤프 생성
 docker exec <container-id> jcmd <pid> GC.heap_dump /dumps/manual_dump.hprof
@@ -97,6 +102,7 @@ docker cp <container-id>:/dumps/manual_dump.hprof ./
 ```
 
 ### 4. **기타 유용한 jcmd 명령어**
+
 ```bash
 # GC 실행
 docker exec <container-id> jcmd <pid> GC.run
