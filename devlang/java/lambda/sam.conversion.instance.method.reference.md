@@ -3,17 +3,18 @@
 참고:
 [MethodReference](https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html)
 
-**Java에서 인스턴스 메서드 (`ClassName::instanceMethod`)에 대해 참조가 사용되면 첫 번째 인자(a)를 메소드의 인스턴스로 간주한다.**  
-예:
-`Integer::compareTo`를 `(a, b) -> a.compareTo(b)`로 해석
-
-instance method란 class내에서 static이 아닌 멤버 메소드를 의미한다.
-
+- **Method Reference**란 `FunctionalInterface`를 인자로 받는 위치에 임의의 클래스의 메서드(`ClassName::Method`)를 사용하는 것을 의미한다.
+- **Instance method Reference**란 `Method References` 사용 시 `instance method`를 사용한 것을 의미한다.
+- **instance method**란 `class내에서 static이 아닌 멤버 메소드`를 의미한다.
+- ***중요:*** **instance method Reference**는 컴파일러에서 `SAM 변환`시 첫 번째 인자(a)를 `instanceMethod`의 클래스 인스턴스로 간주한다. 그래서 Functional Interface의 SAM에서 요구 되는 **인자의 수가 맞지 않아도 `insatanceMethod`를 파리미터로 전달할 수 있게 된다.**
+  - 예: Comparator Interface를 인자 위치에 `Integer::compareTo` 사용
+    - Comparator Interface는 `int compare(T o1, T o2);`의 SAM을 갖는 반면`Integer::compareTo`는 `int compareTo(Integer anotherInteger)` 형식을 갖는다. 이때 컴파일러는 `Integer::compareTo`를 그대로 사용하는 대신에 Comporator Interface에 맞추어 `(Integer o1, Integer o2) -> { o1.compareTo(o2) }` 형식으로 SAM에 변환을 자동으로 수행하여 인터페이스 구현체 지정해 준다.
+    - JAVA 컴파일러는 `SAM 변환`에 의해서 Comparator Interface를 인자 위치에 `Integer::compare(o1, o2)`와 `Integer::compareTo(o1)`를 모두 사용할 수 있도록 지원한다.
 
 Table. Kinds of Method References
 
-| Kind |Syntax | Examples |
-|--- |--- |--- |
+| Kind | Syntax | Examples |
+| --- | --- | --- |
 | Reference to a static method | containingClass::staticMethodName | Person::compareByAge <br> MethodReferencesExamples::appendStrings |
 | Reference to an instance method of a particular object | containingObject::instanceMethodName | myComparisonProvider::compareByName <br> myApp::appendStrings2 |
 | Reference to an instance method of an arbitrary object of a particular type | ContainingType::methodName | String::compareToIgnoreCase <br> String::concat |

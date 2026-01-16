@@ -1,4 +1,4 @@
-# SAM Conversion
+# SAM(Single Abstract Method) Conversion
 
 SAM 변환(SAM Conversion, Single Abstract Method 변환)은 Java 8에서 도입된 람다 표현식과 함수형 인터페이스의 기반이 되는 컴파일러 기술입니다.
 
@@ -6,8 +6,11 @@ SAM 변환(SAM Conversion, Single Abstract Method 변환)은 Java 8에서 도입
 
 ## 1. SAM 변환이란?
 
-- **SAM**: Single Abstract Method. “단 하나의 추상 메서드”만 가진 인터페이스를 뜻합니다.  
-- **SAM 변환**: 람다식(`() -> { … }`) 또는 메서드 참조를 그 인터페이스의 추상 메서드 구현체로 자동으로 바꿔 주는 과정입니다.  
+- **SAM**: Single Abstract Method. 단 하나의 추상 메서드(Single Abstract Method, SAM). `SAM`로 구성된 인터페이스를 함수형 인터페이스(Functional Interface)라고 합니다. 인터페이스에서 SAM 여부 판단 시, 다음의 메소드들은 메서드 카운트에서 제외 됩니다.
+  - Object 클래스의 public 메서드 제외: 앞서 말씀하신 Comparator처럼 equals(Object obj)나 toString(), hashCode()와 같은 Object 클래스의 메서드를 인터페이스 내에 추상 메서드로 다시 선언하더라도, 이는 추상 메서드 개수에 포함되지 않습니다.
+  - default 및 static 메서드 제외: 인터페이스 내에 default 메서드나 static 메서드가 아무리 많아도 추상 메서드가 하나뿐이라면 함수형 인터페이스로 인정됩니다.
+  - @FunctionalInterface 어노테이션이 없더라도 추상 메서드가 하나뿐인 인터페이스는 함수형 인터페이스로 취급됩니다. 하지만 이 어노테이션을 붙여주면 컴파일러가 해당 규칙을 지키고 있는지 검사해주므로 사용이 권장됩니다.
+- **SAM 변환**: 람다식(`() -> { … }`) 또는 메서드 참조(Method Reference)를 그 인터페이스의 `추상 메서드 구현체`로 자동으로 바꿔 주는 과정입니다.
 - 결과적으로 익명 클래스(anonymous class)를 더 간결한 람다 문법으로 대체할 수 있게 해 줍니다.
 
 ---
@@ -82,8 +85,8 @@ int result = sum.calc(3, 5);      // 결과: 8
 SAM 인터페이스에 @FunctionalInterface 어노테이션을 명시 하는 것은 **선택 사항**입니다. @FunctionalInterface 어노테이션이 명시 되어 있지 않더라도 SAM 인터페이스를 만족하는 인터페이스는 SAM 변환이 될 수 있습니다. 
 
 - 효과
-	- 해당 인터페이스가 “함수형 인터페이스”용으로 설계되었음을 문서화하고,  
-	- 추상 메서드를 하나 이상 추가하면 컴파일 오류를 발생시켜 실수를 방지해 줍니다.
+  - 해당 인터페이스가 “함수형 인터페이스”용으로 설계되었음을 문서화하고,  
+  - 추상 메서드를 하나 이상 추가하면 컴파일 오류를 발생시켜 실수를 방지해 줍니다.
 
 ---
 
@@ -101,7 +104,7 @@ SAM 인터페이스에 @FunctionalInterface 어노테이션을 명시 하는 것
 
 SAM 변환은 “단일 추상 메서드 인터페이스”에 대한 람다식을 간결하게 적용하도록 해 주는 핵심 메커니즘이며, Java 8 이후 함수형 프로그래밍 스타일을 가능하게 만든 중요한 언어 기능입니다.
 
-----
+---
 
 네, 공식적으로는 **람다 표현식(lambda expression)** 이라고 부릅니다.  
 
