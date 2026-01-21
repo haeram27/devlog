@@ -1,4 +1,4 @@
-# 함수형 인터페이스(SAM)와 메서드드 매칭 규칙
+# 함수형 인터페이스(SAM)와 메서드 매칭 규칙
 
 * **Java 언어 명세의 메서드 시그니처**는 메서드 이름과 매개변수의 타입 및 순서를 포함하며, 메서드 오버로딩을 구분하는 데 사용됩니다.
 * **함수형 인터페이스의 추론 규칙**은 메서드 이름을 고려하지 않고, 매개변수의 타입과 순서, 반환 타입의 호환성을 기반으로 람다 표현식이나 메서드 참조의 유효성을 판단합니다.
@@ -41,9 +41,10 @@ void compute(int x); // 컴파일 오류: 시그니처가 동일함
 이는 [Java 언어 명세 8.4.2 "Method Signature"](https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.4.2)에서 정의되어 있습니다.
 
 ---
-### 오버로딩(Overloading)
-같은 이름의 메서드를 **매개변수 목록(시그니처)**이 다르게 하여 여러 개 정의하는 것.
 
+### 오버로딩(Overloading)
+
+같은 이름의 메서드를 **매개변수 목록(시그니처)**이 다르게 하여 여러 개 정의하는 것.
 
 Table. 오버로딩의 규칙
 
@@ -92,7 +93,7 @@ Calculator calc = YourClass::add;
 
 ---
 
-### JLE [18장 타입 추론(Type Inference)](https://docs.oracle.com/javase/specs/jls/se8/html/jls-18.html) 요약
+### JLS [18장 타입 추론(Type Inference)](https://docs.oracle.com/javase/specs/jls/se8/html/jls-18.html) 요약
 
 #### 18.1 개념 및 표기법 (Concepts and Notation)
 
