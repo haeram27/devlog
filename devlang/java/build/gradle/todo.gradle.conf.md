@@ -5,11 +5,12 @@
 
 ## .properties와 .gradle 설정 파일
 
-gradle의 주 설정 파일은 크게 gradle 프로세스 실행 환경 설정용 파일과 프로젝트 빌드 설정용 파일로 나뉘어진다.
+gradle의 주 설정 파일은 크게 gradle 프로세스 실행 `환경 설정`용 파일(.properties)과 프로젝트 `빌드 설정`용 파일(.gradle)로 나뉘어진다.
 
 ### gradle 프로세스 실행 환경 설정(.properties)
 
-`${GRADLE_USER_HOME}/gradle.properties` 파일은 gradle 프로세스의 실행 환경을 설정하는데 사용하며, 실행 옵션 등을 지정해 줄 수 있다.
+- `${GRADLE_USER_HOME}/gradle.properties`
+- `gradle.properties` 파일은 gradle 프로세스의 실행 환경을 설정하는데 사용하며, 실행 옵션 등을 지정해 줄 수 있다.
 
 > `GRADLE_USER_HOME=${HOME}/.gradle`
 
@@ -30,7 +31,7 @@ gradle의 주 설정 파일은 크게 gradle 프로세스 실행 환경 설정�
 
 |Priority|Method|Location|Details|
 |---|---|---|---|
-|1|Command line interface|.| In the command line using -D.|
+|1|Command line interface|.| In the command line using `-D`.|
 |2|gradle.properties file|GRADLE_USER_HOME|Stored in a gradle.properties file in the GRADLE_USER_HOME.|
 |3|gradle.properties file|Project Root Dir|Stored in a gradle.properties file in a project directory, then its parent project’s directory up to the project’s root directory.|
 |4|gradle.properties file|GRADLE_HOME|Stored in a gradle.properties file in the GRADLE_HOME, the optional Gradle installation directory.|
@@ -70,7 +71,6 @@ systemProp.org.gradle.internal.repository.initial.backoff=500
 org.gradle.jvmargs=-Xmx2048M
 org.gradle.parallel=true
 
-privateMavenRepositoryUrl=
 #privateMavenRepositoryUrl=https://private.host.com/artifactory/maven-repos/
 ```
 
@@ -185,7 +185,7 @@ offline 모드를 command 라인 옵션으로 설정 하려면 --offline 옵션�
 gradle build --offline
 ```
 
-### settings.gradle
+### {projectroot}/settings.gradle
 
 프로젝트 범위 gradle 설정
 
@@ -226,23 +226,46 @@ if (startParameter.offline) {
 rootProject.name = 'spring'
 ```
 
-### build.gradle
+### {module}/build.gradle
 
-모듈 대상 gradle 설정
-모듈을 빌드하는데 필요한 모든 설정을 명시할 수 있다.
+- 모듈 대상 gradle 설정
+- 모듈을 빌드하는데 필요한 모든 설정을 명시할 수 있다.
 
-dependency repositories(maven, ive)
+- dependency repositories(maven, ive)
+
+- `build.gradle`의 `repositories` 설정은 `settings.gradle`의 `dependencyResolutionManagement:repositories` 설정을 override 함
+- `settings.gradle`의 내용을 그대로 사용할 것이라면 `build.gradle`의 `repositories` block을 삭제할 수 있음
+
+```gradle
+repositories {
+    maven { url privateMavenRepositoryUrl }
+}
+```
+
+### repository 설정시 url과 artifactUrls 차이
+
+```gradle
+repositories {
+    maven {
+        // Look for POMs and artifacts, such as JARs, here
+        url "http://repo2.mycompany.com/maven2"
+        // Look for artifacts here if not found at the above location
+        artifactUrls "http://repo.mycompany.com/jars"
+        artifactUrls "http://repo.mycompany.com/jars2"
+    }
+}
+```
 
 ## 사설 maven repository 사용하는 gradle 프로젝트 설정
 
-## gradle 설치 후 path 설정
+### gradle 설치 후 path 설정
 
 ```bash
 GRADLE_HOME=/opt/gradle/gradle-8.3
 export PATH=$PATH:$GRADLE_HOME/bin
 ```
 
-## `${HOME}/.gradle/gradle.properties`
+### `${HOME}/.gradle/gradle.properties`
 
 - `~/.gradle` 디렉토리는 gradle 명령을 실행 했을 때 생성됨
 - `.gradle/gradle.properties` 파일은 없으면 수동 생성 가능
@@ -258,18 +281,20 @@ org.gradle.parallel=true
 org.gradle.daemon=true
 org.gradle.jvmargs=-Xmx2048M
 
-mavenRepositoryUrl=https://abis.ahnlab.com/artifactory/maven-repos
+privateMavenRepositoryUrl=https://abis.ahnlab.com/artifactory/maven-repos
 ```
 
-## optional:: ${HOME}/.gradle/init.gradle
+### optional:: ${HOME}/.gradle/init.gradle
 
 ```gradle
 initscript { allprojects{ repositories { maven { url privateMavenRepositoryUrl } } } }
 ```
 
-## {projectroot}/settings.gradle
+### {projectroot}/settings.gradle
 
-주의) pluginManagement 블럭은 settings.gradle 파일의 최상위에 정의 되어야 한다.
+- `pluginManagement` 블럭은 settings.gradle 파일의 최상위에 정의 되어야 함
+- `pluginManagement` 블럭은 '빌드 도구 확장'(플러그인) 용 repository(repository) 관리
+- `dependencyResolutionManagement` 블럭은 어플리케이션의 종속성(dependency) 라이브러리 저장소(repository) 관리
 
 ```gradle
 pluginManagement {
@@ -288,12 +313,15 @@ dependencyResolutionManagement {
 }
 ```
 
-참고) gradle의 경우 mavenLocal() repository 사용을 권
+#### mavenLocal()
 
-## {projectroot}/build.gradle
+- `mavenLocal()`은 `~/.m2/repository` 위치의 로컬 maven repository를 가리킴
+- Gradle 설정에서 필요에 따라서 mavenLocal()은 사용할 수 있지만, 일반적으로 권장되지는 않음
 
-주의) build.gradle의 repositories 설정은 settings.gradle의  dependencyResolutionManagement:repositories 설정을 override 한다.
-settings.gradle의 내용을 그대로 사용할 것이라면 build.gradle의 repository block을 삭제할 수 있다.
+### {projectroot}/build.gradle
+
+- `build.gradle`의 `repositories` 설정은 `settings.gradle`의 `dependencyResolutionManagement:repositories` 설정을 override 함
+- `settings.gradle`의 내용을 그대로 사용할 것이라면 `build.gradle`의 `repositories` block을 삭제할 수 있음
 
 ```gradle
 repositories {
@@ -301,7 +329,7 @@ repositories {
 }
 ```
 
-## repository 설정시 url과 artifactUrls 차이
+### repository 설정시 url과 artifactUrls 차이
 
 ```gradle
 repositories {
