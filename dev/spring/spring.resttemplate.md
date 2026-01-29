@@ -74,64 +74,71 @@ for org.apache.httpcomponents.client5:httpclient5:jar:5.5+
 * HttpComponentsClientHttpRequestFactory designed by spring scope sets timeout settings per request of httpclient if default request config for HttpClient then use `RequestConfig`
 
 ```java
-    import java.security.GeneralSecurityException;
-    import java.time.Duration;
-    import org.apache.hc.client5.http.impl.classic.HttpClients;
-    import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-    import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
-    import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-    import org.apache.hc.client5.http.ssl.TrustAllStrategy;
-    import org.apache.hc.core5.ssl.SSLContexts;
-    import org.springframework.context.annotation.Bean;
-    import org.springframework.context.annotation.ComponentScan;
-    import org.springframework.context.annotation.Configuration;
-    import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-    import org.springframework.web.client.RestTemplate;
+@Bean
+@Primary
+public RestTemplate trustAllRestTemplate() {
+    try {
+        var sslContext = SSLContexts.custom()
+            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+            .build();
 
-@Configuration
-public class HttpClientConfig {
+        var tls = ClientTlsStrategyBuilder.create()
+            .setSslContext(sslContext)
+            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+            .buildClassic();
 
-    // register RestTemplate as Spring Bean to be singleton
-    @Bean
-    public RestTemplate trustAllRestTemplate() {
-        try {
-            var sslContext = SSLContexts.custom()
-                .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+        // TCP(Socket) level Connection Config
+        var cc = ConnectionConfig.custom()
+            .setConnectTimeout(Timeout.of(Duration.ofSeconds(2)))  // timeout while waiting for TCP connection establishment
+            .setSocketTimeout(Timeout.of(Duration.ofSeconds(5)))   // inactivity timeout of inter-packet
+            .build();
+
+        // use connection pool
+        var cm = PoolingHttpClientConnectionManagerBuilder.create()
+            .setTlsSocketStrategy(tls)
+            .setDefaultConnectionConfig(cc)
+            .build();
+
+        // use BasicHttpClientConnectionManager for one-time connection
+        /*
+            var cm = BasicHttpClientConnectionManager.create()
+                .setTlsSocketStrategy(tls)   
                 .build();
+        */
 
-            var tls = ClientTlsStrategyBuilder.create()
-                .setSslContext(sslContext)
-                .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                .buildClassic();
+        // Application(HTTP) level Connection Config
+        var rc = RequestConfig.custom()
+            .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // timeout while waiting for lent a connection from connection pool
+            .setResponseTimeout(Timeout.ofSeconds(5))          // timeout while waiting for server response
+            .build();
 
-            // use connection pool
-            var cm = PoolingHttpClientConnectionManagerBuilder.create()
-                .setTlsSocketStrategy(tls)
-                .build();
+        var httpClient = HttpClients.custom()
+            .setConnectionManager(cm)
+            .setDefaultRequestConfig(rc)
+            .evictExpiredConnections() // Find, close and remove connections that are stored in the connection pool that are past the server-set validity (TTL)
+            .evictIdleConnections(TimeValue.ofSeconds(10)) // evict(remove) connection has no sending request for more than 10 sec
+            .build();
 
-            // use BasicHttpClientConnectionManager for one-time connection
-            /*
-                var cm = BasicHttpClientConnectionManager.create()
-                    .setTlsSocketStrategy(tls)   
-                    .build();
+        /* 
+            * set timeout setting per request in RestTemplate (Spring driven),
+            * if timeouts set here then timeout config is not require at ConnectionConfig and RequestConfig
             */
+        var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
+        rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
+        rf.setConnectTimeout(Duration.ofSeconds(2));           // time to establish tcp connection
+        rf.setReadTimeout(Duration.ofSeconds(5));              // time to wait response against http request from http server
 
-            var httpClient = HttpClients.custom()
-                .setConnectionManager(cm)
-                .evictExpiredConnections()
-                .build();
+        var template = new RestTemplate(rf);
 
-            // set timeout setting per request in RestTemplate (Spring driven)
-            var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
-            rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
-            rf.setConnectTimeout(Duration.ofSeconds(2)); // time to establish tcp connection
-            rf.setReadTimeout(Duration.ofSeconds(5)); // time to wait response against http request from http server
+        /*
+            * RestCient can be made by RestTmeplate
+            */
+        // RestClient client = RestClient.create(template);
 
-            return new RestTemplate(rf);
-        } catch (GeneralSecurityException e) {
-            throw new org.springframework.beans.factory.BeanCreationException(
-                "trustAllRestTemplate", "Failed to build SSL trust-all RestTemplate", e);
-        }
+        return template;
+    } catch (GeneralSecurityException e) {
+        throw new org.springframework.beans.factory.BeanCreationException(
+            "trustAllRestTemplate", "Failed to build SSL trust-all RestTemplate", e);
     }
 }
 ```
@@ -162,21 +169,21 @@ public class RestTemplateTestController {
 
     private final RestTemplateTestService service;
 
-    @PostMapping("/cve/search")
+    @PostMapping("/rest/invoke")
     public String searchCve(@RequestBody Map<String, Object> requestJson) {
-        log.info("## Controller::searchCve - request : {}", requestJson);
+        log.info("## Controller::body : {}", requestJson);
 
         var paramMap = requestJson.getParamMap();
-        var cveId = Optional.ofNullable(paramMap.get("cveId"))
+        var key = Optional.ofNullable(paramMap.get("param"))
                             .filter(String.class::isInstance)
                             .map(String.class::cast)
                             .orElse("");
-        log.debug("requested cveId: {}", cveId);
-        if (StringUtils.isEmpty(cveId)) {
-            log.error("Error: {}", "invalid cveId");
+        log.debug("requested param: {}", param);
+        if (StringUtils.isEmpty(param)) {
+            log.error("Error: {}", "invalid param");
         }
 
-        return service.searchCve(cveId);
+        return service.invoke(param);
     }
 }
 ```
@@ -185,77 +192,67 @@ public class RestTemplateTestController {
 
 ```java
 import java.net.URI;
-import java.security.GeneralSecurityException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.TrustAllStrategy;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.core5.ssl.SSLContexts;
+
+import org.apache.logging.log4j.util.Strings;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 /*
- * RestAPI Client GET Test
+ * RestTemplate GET Test
  */
 
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class RestTemplateTestService {
+@SpringBootTest
+public class RestTemplateSyncTests {
 
-    private final RestTemplate trustAllRestTemplate;
+    @Autowired
+    @Qualifier("trustAllRestTemplate")
+    private RestTemplate restTemplate;
 
-    private final JsonMapper mapper = JsonMapper.builder()
-                                        .addModule(new JavaTimeModule())
-                                        .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-                                        .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
-                                        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                                        .build();
+    @Autowired
+    @Qualifier("restClientObjectMapper")
+    private JsonMapper mapper;
 
-    // https://api.cvesearch.com/search?q=CVE-2023-1234
-    private static final String URL_DOMAIN_PORTAL = "api.cvesearch.com";
-    private static final String URL_API_PATH_CVE_SEARCH = "/search";
-
-    private static final String TEST_BEARER_AUTH_TOKEN = "my-access-token";
+    // https://jsonplaceholder.typicode.com/todos
+    private static final String URL_DOMAIN_PORTAL = "jsonplaceholder.typicode.com";
+    private static final String URL_API_PATH = "/todos";
+    private static final String TEST_BEARER_AUTH_TOKEN = "";
 
     public List<Map<String, Object>> send(HttpMethod method, URI uri, HttpEntity<Void> httpEntity) {
         ResponseEntity<JsonNode> responseEntity;
-        List<Map<String, Object>> list;
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();;
 
-        if (StringUtils.isEmpty(method.name())) {
+        if (Strings.isEmpty(method.name())) {
             log.error("Error: No content");
-            return null;
+            return list;
         }
 
         try {
-            log.debug("## Request to get CVE info. uri : {}", uri);
+            log.debug("## request uri : {}", uri);
 
-            responseEntity = trustAllRestTemplate.exchange(uri, method, httpEntity, JsonNode.class);
+            responseEntity = restTemplate.exchange(uri, method, httpEntity, JsonNode.class);
 
             log.debug("Response Body: " + responseEntity.getBody());
             log.debug("Status Code: " + responseEntity.getStatusCode());
@@ -275,7 +272,6 @@ public class RestTemplateTestService {
                     ObjectNode node = (ObjectNode) responseBody;
                     Map<String, Object> map = mapper.convertValue(node, new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
                     // var map = mapper.treeToValue(node, Map.class);
-                    list = new ArrayList<Map<String, Object>>();
                     list.add(map);
                 } else if (responseBody.isArray()) {
                     ArrayNode node = (ArrayNode) responseBody;
@@ -329,35 +325,48 @@ public class RestTemplateTestService {
         return list;
     }
 
-    public void searchCve(String cveId, ResponseJsonObject responseJsonObject) {
-
+    @Test
+    public void getTest() {
         var uri = UriComponentsBuilder.newInstance()
                     .scheme("https")
                     .host(URL_DOMAIN_PORTAL)
-                    .path(URL_API_PATH_CVE_SEARCH)
-                    .queryParam("q", cveId)
+                    .path(URL_API_PATH)
+                    //.queryParam("key", "value")
                     .encode().build().toUri();
 
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(TEST_BEARER_AUTH_TOKEN);
+
+        if (Strings.isNotEmpty(TEST_BEARER_AUTH_TOKEN))
+            headers.setBearerAuth(TEST_BEARER_AUTH_TOKEN);
 
         var httpEntity = new HttpEntity<Void>(headers);
         var responseBody = send(HttpMethod.GET, uri, httpEntity);
 
-        try {
-            log.debug("## response: {}",
-                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseBody));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            log.error("## invalid response");
+        if (responseBody != null && responseBody.size() > 0) {
+            try {
+                log.debug("## response: {}",
+                        mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseBody));
+            } catch (JsonProcessingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                log.error("## invalid response");
+            }
+        } else {
+            log.error("## empty response");
         }
     }
 }
 ```
 
 ## WebClient (Async mechanism HttpClient for Spring)
+
+- `WebClient` is Async HttpClient Wrapper, in case of `Apache httpclient5`, Async HttpClient is `CloseableHttpAsyncClient`
+- `spring-boot-starter-webflux` package is required to use `WebClient`
+
+```gradle
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+```
 
 ```java
 import java.security.GeneralSecurityException;
@@ -381,44 +390,50 @@ import org.springframework.web.reactive.function.client.WebClient;
 public WebClient trustAllWebClient() {
     try {
         var sslContext = SSLContexts.custom()
-            .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
-            .build();
+        .loadTrustMaterial(null, TrustAllStrategy.INSTANCE)
+        .build();
 
         // TlsStrategy: async client method
-        TlsStrategy tls = ClientTlsStrategyBuilder.create()
+        var tls = ClientTlsStrategyBuilder.create()
             .setSslContext(sslContext)
             .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
             .buildAsync();
 
-        // connection pool: async client method
-        PoolingAsyncClientConnectionManager cm =
-            PoolingAsyncClientConnectionManagerBuilder.create()
-                .setTlsStrategy(tls)
-                // 필요 시 풀 한도 조정
-                .setMaxConnTotal(200)    // default: 25
-                .setMaxConnPerRoute(50)  // default: 5
+        // TCP(Socket) level Connection Config
+        var cc = ConnectionConfig.custom()
+                .setConnectTimeout(Timeout.of(Duration.ofSeconds(2)))  // timeout while waiting for TCP connection establishment
+                .setSocketTimeout(Timeout.of(Duration.ofSeconds(5)))  // inactivity timeout of inter-packet
                 .build();
 
-        // request/response default timeout configuration (can apply to both async/sync client method)
-        // also timeouts can be changed at WebClient.exchange() per connection
-        RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // timeout while waiting for lent a connection from connection pool
-            .setConnectTimeout(Timeout.ofSeconds(2))           // timeout while waiting for TCP connection establishment
-            .setResponseTimeout(Timeout.ofSeconds(5))          // timeout while waiting for server response
-            .build();
+        // connection pool: async client method
+        var cm = PoolingAsyncClientConnectionManagerBuilder.create()
+                .setTlsStrategy(tls)
+                .setDefaultConnectionConfig(cc)
+                // modify to enhance performance, mainly Connection Per Route
+                .setMaxConnTotal(25)    // default: 25
+                .setMaxConnPerRoute(5)  // default: 5
+                .build();
 
-        CloseableHttpAsyncClient asyncClient = HttpAsyncClients.custom()
+        // Application(HTTP) level Connection Config
+        var rc = RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofSeconds(1)) // timeout while waiting for lent a connection from connection pool
+                .setResponseTimeout(Timeout.ofSeconds(5))          // timeout while waiting for server response
+                .build();
+
+        // build CloseableHttpAsyncClient
+        var asyncClient = HttpAsyncClients.custom()
             .setConnectionManager(cm)
-            .setDefaultRequestConfig(requestConfig)
-            .evictExpiredConnections()
+            .setDefaultRequestConfig(rc)
+            .evictExpiredConnections() // Find, close and remove connections that are stored in the connection pool that are past the server-set validity (TTL)
+            .evictIdleConnections(TimeValue.ofSeconds(10)) // evict(remove) connection has no sending request for more than 10 sec
             .build();
 
         // assign WebClient to HttpConnector (make Spring control connection lifecycle)
         var connector = new HttpComponentsClientHttpConnector(asyncClient);
 
-        return WebClient.builder()
-            .clientConnector(connector)
-            .build();
+    return WebClient.builder()
+        .clientConnector(connector)
+        .build();
 
     } catch (GeneralSecurityException e) {
         throw new org.springframework.beans.factory.BeanCreationException(

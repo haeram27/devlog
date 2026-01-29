@@ -18,12 +18,12 @@ Java Object 형태의 데이터(VO, DTO)를 JSON 형식 데이터와 상호 변�
 
 ## Jackson 종속성 별도로 추가하여 사용하기
 
-* spring-boot-starter-web (v3.0 이후) 종속성에 기본적으로 jackson.core 모듈을 포함되어 있습니다.
+* spring-boot-starter-web (v3.0 이후) 종속성에 기본적으로 `jackson.core` 모듈을 포함되어 있습니다. 단, core가 아닌 `datatype`이나 `module` 등은 필요시 dependencies에 명시적으로 포함하여야 합니다.
 * 일반 spring-boot-starter 나 java 어플리케이션에서 jackson을 사용하려면 별도로 build.gradle에 모든 종속성을 포함해야 합니다.
 
 ### build.gradle
 
-```text
+```gradle
 ext {
     jacksonVersion = '2.20.1'
 }
