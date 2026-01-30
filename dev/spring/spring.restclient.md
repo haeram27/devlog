@@ -1,10 +1,63 @@
 # RestTemplate: spring에서 http client 사용하기
 
+- java에서는 Http 메세지를 보내기 위해 `HttpClient` 인터페이스를 사용한다.
+- `HttpClient` 인터페이스는 여러 구현체가 존재한다.
+- spring은 `HttpClient`를 편리하게 사용하기 위한 wrapper를 제공한다.
+  - RestTemplate
+  - RestClient
+  - WebClient
+
 - RestTemplate 은 블로킹 방식의 http request를 사용하기 위하여 설계되었다.
 - 블로킹 방식은 request 당 1 thread, 1 socket을 사용한다.
 
-- Async 방식의 http client pool을 사용하려면 WebClient를 사용하라.
+- Async 방식의 http client pool을 사용하려면 WebClient를 사용해야함
 - Async 방식의 request 처리는 많은 requets에서도 더 적은 thread와 socket을 사용할 수 있지만, 응답 처리를 위한 listener 구조를 별도로 구현해야 한다.
+
+## HttpClient 구현체
+
+1.  **`java.net.http.HttpClient` (Java 11+)**
+    *   Java 11부터 JDK에 내장된 표준 HTTP 클라이언트입니다.
+    *   비동기 및 동기 API를 모두 지원하며, HTTP/2와 WebSocket을 지원합니다.
+    *   별도의 라이브러리 추가 없이 사용할 수 있어 간단한 프로젝트에 적합합니다.
+
+2.  **Apache HttpClient**
+    *   오랫동안 Java 생태계에서 널리 사용된 매우 성숙하고 안정적인 라이브러리입니다.
+    *   세밀한 제어(타임아웃, 프록시, 인증 등)가 가능하고 풍부한 기능을 제공합니다.
+    *   많은 레거시 및 엔터프라이즈 시스템에서 표준처럼 사용됩니다.
+
+3.  **OkHttp (by Square)**
+    *   성능이 뛰어나고 효율적인 최신 HTTP 클라이언트입니다.
+    *   HTTP/2 및 SPDY를 지원하며, 연결 풀링, GZIP, 캐싱 등을 자동으로 처리합니다.
+    *   특히 안드로이드 개발에서 널리 사용되며, Retrofit 라이브러리의 기반이 됩니다.
+
+어떤 구현체를 선택할지는 프로젝트의 요구사항, Spring 사용 여부 및 버전, 동기/비동기 처리 필요성 등에 따라 달라집니다. 최신 Spring 프로젝트를 진행하신다면 **`WebClient`** 사용을 우선적으로 고려하는 것이 좋습니다.
+
+## Spring의 `HttpClient` wrapper
+
+- `HttpClient` 사용시 편의성 제공을 위한 
+
+|name|note|
+|---|---|
+|RestTemplate|동기 방식 `HttpClient` 지원, old-school 방식, Exception 직접 처리 필요|
+|RestClient|동기 방식 `HttpClient` 지원, chaining 패턴, exception handling 지원|
+|WebClient|비동기 방식 `CloseableHttpAsyncClient` 지원, 최신 패턴 방식, webflux 라이브러리에 포함, Mono와 Flux라는 pub/sub 구조의 브로커 패턴 사용|
+
+- **Spring `RestTemplate` (Deprecated in Spring 5, removed in Spring 6)**
+  - 과거 Spring의 표준 동기(Blocking) 방식 HTTP 클라이언트였습니다.
+  - 직관적이고 사용하기 쉬웠지만, 유지보수 모드로 전환되었으며 최신 Spring 버전에서는 `RestClient`나 `WebClient` 사용이 권장됩니다.
+  - 기존 프로젝트와의 호환성을 위해 여전히 사용되는 경우가 많습니다.
+
+- **Spring `RestClient` (Spring 5+)**
+  - Spring 5부터 도입된 동기, 블로킹(blocking) 방식의 최신 HTTP 클라이언트입니다.
+  - 체인 방식 설정과 함수형 스타일의 유연한 API를 제공
+  - 내부적으로는 Reactor Netty, Jetty, Apache HttpClient 등을 사용할 수 있습니다.
+
+- **Spring `WebClient` (Spring 5+)**
+  - Spring 5부터 도입된 비동기, 논블로킹(Non-blocking) 방식의 최신 HTTP 클라이언트입니다.
+  - 함수형 스타일의 유연한 API를 제공하며, Reactor를 기반으로 동작합니다.
+  - Spring WebFlux와 함께 사용될 때 최고의 성능을 발휘하며, 현재 Spring에서 가장 권장되는 방식입니다.
+  - 내부적으로는 Reactor Netty, Jetty, Apache HttpClient 등을 사용할 수 있습니다.
+
 
 ## WebClient (Async mechanism HttpClient for Spring)
 
