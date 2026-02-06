@@ -7,13 +7,13 @@
 git checkout -b feature01
 
 # local 브랜치로 부터 remote 브랜치(feature01) 생성
-# local과 remote 브랜치는 자동으로 upstream 관계로 연결 됨
+# (push) -u, --set-upstream 옵션 사용시 push와 더불어 대상 브랜치를 현재 브랜치의 upstream branch로 설정함
 git push -u origin feature01
 
 # upstream 관계 설정 - remote 브랜치를 local 브랜치의 remote-tracking-branch로 설정하기
 # push 할 때 -u 옵션을 사용했으면 이 단계(upstream 설정)는 건너뛰기 가능
 # .git/config 파일에 heads/feature01과 remotes/origin/feature01의 merge관계 명시됨
-# --set-upstream-to 와 -u 는 같은 옵션
+# (branch) -u, --set-upstream-to 옵션은 현재 브랜치의 upstream branch를 설정함
 git branch -u origin/feature01
 git branch --set-upstream-to origin/feature01
 

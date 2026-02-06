@@ -27,7 +27,7 @@ git branch --set-upstream-to=<remote-repository>/<remote-branch>
 | `git switch --track origin/feature`            | 신규 로컬 브랜치를 생성하면서 upstream 브랜치 설정 |
 | `git branch --set-upstream-to=origin/feature`  | 수동으로 upstream 설정 |
 | `git push -u origin feature`                   | 현재 로킬 브랜치를 push하면서 upstream 브랜치 설정 |
-| `git push -u origin feature`                   | 현재 로킬 브랜치를 push하면서 upstream 브랜치 설정 |
+
 
 ## upstream 설정시 내부 동작
 

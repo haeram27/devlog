@@ -10,14 +10,14 @@ downstream(tracking) branch <-(pull/fetch)- upstream branch
 downstream(tracking) branch    -(push)->    upstream branch
 ```
 
-* `upstream branch`의 위치가 remote repository인 경우에 local repository에는 `remote-tracking branch`라는 참조가 생성됨
-* `remote-tracking branch`는 remote repository에 위치한 `upstream branch`의 상태 정보를 가진 local reposity의 참조 포인트 이며 push/pull/fetch 등 remote repository와 연결되는 작업이 발생했을 때 해당 시점의 `upstream branch`의 마지막 상태 정보로 업데이트됨
+* `upstream branch`의 위치가 remote repository인 경우에 local repository에는 `remote-tracking branch`라는 참조가 생성되며, `tracking branch`의 실제 `upstream branch`는 이 `remote-tracking branch`로 설정 됨
+* `remote-tracking branch`는 remote repository에 위치한 `upstream branch`의 상태 정보를 가진 local repository의 참조 포인트 이며 push/pull/fetch 등 remote repository와 연결되는 작업이 발생했을 때 해당 시점의 `remote upstream branch`의 마지막 상태 정보로 업데이트됨
 
 ```text
-| local repository                              | remote repository |
---------------------------------------------------------------------|
-| tracking branch - remote-tracking branch(ref) | upstream branch   |
-| main            - orgin/main                  | main              |
+| local repository                              | remote repository      |
+-------------------------------------------------------------------------|
+| tracking branch - remote-tracking branch(ref) | remote upstream branch |
+| main            - orgin/main                  | main                   |
 ```
 
 ### tracking branch
@@ -61,16 +61,16 @@ Git에서 "추적 브랜치(tracking branch)"는 원격 저장소(remote reposit
 
 ### 1. 추적 브랜치 (Tracking Branch)
 
-* **이것은 여러분이 직접 작업하는 '로컬 브랜치'입니다.** (`main`, `feature/login` 등)
+* **이것은 사용자가 직접 작업하는 '로컬 브랜치'입니다.** (`main`, `feature/login` 등)
 * 이 로컬 브랜치는 특정 원격 브랜치(업스트림 브랜치)와 연결되어(추적하도록 설정되어) 있습니다.
 * 이 연결 덕분에 `git pull`, `git push` 같은 명령을 간단하게 사용할 수 있습니다.
-* **여러분이 직접 커밋하고 코드를 수정하는 브랜치입니다.**
+* **사용자가 직접 커밋하고 코드를 수정하는 브랜치입니다.**
 
 ### 2. 원격 추적 브랜치 (Remote-Tracking Branch)
 
 * **이것은 일반적인 작업용 브랜치가 아닌 원격 저장소의 브랜치 상태를 '복사'해 놓은 '로컬의 읽기 전용 브랜치'(참조)입니다.**
 * 이름은 보통 `[원격저장소이름]/[브랜치이름]` 형식을 가집니다 (예: `origin/main`, `origin/develop`).
-* **여러분이 이 브랜치에 직접 커밋하거나 수정할 수 없습니다.**
+* **사용자가 이 브랜치 자체에 직접 커밋하거나 수정할 수 없습니다.**
 * 이 브랜치의 역할은 마지막으로 원격 저장소와 통신했을 때(예: `git fetch`, `git pull`)의 상태를 로컬에 기록해두는 '책갈피'와 같습니다.
 * `git fetch` 명령을 실행하면, Git은 원격 저장소에서 최신 정보를 가져와서 이 **원격 추적 브랜치**(`origin/main`)를 업데이트합니다. 여러분의 로컬 작업 브랜치(`main`)는 이때 변경되지 않습니다.
 
