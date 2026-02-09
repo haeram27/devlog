@@ -3,21 +3,35 @@
 ## branch
 
 * 브랜치간 tracking을 위한 업스트림 관계
-  * upstream 브랜치는 local 또는 remote에 위치할 수 있음
 
 ```text
 downstream(tracking) branch <-(pull/fetch)- upstream branch
 downstream(tracking) branch    -(push)->    upstream branch
 ```
 
-* `upstream branch`의 위치가 remote repository인 경우에 local repository에는 `remote-tracking branch`라는 참조가 생성되며, `tracking branch`의 실제 `upstream branch`는 이 `remote-tracking branch`로 설정 됨
+* 모든 branch는 `upstream branch`를 가질 수 있음
+* 두 브랜치 간에 업스트림 관계가 설정 되면 downstream는 upstream 브랜치로 부터 pull/fetch/push 등의 명령어를 사용수 있게 됨 * * 
+* `downstream branch` 는 local에서 사용자가 작업(read/write) 가능한 브랜치임
+* `upstream branch` 는 local 또는 remote에 위치할 수 있음
+* `upstream branch`의 위치가 remote repository인 경우에 local repository에는 `remote-tracking branch`라는 참조(읽기 전용 브랜치)가 생성되며, `tracking branch`의 실제 `upstream branch`는 이 `remote-tracking branch`로 설정 됨
 * `remote-tracking branch`는 remote repository에 위치한 `upstream branch`의 상태 정보를 가진 local repository의 참조 포인트 이며 push/pull/fetch 등 remote repository와 연결되는 작업이 발생했을 때 해당 시점의 `remote upstream branch`의 마지막 상태 정보로 업데이트됨
 
+* `local upstream branch` 사용시 branch tracking 구조 
+
 ```text
-| local repository                              | remote repository      |
--------------------------------------------------------------------------|
-| tracking branch - remote-tracking branch(ref) | remote upstream branch |
-| main            - orgin/main                  | main                   |
+| local repository                  |
+|-----------------------------------|
+| tracking branch - upstream branch |
+| local-track     - main            | # branch 이름 예
+```
+
+* `remote upstream branch` 사용시 branch tracking 구조 
+
+```text
+| local repository                                       | remote repository      |
+|---------------------------------------------------------------------------------|
+| tracking branch - remote-tracking branch(ref/upstream) | remote upstream branch |
+| main            - orgin/main                           | main                   | # branch 이름 예
 ```
 
 ### tracking branch

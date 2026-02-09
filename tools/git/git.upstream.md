@@ -28,7 +28,6 @@ git branch --set-upstream-to=<remote-repository>/<remote-branch>
 | `git branch --set-upstream-to=origin/feature`  | 수동으로 upstream 설정 |
 | `git push -u origin feature`                   | 현재 로킬 브랜치를 push하면서 upstream 브랜치 설정 |
 
-
 ## upstream 설정시 내부 동작
 
 upstream을 설정하면 현재 브랜치(예: mybranch)에 대해서 다음의 설정이 추가 된다.

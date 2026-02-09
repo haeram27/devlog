@@ -115,7 +115,7 @@ SET
             @Override
             public JobParameters getNext(JobParameters jobParameters) {
                 if (jobParameters == null || jobParameters.isEmpty()) {
-                return new JobParametersBuilder().addLong(RUN_ID, 1L).toJobParameters();
+                    return new JobParametersBuilder().addLong(RUN_ID, 1L).toJobParameters();
                 }
 
                 long id = jobParameters.getLong(RUN_ID, 0L) + 1;
