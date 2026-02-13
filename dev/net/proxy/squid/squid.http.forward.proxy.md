@@ -33,7 +33,7 @@ curl -kvx http://localhost:3128 https://github.com
 
 ## configuration (/etc/squid/squid.conf)
 
-* simple test configuration
+- simple test configuration
 
 ```bash
 # comment all access deny configuration
@@ -51,7 +51,7 @@ http_access allow all
 http_port 0.0.0.0:3128
 ```
 
-* full configuration
+- full configuration
 
 ```bash
 #  TAG: acl 
@@ -107,9 +107,9 @@ ip, port를 베이스로 대상을 지정할 수 있으며, acl의 묶음 또한
 acl 지시자를 사용한 ACL 선언은 단지 조건을 정의하는 것이며, 어떤 것도 차단하거나 허용하지 않는다.
 http_access 등의 명령에서 ACL을 사용해야 실제 효과가 있다.
 
-* 명령어
-  * acl - acl 선언 (src/dest ip, dest port의 range 표현)
-  * http_access - src host, acl 등의 접근 allow/deny 정의
+- 명령어
+  - acl - acl 선언 (src/dest ip, dest port의 range 표현)
+  - http_access - src host, acl 등의 접근 allow/deny 정의
 
 ex: ACL 선언 및 http_access로 등록
 
@@ -168,13 +168,13 @@ Squid는 `위에서 아래로 차례대로` http_access 규칙을 검사한다.
 
 ## ssh port-forward to proxy server
 
-* linux:
+- linux:
 
 ```bash
 [[ -z $(ss -tulnp | fgrep :3128) ]] && ssh -fCN -L 3128:<http.proxy.host.ip>:3128 <gateway.remote.sshd> -o ServerAliveCountMax=10 -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -o TCPKeepAlive=no
 ```
 
-* windows:
+- windows:
 
 ```bash
 start /B ssh -fCN -L 3128:<http.proxy.host.ip>:3128 <gateway.remote.sshd> -o ExitOnForwardFailure=yes -o ServerAliveInterval=60 -o ServerAliveCountMax=10
@@ -185,7 +185,7 @@ start /B ssh -fCN -L 3128:<http.proxy.host.ip>:3128 <gateway.remote.sshd> -o Exi
 linux에서 proxy 서버 설정은 각 어플리케이션에 직접 하는 것이 일반 적이지만
 환경 변수를 참조하는 legacy 어플리케이션들도 있으며, 이들을 위하여 다음과 같이 환경 변수에 설정할 수 도 있다. 
 
-* .bashrc 또는 .zshrc 등 rc 파일에 설정
+- .bashrc 또는 .zshrc 등 rc 파일에 설정
 
 ```bash
 http_proxy=<proxy-server-address>:<proxy-server-port>
@@ -193,7 +193,7 @@ https_proxy=<proxy-server-address>:<proxy-server-port>
 no_proxy=
 ```
 
-* proxy server를 localhost에서 ssh port-forwarding 한 경우
+- proxy server를 localhost에서 ssh port-forwarding 한 경우
 
 ```bash
 http_proxy=localhost:<bind-port>

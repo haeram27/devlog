@@ -26,7 +26,7 @@ Array.from({ length: 100 }, (_, i) => ({
 실행
 javascript 프롬프트에서 붙여넣기 실행
 
-* 브라우저(chrome 등) 개발자 도구의 console
+- 브라우저(chrome 등) 개발자 도구의 console
 
 ## python
 

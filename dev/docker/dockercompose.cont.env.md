@@ -6,26 +6,26 @@
 
 docker compose에는 언급되는 환경 변수에는 두 가지 타입이 있다.
 
-* ***compose 환경 변수***
-  * docker-compose.yaml 파일내에서 참조 가능한 환경이며 변수 yaml 파일을 구성하는데 사용된다.
-  * ***compose 환경 변수는 컨테이너 내부의 환경변수로 전파되지 않는다.***
-  * 지정 방법
-    * docker compose 명령에 전달 되는 쉘 환경 변수 (`export` 또는 compose 명령 라인에 함께 명시)
-    * `docker-compose.yaml`과 같은 디렉토리에 존재하는 `.env` 파일 (`--env_file` 옵션)
-  * .env 파일은 docker compose 명령 실행시 단 하나의 파일만 참조 가능하다.
-  * 자동 참조 되는 .env 파일보다 `--env_file` 옵션으로 지정한 파일의 우선 순위가 높다.
-* ***container 환경 변수***
-  * docker compose에 의해 실행되는 컨테이너 내부에 생성되는 환경 변수
-  * 지정 방법
-    * docker-compose.yaml 파일 내 `env_file` 또는 `environment` 필드에 명시
-    * 중복키의 경우 `environment` 필드가 `env_file` 필드 보다 우선순위가 높다.
-    * `env_file` 필드에는 여러 파일이 명시 가능하다.
+- ***compose 환경 변수***
+  - docker-compose.yaml 파일내에서 참조 가능한 환경이며 변수 yaml 파일을 구성하는데 사용된다.
+  - ***compose 환경 변수는 컨테이너 내부의 환경변수로 전파되지 않는다.***
+  - 지정 방법
+    - docker compose 명령에 전달 되는 쉘 환경 변수 (`export` 또는 compose 명령 라인에 함께 명시)
+    - `docker-compose.yaml`과 같은 디렉토리에 존재하는 `.env` 파일 (`--env_file` 옵션)
+  - .env 파일은 docker compose 명령 실행시 단 하나의 파일만 참조 가능하다.
+  - 자동 참조 되는 .env 파일보다 `--env_file` 옵션으로 지정한 파일의 우선 순위가 높다.
+- ***container 환경 변수***
+  - docker compose에 의해 실행되는 컨테이너 내부에 생성되는 환경 변수
+  - 지정 방법
+    - docker-compose.yaml 파일 내 `env_file` 또는 `environment` 필드에 명시
+    - 중복키의 경우 `environment` 필드가 `env_file` 필드 보다 우선순위가 높다.
+    - `env_file` 필드에는 여러 파일이 명시 가능하다.
 
 ## 우선 순위 (중복 키에 대한 최종 값)
 
 1. `environment` 필드
 1. `env_file` 필드
-   * 다중 파일 정의시 위에서 아래로 override 방식으로 최종 값 적용
+   - 다중 파일 정의시 위에서 아래로 override 방식으로 최종 값 적용
 
 ---
 
@@ -66,8 +66,8 @@ DEBUG=false
 
 windows에서 사용되던 ini 설정파일의 형식과 유사
 
-* 라인 별로 `KEY=VALUE` 형식의 아이템을 지정 가능
-* `VALUE`는 반드시 string literal이어야 하며 `${VAR}`과 같은 확장 참조 표현 불가능
+- 라인 별로 `KEY=VALUE` 형식의 아이템을 지정 가능
+- `VALUE`는 반드시 string literal이어야 하며 `${VAR}`과 같은 확장 참조 표현 불가능
 
 #### 형식 규칙
 
@@ -97,8 +97,8 @@ services:
       - .env.app
 ```
 
-* `.env.app`에 정의된 모든 환경변수들이 컨테이너 내부에 주입됩니다.
-* 이는 컨테이너의 `ENV`로 전달되며, `environment:`와 유사하게 작동합니다.
+- `.env.app`에 정의된 모든 환경변수들이 컨테이너 내부에 주입됩니다.
+- 이는 컨테이너의 `ENV`로 전달되며, `environment:`와 유사하게 작동합니다.
 
 ---
 
@@ -109,8 +109,8 @@ APP_ENV=prod
 PORT=${APP_PORT}   # 지원 안 됨 (변수 확장 안 됨)
 ```
 
-* `${APP_PORT}`와 같은  **변수 참조는 작동하지 않습니다**.
-* 값은 반드시 리터럴 문자열이어야 합니다.
+- `${APP_PORT}`와 같은  **변수 참조는 작동하지 않습니다**.
+- 값은 반드시 리터럴 문자열이어야 합니다.
 
 ---
 

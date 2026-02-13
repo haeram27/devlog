@@ -126,8 +126,8 @@ Java의 메서드 레퍼런스는 \*\*타겟 타입(target type)\*\*에 따라 �
 
 따라서:
 
-* `Integer::compareTo`는 `Comparator<Integer>`처럼 `(Integer a, Integer b) -> int`인 문맥에서
-* `a.compareTo(b)`로 **자동 변환됩니다.**
+- `Integer::compareTo`는 `Comparator<Integer>`처럼 `(Integer a, Integer b) -> int`인 문맥에서
+- `a.compareTo(b)`로 **자동 변환됩니다.**
 
 ---
 

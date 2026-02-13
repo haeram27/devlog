@@ -12,17 +12,17 @@
 
 ## 읽기(역직렬화)
 
-* readValue
+- readValue
 
 ## 쓰기(직렬화)
 
-* writeValue
+- writeValue
 
 ## 주의: JsonMapper.readValue() 호출시 `Class<T>` vs `TypeReference<T>` 사용 차이
 
-* Generic 파라미터를 가지는 ParamterizedType에 매핑하는 경우 TypeReference를 사용하라
-  * TypeReference를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 ParameterizedType이 가져야하는 제너릭 타입에 대한 type check를 해준다.
-  * 그래서 런타임에 json 데이터가 개발자가 의도한 타입이 아니라면 Exception을 발생시킨다.
+- Generic 파라미터를 가지는 ParamterizedType에 매핑하는 경우 TypeReference를 사용하라
+  - TypeReference를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 ParameterizedType이 가져야하는 제너릭 타입에 대한 type check를 해준다.
+  - 그래서 런타임에 json 데이터가 개발자가 의도한 타입이 아니라면 Exception을 발생시킨다.
 
 ## 단순 구분 조건 (추천)
 
@@ -98,8 +98,8 @@ List<String> list = jsonMapper.readValue(jsonArrayString,
     new TypeReference<List<Map<String, UserVO>>>(){});
 ```
 
-* jackson의 JsonMapper 클래스에는 여러 버전의 readValue() Overload가 정의 되어 있다.
-* 일반적으로 Json String 역질렬화시 아래의 두 가지 readValue()가 사용된다.
+- jackson의 JsonMapper 클래스에는 여러 버전의 readValue() Overload가 정의 되어 있다.
+- 일반적으로 Json String 역질렬화시 아래의 두 가지 readValue()가 사용된다.
 
 ```java
 public <T> T readValue(String content, Class<T> valueType)
@@ -192,7 +192,7 @@ public class Box {
 
 ### 역직렬화(deserialize) : Json(String) -> Java Object
 
-* JsonMapper.readValue()
+- JsonMapper.readValue()
 
 ```java
 JsonMapper mapper = new JsonMapper();
@@ -209,7 +209,7 @@ UserVO userVO = mapper.readValue("{\"id\":\"abc\", \"pw\":1234}", userVO.class);
 
 ### 역직렬화(deserialize) : Json(String) -> JsonNode(Object)
 
-* JsonMapper.readTree()
+- JsonMapper.readTree()
 
 ```java 
 JsonMapper mapper = new JsonMapper();
@@ -220,8 +220,8 @@ JsonNode rootNode = mapper.readTree(jsonString);
 
 ### 직렬화(serialize, write): Java Object -> Json(String)
 
-* JsonMapper.writeValue(Model)
-* JsonMapper.writeValueAsString(Model)
+- JsonMapper.writeValue(Model)
+- JsonMapper.writeValueAsString(Model)
 
 ```java
 JsonMapper mapper = JsonMapper.builder()
@@ -356,7 +356,7 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
 
 ## json pointer expression을 사용하여 json 내부 값 변경 하기
 
-* json의 특정 노드에 접근하기위한 표현식으로 일반적으로 json path와 json point expression이 있는데, Jackson의 경우 json point expression을 사용한다.
+- json의 특정 노드에 접근하기위한 표현식으로 일반적으로 json path와 json point expression이 있는데, Jackson의 경우 json point expression을 사용한다.
 
 ```java
     @Test
@@ -408,7 +408,7 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
             JsonNode rootNode = jsonMapper.readTree(jsonString);
 
             /*
-             * read first category of book
+             - read first category of book
              */
             String firstBookCategory;
 
@@ -421,7 +421,7 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
             System.out.println("----------------------------------------------------------");
 
             /*
-             * read bicycle price
+             - read bicycle price
              */
             double bicyclePrice;
 
@@ -435,7 +435,7 @@ mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), user
             System.out.println("----------------------------------------------------------");
 
             /*
-             * update value using json point expression
+             - update value using json point expression
              */
             String modifiedJsonString;
             ((ObjectNode) rootNode.at("/store/book/0")).put("price", 10.99);

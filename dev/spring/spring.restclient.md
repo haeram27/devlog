@@ -16,19 +16,19 @@
 ## HttpClient 구현체
 
 1.  **`java.net.http.HttpClient` (Java 11+)**
-    *   Java 11부터 JDK에 내장된 표준 HTTP 클라이언트입니다.
-    *   비동기 및 동기 API를 모두 지원하며, HTTP/2와 WebSocket을 지원합니다.
-    *   별도의 라이브러리 추가 없이 사용할 수 있어 간단한 프로젝트에 적합합니다.
+    -   Java 11부터 JDK에 내장된 표준 HTTP 클라이언트입니다.
+    -   비동기 및 동기 API를 모두 지원하며, HTTP/2와 WebSocket을 지원합니다.
+    -   별도의 라이브러리 추가 없이 사용할 수 있어 간단한 프로젝트에 적합합니다.
 
 2.  **Apache HttpClient**
-    *   오랫동안 Java 생태계에서 널리 사용된 매우 성숙하고 안정적인 라이브러리입니다.
-    *   세밀한 제어(타임아웃, 프록시, 인증 등)가 가능하고 풍부한 기능을 제공합니다.
-    *   많은 레거시 및 엔터프라이즈 시스템에서 표준처럼 사용됩니다.
+    -   오랫동안 Java 생태계에서 널리 사용된 매우 성숙하고 안정적인 라이브러리입니다.
+    -   세밀한 제어(타임아웃, 프록시, 인증 등)가 가능하고 풍부한 기능을 제공합니다.
+    -   많은 레거시 및 엔터프라이즈 시스템에서 표준처럼 사용됩니다.
 
 3.  **OkHttp (by Square)**
-    *   성능이 뛰어나고 효율적인 최신 HTTP 클라이언트입니다.
-    *   HTTP/2 및 SPDY를 지원하며, 연결 풀링, GZIP, 캐싱 등을 자동으로 처리합니다.
-    *   특히 안드로이드 개발에서 널리 사용되며, Retrofit 라이브러리의 기반이 됩니다.
+    -   성능이 뛰어나고 효율적인 최신 HTTP 클라이언트입니다.
+    -   HTTP/2 및 SPDY를 지원하며, 연결 풀링, GZIP, 캐싱 등을 자동으로 처리합니다.
+    -   특히 안드로이드 개발에서 널리 사용되며, Retrofit 라이브러리의 기반이 됩니다.
 
 어떤 구현체를 선택할지는 프로젝트의 요구사항, Spring 사용 여부 및 버전, 동기/비동기 처리 필요성 등에 따라 달라집니다. 최신 Spring 프로젝트를 진행하신다면 **`WebClient`** 사용을 우선적으로 고려하는 것이 좋습니다.
 
@@ -166,8 +166,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /*
- * Apache httpclient5 Docs - https://hc.apache.org/httpcomponents-client-5.6.x/index.html
- * Examples - https://github.com/apache/httpcomponents-client/tree/master/httpclient5/src/test/java/org/apache/hc/client5/http/examples
+ - Apache httpclient5 Docs - https://hc.apache.org/httpcomponents-client-5.6.x/index.html
+ - Examples - https://github.com/apache/httpcomponents-client/tree/master/httpclient5/src/test/java/org/apache/hc/client5/http/examples
  */
 
 @Configuration
@@ -186,7 +186,7 @@ public class HttpClientConfig {
     }
 
     /*
-     * RestTemplate - Sync, Blocking HttpClient
+     - RestTemplate - Sync, Blocking HttpClient
      */
 
     @Bean
@@ -235,8 +235,8 @@ public class HttpClientConfig {
                 .build();
 
             /* 
-             * set timeout setting per request in RestTemplate (Spring driven),
-             * if timeouts set here then timeout config is not require at ConnectionConfig and RequestConfig
+             - set timeout setting per request in RestTemplate (Spring driven),
+             - if timeouts set here then timeout config is not require at ConnectionConfig and RequestConfig
              */
             var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
             rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
@@ -246,7 +246,7 @@ public class HttpClientConfig {
             var template = new RestTemplate(rf);
 
             /*
-             * RestCient can be made by RestTmeplate
+             - RestCient can be made by RestTmeplate
              */
             // RestClient client = RestClient.create(template);
 
@@ -258,7 +258,7 @@ public class HttpClientConfig {
     }
 
     /*
-     * RestClient - Sync, Blocking HttpClient
+     - RestClient - Sync, Blocking HttpClient
      */
 
     @Bean
@@ -307,8 +307,8 @@ public class HttpClientConfig {
                 .build();
 
             /* 
-             * support timeout setting per request for SYNC way HttpClient (Spring driven),
-             * if timeouts set here then timeout config is not require at ConnectionConfig and RequestConfig
+             - support timeout setting per request for SYNC way HttpClient (Spring driven),
+             - if timeouts set here then timeout config is not require at ConnectionConfig and RequestConfig
              */
             var rf = new HttpComponentsClientHttpRequestFactory(httpClient);
             rf.setConnectionRequestTimeout(Duration.ofSeconds(1)); // time to resolve idle http connection from conn pool
@@ -325,7 +325,7 @@ public class HttpClientConfig {
     }
 
     /*
-     * WebClient - Async, Non-Blocking HttpClient
+     - WebClient - Async, Non-Blocking HttpClient
      */
 
     @Bean
@@ -462,7 +462,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
 /*
- * RestAPI Client GET Test
+ - RestAPI Client GET Test
  */
 
 @Slf4j

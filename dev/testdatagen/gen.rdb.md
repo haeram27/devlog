@@ -2,8 +2,8 @@
 
 ## FOR문 이용한 ROW 생성
 
-* main table에 PRIMARY KEY row_id가 있고 sub table에서 해당 키를 참조 하는 구조
-* main table과 main의 PRIMARY KEY를 참조하는 sub table에 모두 row를 생성
+- main table에 PRIMARY KEY row_id가 있고 sub table에서 해당 키를 참조 하는 구조
+- main table과 main의 PRIMARY KEY를 참조하는 sub table에 모두 row를 생성
 
 ```sql
 DO $$

@@ -22,15 +22,15 @@ public class PermutationTests extends EvaluatedTimeTests {
     }
 
     /**
-    * @brief permutation
+    - @brief permutation
     *
-    * @tparam T
-    * @param data      element list (size >= r)
-    * @param out       result of combination (size = r)
-    * @param r         round (number of output elements)
-    * @param depth     index of out[](permutation), if depth==2 then 0~(depth-1) index is filled in out[]
-    *                  index i on for() statement is index of data[] to be candidate of out[depth]
-    * @param visited   mark consumed index of data[] while traversal, visited is used to prevent choice of data[index] already consumed
+    - @tparam T
+    - @param data      element list (size >= r)
+    - @param out       result of combination (size = r)
+    - @param r         round (number of output elements)
+    - @param depth     index of out[](permutation), if depth==2 then 0~(depth-1) index is filled in out[]
+    -                  index i on for() statement is index of data[] to be candidate of out[depth]
+    - @param visited   mark consumed index of data[] while traversal, visited is used to prevent choice of data[index] already consumed
     */
     public <T> void permutation(T[] data, T[] out, int r, int depth, boolean[] visited) {
         //System.out.println(String.format("depth=%d, start=%d", depth, start));
@@ -40,10 +40,10 @@ public class PermutationTests extends EvaluatedTimeTests {
         }
 
         /**
-         * depth : index of out[], level of permutation selecting tree
-         * i : index for data[] to be out[depth], i can be controlled by for() and visited[]
-         * visited[i] : if true then data[i] can NOT be used in next depth 
-         *              if false then data[i] can be used in previous/currrent depth
+         - depth : index of out[], level of permutation selecting tree
+         - i : index for data[] to be out[depth], i can be controlled by for() and visited[]
+         - visited[i] : if true then data[i] can NOT be used in next depth 
+         -              if false then data[i] can be used in previous/currrent depth
          */
         for (int i = 0; i < data.length; i++) {
             if (!visited[i]) {

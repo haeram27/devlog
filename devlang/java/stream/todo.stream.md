@@ -220,10 +220,10 @@ Function type interface를 인자로 받음
 @FunctionalInterface
 public interface Function<T, R> {
     /**
-     * Applies this function to the given argument.
+     - Applies this function to the given argument.
      *
-     * @param t the function argument
-     * @return the function result
+     - @param t the function argument
+     - @return the function result
      */
     R apply(T t);
 }

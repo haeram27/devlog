@@ -2,8 +2,8 @@
 
 호스트 외부에서 접속이 허용되지 않는 A 포트를 외부에서 접속 하려면 두 가지 방법이 있다.
 
-* SSH : ssh로 호스트에 접속 후 호스트 내부에서 A 포트에 연결
-* port-fowrding : 포트 포워딩으로 외부에서 접속가능한 포트 B를 생성하여 외부의 접속 요청을 포트 A로 전달
+- SSH : ssh로 호스트에 접속 후 호스트 내부에서 A 포트에 연결
+- port-fowrding : 포트 포워딩으로 외부에서 접속가능한 포트 B를 생성하여 외부의 접속 요청을 포트 A로 전달
 
 다음은 동일 호스트 내에서 포트 포워딩을 하는 방법을 설명 한다.
 
@@ -56,8 +56,8 @@ syntax:
 socat TCP-LISTEN:<forward-port>,fork TCP:localhost:<destination-port>
 ```
 
-* forwarded-port:
-* bind-port:
+- forwarded-port:
+- bind-port:
 
 임시 포워딩:
 

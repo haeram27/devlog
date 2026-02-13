@@ -18,28 +18,28 @@ Docker Compose (`docker-compose` 및 `Compose V2`)는 `.env` 파일 또는 셸 �
 
 ### 🔹 1. `${VAR}`
 
-* `VAR`의 값을 그대로 사용
-* 없으면 에러 발생 (또는 빈 문자열로 해석)
+- `VAR`의 값을 그대로 사용
+- 없으면 에러 발생 (또는 빈 문자열로 해석)
 
 ---
 
 ### 🔹 2. `${VAR:-default}`
 
-* `VAR`가 선언되지 않았거나 빈 문자열이면 `"default"` 사용
-* **Compose에서 매우 자주 쓰임**
+- `VAR`가 선언되지 않았거나 빈 문자열이면 `"default"` 사용
+- **Compose에서 매우 자주 쓰임**
 
 ---
 
 ### 🔹 3. `${VAR-default}`
 
-* `VAR`가 **선언되지 않았을 때만** `"default"` 사용 (빈 문자열은 그대로 사용)
+- `VAR`가 **선언되지 않았을 때만** `"default"` 사용 (빈 문자열은 그대로 사용)
 
 ---
 
 ### 🔹 4. `${VAR:?error}`
 
-* `VAR`가 선언되지 않으면 **오류 메시지를 출력하고 종료**
-* 예:
+- `VAR`가 선언되지 않으면 **오류 메시지를 출력하고 종료**
+- 예:
 
   ```yaml
   image: ${REQUIRED_VAR:?You must set REQUIRED_VAR}
@@ -49,8 +49,8 @@ Docker Compose (`docker-compose` 및 `Compose V2`)는 `.env` 파일 또는 셸 �
 
 ### 🔹 5. `${VAR:+alt}`
 
-* `VAR`가 설정되어 있으면 `"alt"` 사용
-* 설정되지 않았거나 비어 있으면 아무 것도 출력하지 않음
+- `VAR`가 설정되어 있으면 `"alt"` 사용
+- 설정되지 않았거나 비어 있으면 아무 것도 출력하지 않음
 
 ---
 

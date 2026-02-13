@@ -29,9 +29,9 @@ JDBC는 더 이상 java.sql.Timestamp로 변환하지 않고, 직접적으로 `j
 
 즉, 명시적으로 getObject(..., OffsetDateTime.class) 또는 getObject(..., ZonedDateTime.class)를 사용할 경우, JDBC는 java.sql.Timestamp를 거치지 않습니다.
 
-* Java 8+ 사용 중이라면, `java.sql.Timestamp`는 사용을 **지양**하고 `OffsetDateTime` 사용을 추천드립니다.
-* **ORM (예: JPA)** 에서도 `@Column`에 `OffsetDateTime`을 매핑하면 `timestamptz`와 자동 대응됩니다.
-* 단 JDBC는 RDB의 timestamptz 값을 현재 세션의 timezone으로 변환하여 `OffsetDateTime`나 `ZonedDateTime` 형식에 맵핑하므로, JDBC가 읽어오는 timestamptz의 값이 임의로 변경되길 원하지 않는다면, JDBC 세션 설정시 timezone 값은 되도록 `UTC`로 사용하도록 설정한다. 별도로 설정하지 않으면 JDBC와 RDB 사이의의 세션 timezone은 RDB의 기본값을 사용하며 이는 `UTC`이다.
+- Java 8+ 사용 중이라면, `java.sql.Timestamp`는 사용을 **지양**하고 `OffsetDateTime` 사용을 추천드립니다.
+- **ORM (예: JPA)** 에서도 `@Column`에 `OffsetDateTime`을 매핑하면 `timestamptz`와 자동 대응됩니다.
+- 단 JDBC는 RDB의 timestamptz 값을 현재 세션의 timezone으로 변환하여 `OffsetDateTime`나 `ZonedDateTime` 형식에 맵핑하므로, JDBC가 읽어오는 timestamptz의 값이 임의로 변경되길 원하지 않는다면, JDBC 세션 설정시 timezone 값은 되도록 `UTC`로 사용하도록 설정한다. 별도로 설정하지 않으면 JDBC와 RDB 사이의의 세션 timezone은 RDB의 기본값을 사용하며 이는 `UTC`이다.
 
 ## 예제: JAVA에서 JDBC를 통해 `OffsetDateTime`으로 RDB의의 `timestamptz` 받기
 
@@ -57,8 +57,8 @@ if (rs.next()) {
 }
 ```
 
-* 출력 결과는 정확한 **오프셋(+09:00)** 정보 포함
-* `java.sql.Timestamp`가 아닌 java.time.OffsetDateTime 이나 ZonedDateTime 사용
+- 출력 결과는 정확한 **오프셋(+09:00)** 정보 포함
+- `java.sql.Timestamp`가 아닌 java.time.OffsetDateTime 이나 ZonedDateTime 사용
 
 ## JDBC 동작 설명
 
@@ -68,30 +68,30 @@ if (rs.next()) {
 | `rs.getObject("tstz", OffsetDateTime.class)` | `java.time.OffsetDateTime` | **오프셋 포함** |
 | `rs.getObject("tstz", ZonedDateTime.class)`  | `java.time.ZonedDateTime`  | **시간대 포함** |
 
-* PostgreSQL JDBC(4.2+) 드라이버가 `timestamptz` → `OffsetDateTime` 매핑을 직접 수행
-* 단 JDBC는 RDB의 timestamptz 값을 현재 세션의 timezone으로 변환하여 `OffsetDateTime`나 `ZonedDateTime` 형식에 담아준다. 다시말해 `별도로 JDBC 세션 timezone을 설정`한다면 `RDB로 부터 읽어온 timestamptz는 세션의 timezone으로 변환된 값`이 된다.
+- PostgreSQL JDBC(4.2+) 드라이버가 `timestamptz` → `OffsetDateTime` 매핑을 직접 수행
+- 단 JDBC는 RDB의 timestamptz 값을 현재 세션의 timezone으로 변환하여 `OffsetDateTime`나 `ZonedDateTime` 형식에 담아준다. 다시말해 `별도로 JDBC 세션 timezone을 설정`한다면 `RDB로 부터 읽어온 timestamptz는 세션의 timezone으로 변환된 값`이 된다.
 
 ---
 
 ## JDBC/RDB간 올바른 timestamptz 사용 전략
 
-* RDB에서는 항상 UTC 기준으로 timestamp 또는 timestamptz 값을 저장한다.
-* RDB의 timezone 설정은 `UTC`로 사용한다.
-* JDBC의 세션 설정시 timezone은 `UTC`를 사용한다. (별도의 설정을 하지 않는다)
-* JAVA 8+ 이상에서 RDB의 timestamptz를 읽는 경우 항상 `java.time.OffsetDateTime 또는 ZonedDateTime 객체`를 이용하여 읽어온다.
+- RDB에서는 항상 UTC 기준으로 timestamp 또는 timestamptz 값을 저장한다.
+- RDB의 timezone 설정은 `UTC`로 사용한다.
+- JDBC의 세션 설정시 timezone은 `UTC`를 사용한다. (별도의 설정을 하지 않는다)
+- JAVA 8+ 이상에서 RDB의 timestamptz를 읽는 경우 항상 `java.time.OffsetDateTime 또는 ZonedDateTime 객체`를 이용하여 읽어온다.
 
 ---
 
 ## 참고: `JDBC 4.2 미만 + JAVA 8 미만` 환경경에서 RDB의 timestamptz를 timestamp로 변환 맵핑하는 과정
 
-* JDBC 4.2 미만 버전에서서는 RDB의 timestamptz(timestamp with timezone) 타입을 맵핑할 데이터 타입이 없다.
-* RDB의 timestamptz는 항상 UTC 기준 timezonme + 시간 값으로 저장된다.
-* JDBC는 RDB의 timestamptz 형식을 java.sql.Timestamp 타입으로 변환 맵핑하여 가져온다.
-* java.sql.Timestamp 는 timezone 정보가 없는 timestamp 저장 형식이다.
-* JDBC가 timestamptz 를 Timestamp로 변환할 때는 `JDBC와 RDB 사이에 맺어진 현재 세션의 timezone 설정`을 기준으로 timestamp를 계산하여 가져온다. 결과적으로 JDBC를 통해 가져온 timestamptz는 세션의 timezone으로 변환 연산된 timestamp 값이다.
-* 현재 세션의 timezone은 별도의 사용자 설정이 없는 경우 RDB 설정 파일의 기본 값을 사용하게 되는데, 보통 `UTC`이다.
-* RDB의 기본 timezone은 각 RDB 어플리케이션의 공식 문서 또는 설정을 확인한다.
-* JDBC를 통해서 읽어온 timestamp 값은 클라이언트 JVM 어플리케이션에서 필요한 timezone으로 변화하여 사용하여야 한다.
+- JDBC 4.2 미만 버전에서서는 RDB의 timestamptz(timestamp with timezone) 타입을 맵핑할 데이터 타입이 없다.
+- RDB의 timestamptz는 항상 UTC 기준 timezonme + 시간 값으로 저장된다.
+- JDBC는 RDB의 timestamptz 형식을 java.sql.Timestamp 타입으로 변환 맵핑하여 가져온다.
+- java.sql.Timestamp 는 timezone 정보가 없는 timestamp 저장 형식이다.
+- JDBC가 timestamptz 를 Timestamp로 변환할 때는 `JDBC와 RDB 사이에 맺어진 현재 세션의 timezone 설정`을 기준으로 timestamp를 계산하여 가져온다. 결과적으로 JDBC를 통해 가져온 timestamptz는 세션의 timezone으로 변환 연산된 timestamp 값이다.
+- 현재 세션의 timezone은 별도의 사용자 설정이 없는 경우 RDB 설정 파일의 기본 값을 사용하게 되는데, 보통 `UTC`이다.
+- RDB의 기본 timezone은 각 RDB 어플리케이션의 공식 문서 또는 설정을 확인한다.
+- JDBC를 통해서 읽어온 timestamp 값은 클라이언트 JVM 어플리케이션에서 필요한 timezone으로 변화하여 사용하여야 한다.
 
 ---
 

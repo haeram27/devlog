@@ -7,8 +7,8 @@ linux application은 보통 다음의 우선 순위(높음->낮음)로 timezone�
 
 1. TZ 환경변수
 1. OS의 localtime 설정파일
-   * /etc/localtime (systemd base linux - Debian/Ubuntu/Rocky) - /usr/share/zoneinfo 경로 이하의 timezone 설정 파일에 링크
-   * /etc/timezone (initd base linux - Alpine)
+   - /etc/localtime (systemd base linux - Debian/Ubuntu/Rocky) - /usr/share/zoneinfo 경로 이하의 timezone 설정 파일에 링크
+   - /etc/timezone (initd base linux - Alpine)
 
 위 둘 모두 설정이 되지 않은 경우, 모든 application은 기본적으로 UTC로 동작한다.
 TZ나 OS localtime 설정 파일이 비어있거나 기본값이면 glibc/musl가 **UTC**로 동작합니다.

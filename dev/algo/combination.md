@@ -26,14 +26,14 @@ public class CombinationTests extends EvaluatedTimeTests {
     }
 
     /**
-    * @brief combination
+    - @brief combination
     *
-    * @tparam T
-    * @param data      element list (size >= r)
-    * @param out       result of combination (size = r)
-    * @param r         round (number of output elements)
-    * @param depth     current level of combination, if depth==2 then 0~(depth-1) index is filled in out array 
-    * @param start     start is index of data to be candidate of out[depth]
+    - @tparam T
+    - @param data      element list (size >= r)
+    - @param out       result of combination (size = r)
+    - @param r         round (number of output elements)
+    - @param depth     current level of combination, if depth==2 then 0~(depth-1) index is filled in out array 
+    - @param start     start is index of data to be candidate of out[depth]
     */
     <T> void combinationA(T[] data, T[] out, int r, int depth, int start) {
         //System.out.println(String.format("depth=%d, start=%d", depth, start));
@@ -43,8 +43,8 @@ public class CombinationTests extends EvaluatedTimeTests {
         }
 
         /**
-         * depth : index of out[], level of combination selecting tree
-         * i : index for data[] to be out[depth], i can be controlled by for() and start
+         - depth : index of out[], level of combination selecting tree
+         - i : index for data[] to be out[depth], i can be controlled by for() and start
          */
         for (int i = start; i < data.length; i++) {
             // data[i] is selected for current depth

@@ -2,8 +2,8 @@
 
 ## ref
 
-* https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
-* https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+- https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+- https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 
 ## ansi escape code : color
 
@@ -35,8 +35,8 @@ $ echo $(tput bold setaf 1 setab 21)red$(tput sgr0)
 
 ### 적용가능 명령어
 
-* echo
-* print
+- echo
+- print
 
 ## ansi escape color code
 

@@ -1,7 +1,7 @@
 # vim - gcommand
 
-* g command는 문서내에서 특정 패턴을 포함하는 문서 내 `라인`을 찾아 지정된 명령을 수행한다.
-* g command는 `패턴`을 이용한 라인 선택기로 이해하면 편리하다.
+- g command는 문서내에서 특정 패턴을 포함하는 문서 내 `라인`을 찾아 지정된 명령을 수행한다.
+- g command는 `패턴`을 이용한 라인 선택기로 이해하면 편리하다.
 
 ---
 
@@ -11,15 +11,15 @@
 :g/pattern/command
 ```
 
-* `pattern`: 정규 표현식으로 검색할 패턴
-* `command`: 패턴에 일치하는 줄에 대해 실행할 Ex 명령
+- `pattern`: 정규 표현식으로 검색할 패턴
+- `command`: 패턴에 일치하는 줄에 대해 실행할 Ex 명령
 
 ---
 
 ## 주의 사항
 
-* `:g` 명령은 강력하므로 실수로 많은 줄을 삭제하거나 변경할 수 있습니다.
-* 변경 전에는 `:w`로 저장하거나 `u` (undo)로 복구할 준비를 하세요.
+- `:g` 명령은 강력하므로 실수로 많은 줄을 삭제하거나 변경할 수 있습니다.
+- 변경 전에는 `:w`로 저장하거나 `u` (undo)로 복구할 준비를 하세요.
 
 ---
 
@@ -34,8 +34,8 @@ syntax: :g/pattern/cmd
 :g/error/p
 ```
 
-* "error"가 포함된 줄만 출력 (print)
-* 별도의 명령이 명시되지 않으면 default로 `p` (print) 명령 실행
+- "error"가 포함된 줄만 출력 (print)
+- 별도의 명령이 명시되지 않으면 default로 `p` (print) 명령 실행
 
 ### 마지막 패턴 그대로 사용
 
@@ -52,22 +52,22 @@ syntax: :g/pattern/cmd
 :v/success/p
 ```
 
-* `v` 는 `g!`와 동일하게 매칭의 반전 의미
-* "success"가 없는 줄을 출력
+- `v` 는 `g!`와 동일하게 매칭의 반전 의미
+- "success"가 없는 줄을 출력
 
 ---
 
 ### 특정 줄에만 치환 적용
 
-* `DEBUG`가 있는 줄에서만 `foo`를 `bar`로 치환
+- `DEBUG`가 있는 줄에서만 `foo`를 `bar`로 치환
 
 ```vim
 :g/DEBUG/s/foo/bar/   # s command는 기본적으로 라인내 매칭 되는 첫번째 단어만 교체함
 :g/DEBUG/s/foo/bar/g  # s command에 g 옵션 사용시 라인내 매칭 되는 전체 단어를 교체하도록 함
 ```
 
-* g command는 라인 선택자로써 동작하며, s command가 라인 내에서 교체 작업을 수행
-* g command는 문서내 라인에 대해서 global matching을 수행, s command의 g 옵션은 라인내에서 단어에 대해서 global matching을 지정함
+- g command는 라인 선택자로써 동작하며, s command가 라인 내에서 교체 작업을 수행
+- g command는 문서내 라인에 대해서 global matching을 수행, s command의 g 옵션은 라인내에서 단어에 대해서 global matching을 지정함
 
 ---
 
@@ -77,7 +77,7 @@ syntax: :g/pattern/cmd
 :g/error/d
 ```
 
-* `error`가 포함된 모든 줄 삭제
+- `error`가 포함된 모든 줄 삭제
 
 ---
 
@@ -87,7 +87,7 @@ syntax: :g/pattern/cmd
 :g/^\s*$/d
 ```
 
-* 완전히 비어 있거나 공백만 있는 줄 삭제
+- 완전히 비어 있거나 공백만 있는 줄 삭제
 
 ---
 
@@ -97,7 +97,7 @@ syntax: :g/pattern/cmd
 :g/\d/d
 ```
 
-* 숫자(`0~9`)가 포함된 줄 삭제 (`\d`는 일부 vim에서만 작동. 일반 vi에서는 `[0-9]` 사용)
+- 숫자(`0~9`)가 포함된 줄 삭제 (`\d`는 일부 vim에서만 작동. 일반 vi에서는 `[0-9]` 사용)
 
 ---
 
@@ -117,7 +117,7 @@ syntax: :g/pattern/cmd
 :g/TODO/norm gUU
 ```
 
-* `TODO`가 있는 줄을 대문자로 변환 (`norm` = normal 모드 명령 실행)
+- `TODO`가 있는 줄을 대문자로 변환 (`norm` = normal 모드 명령 실행)
 
 ---
 
@@ -137,7 +137,7 @@ syntax: :g/pattern/cmd
 :g/debug/normal dd
 ```
 
-* `debug`가 있는 줄을 Normal 모드 명령으로 삭제 (`dd`)
+- `debug`가 있는 줄을 Normal 모드 명령으로 삭제 (`dd`)
 
 ---
 
@@ -159,27 +159,27 @@ syntax: :g/pattern/cmd
 
 ### :g — command
 
-* 형식: :g/pattern/command
-* 의미: "pattern"이 포함된 줄에 대해서만 "command"를 실행
-* 용도: 조건부 라인에 명령 실행시 사용
+- 형식: :g/pattern/command
+- 의미: "pattern"이 포함된 줄에 대해서만 "command"를 실행
+- 용도: 조건부 라인에 명령 실행시 사용
 
 ```vim
 :g/error/d
 ```
 
-* "error"를 포함한 줄 삭제
+- "error"를 포함한 줄 삭제
 
 ### `%` — line range expression
 
-* 형식: :%command
-* 의미: **전체 줄(1,$)** 범위 축약표현
-* 용도: 파일 전체에 대한 일괄 명령 실행시 사용
+- 형식: :%command
+- 의미: **전체 줄(1,$)** 범위 축약표현
+- 용도: 파일 전체에 대한 일괄 명령 실행시 사용
 
 ```vim
 :%s/foo/bar/g
 ```
 
-* 파일 전체에서 "foo"를 "bar"로 모두 치환
+- 파일 전체에서 "foo"를 "bar"로 모두 치환
 
 ### 차이점 정리
 

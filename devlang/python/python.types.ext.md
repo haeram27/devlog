@@ -12,7 +12,7 @@
 | `defaultdict` | 키가 없을 때 자동으로 기본값 생성 | 생성자 `default_factory`, 누락 키 접근 시 자동 생성 | 조회/삽입 평균 **O(1)** | 카운팅(예: `int`), 리스트 누적(`list`), 집합 누적(`set`) |
 | `ChainMap`    | 여러 매핑을 **읽기 전용으로** 겹쳐 보이게 하는 뷰 | `.maps`(리스트), `new_child`, `parents` | 조회: 체인 길이를 `k`라 하면 최악 **O(k)** | 다중 스코프(환경변수 + 디폴트), 설정 오버레이 |
 
-* ChainMap은 여러 dict를 겹쳐서 구성 후 값의 뷰를 조회/수정하기 위한 컨테이너이다. 키 조회시 조회대상 dict의 우선순위를 정하기 위하여 사용. 조회시 `first to last dict`로 순서 검색하며 가장 먼저 찾은 키의 값을 반환한다.
+- ChainMap은 여러 dict를 겹쳐서 구성 후 값의 뷰를 조회/수정하기 위한 컨테이너이다. 키 조회시 조회대상 dict의 우선순위를 정하기 위하여 사용. 조회시 `first to last dict`로 순서 검색하며 가장 먼저 찾은 키의 값을 반환한다.
 
 ## 래퍼/서브클래싱 보조
 
@@ -75,10 +75,10 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
 
 ## 추가 메모
 
-* **왜 `OrderedDict`가 아직 유용한가?**
+- **왜 `OrderedDict`가 아직 유용한가?**
   파이썬 3.7+의 `dict`도 **삽입 순서 유지**는 하지만, `OrderedDict`는 `move_to_end` 같은 **순서 조작**과 **양끝 pop 제어**가 편리합니다. 또한 `OrderedDict`의 **동등성 비교는 순서를 고려**합니다.
-* **`defaultdict` 주의점**: 존재하지 않는 키를 **접근만 해도** 엔트리가 생성될 수 있어, 단순 존재 확인에는 `in` 연산을 쓰는 것이 안전합니다.
-* \*\*`ChainMap`\*\*은 상위 맵을 **변경 없이 겹쳐 보는 용도**에 적합합니다(쓰기 연산은 첫 맵에만 반영).
+- **`defaultdict` 주의점**: 존재하지 않는 키를 **접근만 해도** 엔트리가 생성될 수 있어, 단순 존재 확인에는 `in` 연산을 쓰는 것이 안전합니다.
+- \*\*`ChainMap`\*\*은 상위 맵을 **변경 없이 겹쳐 보는 용도**에 적합합니다(쓰기 연산은 첫 맵에만 반영).
 
 좋습니다! `collections` 주요 타입별로 **사용 패턴/안티패턴**과 **시간 복잡도 상세표**를 정리했습니다. (CPython 기준의 실무적 평균 복잡도이며, 최악/상수는 구현·데이터 형태에 따라 달라질 수 있어요.)
 
@@ -164,13 +164,13 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
 
 ### 실전 팁 (요약)
 
-* **큐/버퍼/윈도우**: `deque(maxlen=N)` → 자동 버림 + O(1) 양끝 연산
-* **빈도 분석**: `Counter.update()` + `most_common(k)` → 상위 k만 필요하면 전체 정렬 대신 **O(n log k)**
-* **순서 조작 필요**: 단순 보존이면 `dict`, **재배치 필요**이면 `OrderedDict`
-* **그룹핑/카운팅 누락 키**: `defaultdict(list/int/set)`
-* **구성값 오버레이**: `ChainMap(override, defaults)`
-* **가벼운 불변 레코드**: `namedtuple` (자주 바꾸면 `dataclasses.dataclass(frozen=False)` 고려)
-* **컨테이너 커스터마이징**: `User*` 계열로 안전하게 래핑
+- **큐/버퍼/윈도우**: `deque(maxlen=N)` → 자동 버림 + O(1) 양끝 연산
+- **빈도 분석**: `Counter.update()` + `most_common(k)` → 상위 k만 필요하면 전체 정렬 대신 **O(n log k)**
+- **순서 조작 필요**: 단순 보존이면 `dict`, **재배치 필요**이면 `OrderedDict`
+- **그룹핑/카운팅 누락 키**: `defaultdict(list/int/set)`
+- **구성값 오버레이**: `ChainMap(override, defaults)`
+- **가벼운 불변 레코드**: `namedtuple` (자주 바꾸면 `dataclasses.dataclass(frozen=False)` 고려)
+- **컨테이너 커스터마이징**: `User*` 계열로 안전하게 래핑
 
 ## `collections` 주요 타입별로 미세 최적화 체크리스트
 
@@ -178,8 +178,8 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
 
 ### deque
 
-* 슬라이딩 윈도우: `deque(maxlen=N)`으로 자동 버림 처리 → 분기/삭제 코드 제거.
-* 합/통계 유지: 윈도우 합은 **증분 갱신**.
+- 슬라이딩 윈도우: `deque(maxlen=N)`으로 자동 버림 처리 → 분기/삭제 코드 제거.
+- 합/통계 유지: 윈도우 합은 **증분 갱신**.
 
   ```python
   win = deque(maxlen=N); s = 0
@@ -188,36 +188,36 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
       win.append(x); s += x
   ```
 
-* 큐/스택: 양끝 연산만 사용(`append`, `appendleft`, `pop`, `popleft`) → O(1) 보장.
-* 회전: `rotate(k)`는 |k|가 작을 때만. 큰 k면 `k %= len(d)`.
-* 대량 앞삽입은 `extendleft(reversed(seq))`가 더 빠름(`extendleft`는 역순 삽입).
-* 반복 루프에서 메서드 바인딩(속성 조회 최소화):
+- 큐/스택: 양끝 연산만 사용(`append`, `appendleft`, `pop`, `popleft`) → O(1) 보장.
+- 회전: `rotate(k)`는 |k|가 작을 때만. 큰 k면 `k %= len(d)`.
+- 대량 앞삽입은 `extendleft(reversed(seq))`가 더 빠름(`extendleft`는 역순 삽입).
+- 반복 루프에서 메서드 바인딩(속성 조회 최소화):
 
   ```python
   ap, pl = dq.append, dq.popleft
   for _ in range(m): ap(...); pl()
   ```
 
-* 임의 인덱싱/중간 삽입은 피하기 → 리스트로 전환해서 일괄 처리 후 다시 deque.
+- 임의 인덱싱/중간 삽입은 피하기 → 리스트로 전환해서 일괄 처리 후 다시 deque.
 
 ### Counter
 
-* 집계는 `update`에 맡기기:
+- 집계는 `update`에 맡기기:
 
   ```python
   c = Counter(); c.update(iterable)     # 루프에서 +=1보다 빠름(파이썬 레벨 오버헤드↓)
   ```
 
-* 상위 k만 필요하면 `most_common(k)` (전체 정렬 `sorted(c.items())`보다 유리).
-* 합치기/교집합/합집합은 연산자 사용: `c1 + c2`, `c1 & c2`, `c1 | c2` → 파이썬 루프보다 빠름.
-* 음수·0 카운트 정리: `+c` (유효 항목만 남김) 또는 `c += Counter()` (0/음수 제거).
-* 희소 대량 업데이트는 `Counter(mapping)`보다 `Counter().update(mapping)`가 종종 유리.
-* 키는 해시 안정 타입 사용(숫자/문자열/튜플). 가변 객체 금지.
-* 누적 중간 결과가 거대하면 주기적으로 `c = +c`로 슬림화(메모리/순회 비용↓).
+- 상위 k만 필요하면 `most_common(k)` (전체 정렬 `sorted(c.items())`보다 유리).
+- 합치기/교집합/합집합은 연산자 사용: `c1 + c2`, `c1 & c2`, `c1 | c2` → 파이썬 루프보다 빠름.
+- 음수·0 카운트 정리: `+c` (유효 항목만 남김) 또는 `c += Counter()` (0/음수 제거).
+- 희소 대량 업데이트는 `Counter(mapping)`보다 `Counter().update(mapping)`가 종종 유리.
+- 키는 해시 안정 타입 사용(숫자/문자열/튜플). 가변 객체 금지.
+- 누적 중간 결과가 거대하면 주기적으로 `c = +c`로 슬림화(메모리/순회 비용↓).
 
 ### OrderedDict
 
-* LRU 캐시 뼈대:
+- LRU 캐시 뼈대:
 
   ```python
   od = OrderedDict()
@@ -228,13 +228,13 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
       if len(od) > CAP: od.popitem(last=False)
   ```
 
-* 단순 “삽입 순서 보존”만 필요하면 내장 `dict` 사용(파이썬 3.7+).
+- 단순 “삽입 순서 보존”만 필요하면 내장 `dict` 사용(파이썬 3.7+).
   **순서 조작**이 필요할 때만 `OrderedDict`.
-* 빈번한 재배치가 있으면 `move_to_end`만 사용(삭제→재삽입보다 덜 비쌈).
+- 빈번한 재배치가 있으면 `move_to_end`만 사용(삭제→재삽입보다 덜 비쌈).
 
 ### defaultdict
 
-* 그룹핑/버킷화는 `defaultdict(list|set|int)`로 단일 패스 처리:
+- 그룹핑/버킷화는 `defaultdict(list|set|int)`로 단일 패스 처리:
 
   ```python
   from collections import defaultdict
@@ -243,14 +243,14 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
   for k, v in data: ap(k).append(v)
   ```
 
-* 존재 확인은 `in` 사용. `d[key]` 접근은 **엔트리 생성**하므로 부작용 주의.
-* `default_factory`는 가벼운 콜러블 사용(무거운 I/O나 DB 호출 넣지 않기).
+- 존재 확인은 `in` 사용. `d[key]` 접근은 **엔트리 생성**하므로 부작용 주의.
+- `default_factory`는 가벼운 콜러블 사용(무거운 I/O나 DB 호출 넣지 않기).
 
 ### ChainMap
 
-* 읽기 우선 오버레이: 가장 **핫한 매핑을 앞**에 둬 조회 비용 최소화.
-* 쓰기가 필요하면 `cm = ChainMap({}, *maps)`로 **프런트 버퍼** 추가(원본 보호).
-* 체인이 길고 조회가 잦으면 한 번 **실제 dict로 플래튼**:
+- 읽기 우선 오버레이: 가장 **핫한 매핑을 앞**에 둬 조회 비용 최소화.
+- 쓰기가 필요하면 `cm = ChainMap({}, *maps)`로 **프런트 버퍼** 추가(원본 보호).
+- 체인이 길고 조회가 잦으면 한 번 **실제 dict로 플래튼**:
 
   ```python
   flat = dict(ChainMap(*maps))  # 핫패스에서 반복 조회 시 유리
@@ -258,29 +258,29 @@ ld['Key'] = 1                     # 실제로는 'key'로 저장
 
 ### namedtuple
 
-* 대량 생성은 팩토리 바인딩:
+- 대량 생성은 팩토리 바인딩:
 
   ```python
   Point = namedtuple('Point', 'x y'); P = Point
   pts = [P(x, y) for x, y in pairs]
   ```
 
-* 값 변경이 잦다면 `_replace` 연쇄 대신 **가변 구조(예: dataclass)** 고려.
-* 딕트 변환이 잦다면 한 번만 `_asdict()` 후 그 딕트 재사용.
+- 값 변경이 잦다면 `_replace` 연쇄 대신 **가변 구조(예: dataclass)** 고려.
+- 딕트 변환이 잦다면 한 번만 `_asdict()` 후 그 딕트 재사용.
 
 ### UserDict / UserList / UserString
 
-* C 최적화 경로 보존: 가능한 한 **메서드 오버라이드 최소화**, 내부 `data` 위임 후 크리티컬 로직만 추가.
-* 반복되는 검증/로깅은 **데코레이터**로 감싸고, 핫패스 메서드(`__getitem__`, `append`)는 가벼워야 함.
-* 불변语 의미 유지: `UserString`은 **새 인스턴스 반환** 패턴 지키기.
+- C 최적화 경로 보존: 가능한 한 **메서드 오버라이드 최소화**, 내부 `data` 위임 후 크리티컬 로직만 추가.
+- 반복되는 검증/로깅은 **데코레이터**로 감싸고, 핫패스 메서드(`__getitem__`, `append`)는 가벼워야 함.
+- 불변语 의미 유지: `UserString`은 **새 인스턴스 반환** 패턴 지키기.
 
 ### 공통 미세 튜닝 팁
 
-* **로컬 바인딩**: 루프 전에 `append = lst.append`, `get = d.get` 등으로 속성 조회 줄이기.
-* **분기 밖으로 빼기**: 조건문/계산이 루프 내에서 불변이면 루프 외부로.
-* **일괄 처리**: 가능하면 컨테이너 변환/확장은 한 번에(`extend`, `update`).
-* **제너레이터 활용**: 중간 리스트 생성 피하기(특히 큰 데이터).
-* **프로파일링 먼저**: `timeit`, `cProfile`, `line_profiler`로 **병목 확인 후** 적용.
+- **로컬 바인딩**: 루프 전에 `append = lst.append`, `get = d.get` 등으로 속성 조회 줄이기.
+- **분기 밖으로 빼기**: 조건문/계산이 루프 내에서 불변이면 루프 외부로.
+- **일괄 처리**: 가능하면 컨테이너 변환/확장은 한 번에(`extend`, `update`).
+- **제너레이터 활용**: 중간 리스트 생성 피하기(특히 큰 데이터).
+- **프로파일링 먼저**: `timeit`, `cProfile`, `line_profiler`로 **병목 확인 후** 적용.
 
 ---
 

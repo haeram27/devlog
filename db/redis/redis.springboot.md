@@ -23,7 +23,7 @@ public class RedisConfig {
   private final CacheDataSourceManager cacheDataSourceManager = CacheDataSourceManager.getInstance();
 
   /**
-   * @return
+   - @return
    */
   @Primary
   @Bean

@@ -25,24 +25,24 @@ $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.ski
 
 1. **디렉터리**
 
-   * 컴파일된 `.class` 파일이 들어 있는 폴더를 지정
-   * 예: `-cp /home/user/myapp/bin`
+   - 컴파일된 `.class` 파일이 들어 있는 폴더를 지정
+   - 예: `-cp /home/user/myapp/bin`
 
 2. **JAR 파일(또는 ZIP 파일)**
 
-   * 내부에 `.class`와 리소스가 들어 있는 압축 파일
-   * 예: `-cp lib/mylib.jar`
+   - 내부에 `.class`와 리소스가 들어 있는 압축 파일
+   - 예: `-cp lib/mylib.jar`
 
 3. **여러 경로의 조합**
 
-   * OS별 구분자(`:` on UNIX/Linux/macOS, `;` on Windows)로 나열
-   * 예 (Linux/macOS):
+   - OS별 구분자(`:` on UNIX/Linux/macOS, `;` on Windows)로 나열
+   - 예 (Linux/macOS):
 
      ```bash
      java -cp bin:lib/a.jar:lib/b.jar com.example.Main
      ```
 
-   * 예 (Windows):
+   - 예 (Windows):
 
      ```cmd
      java -cp bin;lib\a.jar;lib\b.jar com.example.Main
@@ -50,24 +50,24 @@ $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.ski
 
 4. **와일드카드 패턴** (Java 6 이후)
 
-   * 디렉터리 내 모든 JAR/ZIP 파일을 한꺼번에 포함
-   * 문법: `<디렉터리>/*`
-   * 예:
+   - 디렉터리 내 모든 JAR/ZIP 파일을 한꺼번에 포함
+   - 문법: `<디렉터리>/*`
+   - 예:
 
      ```bash
      java -cp "bin:lib/*" com.example.Main
      ```
 
-   * 주의: 하위 디렉터리까지 재귀적으로 검색하지는 않으며, 오직 지정한 디렉터리의 최상위에 있는 `*.jar`·`*.zip` 만 포함됩니다.
+   - 주의: 하위 디렉터리까지 재귀적으로 검색하지는 않으며, 오직 지정한 디렉터리의 최상위에 있는 `*.jar`·`*.zip` 만 포함됩니다.
 
 5. **상대 경로·절대 경로 혼용**
 
-   * `.`(현재 디렉터리), `../` 등 상대경로도 가능
-   * 예: `-cp .:../common/lib/*.jar`
+   - `.`(현재 디렉터리), `../` 등 상대경로도 가능
+   - 예: `-cp .:../common/lib/*.jar`
 
 6. **매니페스트(Class-Path) 무시**
 
-   * JAR 내부 `META-INF/MANIFEST.MF` 의 `Class-Path` 선언 대신, `-cp` 에 지정된 값이 우선 적용됩니다.
+   - JAR 내부 `META-INF/MANIFEST.MF` 의 `Class-Path` 선언 대신, `-cp` 에 지정된 값이 우선 적용됩니다.
 
 ### 예시
 
@@ -109,9 +109,9 @@ java -jar -Xms4096m -Xmx4096m -Dmax.threads=512 -Dapp.processor.id=myapp /path/t
 | **Shadow/Shade Plug-in 사용** | `maven-shade-plugin`의 `ManifestResourceTransformer` 등으로 `Main-Class`를 주입 | 사용자 또는 플러그인 설정에서 명시적으로 넣어 준 것 |
 | **CLI로 직접 `jar -cmvf`** | 매니페스트 파일을 수동으로 포함 | 역시 사람이 지정 |
 
-* 매니페스트에 mainClass 지정 제약사항
+- 매니페스트에 mainClass 지정 제약사항
 
-* build.gralde에서 main class 지정
+- build.gralde에서 main class 지정
 
 ```gradle
 tasks.jar {
@@ -121,7 +121,7 @@ tasks.jar {
 }
 ```
 
-* pom.xml에서 main class 지정
+- pom.xml에서 main class 지정
 
 ```xml
 <build>
@@ -148,8 +148,8 @@ java -cp <class-path>[:<class-path>:...] <package.path.to.mainClass> [args...]
 ```
 
 - class-path : 실행할 .jar 파일이나 클래스들이 들어있는 디렉토리 경로
-* mainClass : public static void main(String[] args) 를 가진 FQCN (Fully Qualified Class Name)
-* args... : String[] args 로 전달될 값들
+- mainClass : public static void main(String[] args) 를 가진 FQCN (Fully Qualified Class Name)
+- args... : String[] args 로 전달될 값들
 
 ```
 java -cp "myapp.jar:lib/*" com.example.MainApp arg1 arg2 "arg 3"

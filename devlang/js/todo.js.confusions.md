@@ -2,14 +2,14 @@
 
 ## 참고
 
-* unified guide
-  * [mozilla](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide)
-  * [w3schools](https://www.w3schools.com/js/default.asp)
+- unified guide
+  - [mozilla](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide)
+  - [w3schools](https://www.w3schools.com/js/default.asp)
 
-* 요약
-  * [basics 1](https://velog.io/@chyori/JavaScript-%EA%B8%B0%EB%B3%B8-%EB%AC%B8%EB%B2%95-%EC%B4%9D-%EC%A0%95%EB%A6%AC)
-  * [basics 2](https://ko.javascript.info)
-  * [basics 3](https://d-craftshop.tistory.com/211)
+- 요약
+  - [basics 1](https://velog.io/@chyori/JavaScript-%EA%B8%B0%EB%B3%B8-%EB%AC%B8%EB%B2%95-%EC%B4%9D-%EC%A0%95%EB%A6%AC)
+  - [basics 2](https://ko.javascript.info)
+  - [basics 3](https://d-craftshop.tistory.com/211)
 
 ## equals
 
@@ -29,14 +29,14 @@ null == undefined  // true
 null === undefined  // false
 ```
 
-* 권장 사용:
-  * **항상 `===` 사용 권장** (타입 안정성)
-  * `==`은 의도치 않은 타입 변환으로 버그 발생 가능
+- 권장 사용:
+  - **항상 `===` 사용 권장** (타입 안정성)
+  - `==`은 의도치 않은 타입 변환으로 버그 발생 가능
 
 ## quotes
 
-* `''`와 `""`는 동일 표현
-* ``` `` ```는 개선된 문자열 표현
+- `''`와 `""`는 동일 표현
+- ``` `` ```는 개선된 문자열 표현
 
 ### 1. **Single Quotes (`''`)** - 작은따옴표
 
@@ -45,8 +45,8 @@ let str = 'Hello World';
 let message = 'It\'s a nice day';  // 이스케이프 필요
 ```
 
-* 가장 기본적인 문자열 표현
-* 내부에 작은따옴표 사용 시 이스케이프(`\'`) 필요
+- 가장 기본적인 문자열 표현
+- 내부에 작은따옴표 사용 시 이스케이프(`\'`) 필요
 
 ### 2. **Double Quotes (`""`)** - 큰따옴표
 
@@ -56,8 +56,8 @@ let message = "It's a nice day";  // 이스케이프 불필요
 let quote = "He said \"Hi\"";     // 이스케이프 필요
 ```
 
-* 작은따옴표와 기능적으로 동일
-* 내부에 큰따옴표 사용 시 이스케이프(`\"`) 필요
+- 작은따옴표와 기능적으로 동일
+- 내부에 큰따옴표 사용 시 이스케이프(`\"`) 필요
 
 ### 3. **Backticks (``` `` ```)** - 백틱 (Template Literals)
 
@@ -87,15 +87,15 @@ let upper = `Hello ${name.toUpperCase()}`;
 | 표현식 평가 | ❌ 불가능 | ✅ `${expression}` 가능 |
 | 이스케이프 | 해당 따옴표만 필요 | 백틱만 이스케이프 필요 |
 
-* 권장 사용:
-  * 일반 문자열: '' 또는 ""
-  * 변수 삽입/여러 줄/표현식: ``
+- 권장 사용:
+  - 일반 문자열: '' 또는 ""
+  - 변수 삽입/여러 줄/표현식: ``
 
 ## var vs let vs const
 
-* **`var`**: 함수 스코프, 호이스팅 발생, 재선언 가능 (사용 비권장)
-* **`let`**: 블록 스코프, 재할당 가능
-* **`const`**: 블록 스코프, 재할당 불가능 (객체 속성은 변경 가능)
+- **`var`**: 함수 스코프, 호이스팅 발생, 재선언 가능 (사용 비권장)
+- **`let`**: 블록 스코프, 재할당 가능
+- **`const`**: 블록 스코프, 재할당 불가능 (객체 속성은 변경 가능)
 
 ## 화살표 함수(Arrow Function) vs 일반 함수 (Normal Function)
 
@@ -111,13 +111,13 @@ let upper = `Hello ${name.toUpperCase()}`;
 
 ### syntax
 
-* 화살표 함수
+- 화살표 함수
 
 ```js
 f = () => {}
 ```
 
-* 일반 함수
+- 일반 함수
 
 ```js
 f = function() {}
@@ -267,5 +267,5 @@ calculator.addWrong(10); // NaN (this.value가 undefined)
 
 ## null vs undefined
 
-* **`undefined`**: 값이 할당되지 않음
-* **`null`**: 의도적으로 빈 값
+- **`undefined`**: 값이 할당되지 않음
+- **`null`**: 의도적으로 빈 값

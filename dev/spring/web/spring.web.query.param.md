@@ -8,9 +8,9 @@
 
 다음 mapping annotation들은 HTTP METHOD와 무관하여 GET/PUT/POST 등 Method와 관계 없이 임의의 HTTP request에서 필요한 위치의 값을 참조가 가능하다
 
-* @PathVariable : path parameter (/{val}) 참조
-* @RequestParam : query parameter (?key=value) 참조
-* @RequestBody : http req 메세지의 Content 헤더의 값 참조, content 값 (보통 json 등 특정 형식 문서)을 지정한 Java 객체로 맵핑
+- @PathVariable : path parameter (/{val}) 참조
+- @RequestParam : query parameter (?key=value) 참조
+- @RequestBody : http req 메세지의 Content 헤더의 값 참조, content 값 (보통 json 등 특정 형식 문서)을 지정한 Java 객체로 맵핑
 
 ## 경로 매개변수와 쿼리 매개변수
 /api/v1/users?sort=name&limit=10

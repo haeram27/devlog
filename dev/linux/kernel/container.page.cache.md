@@ -15,13 +15,13 @@ GitHub Copilot: 컨테이너 환경에서 대용량 파일 쓰기 시 Page Cache
 
 가장 먼저 적용해야 할 필수 조치입니다. 컨테이너가 사용할 수 있는 메모리의 상한선을 두어야 커널이 Page Cache를 능동적으로 회수(Eviction)하기 시작합니다.
 
-*   **Docker 사용 시:**
+-   **Docker 사용 시:**
     `--memory` 옵션을 사용하여 컨테이너 메모리를 제한합니다.
     ```bash
     docker run -d --memory="4g" --memory-swap="4g" ...
     ```
 
-*   **Kubernetes 사용 시:**
+-   **Kubernetes 사용 시:**
 
     Pod Spec에 `resources.limits.memory`를 설정합니다.
     ```yaml
@@ -144,8 +144,8 @@ public abstract class ResumableFileUploadService {
 
 컨테이너 호스트(또는 특권 컨테이너)에서 커널의 Dirty Page 처리 방식을 변경하여, 캐시가 너무 많이 쌓이기 전에 디스크로 플러시하도록 유도합니다.
 
-*   `vm.dirty_background_ratio`: 백그라운드에서 디스크 쓰기를 시작할 메모리 비율 (기본값 10% -> **5% 이하로 축소**)
-*   `vm.dirty_ratio`: 프로세스가 쓰기를 멈추고 디스크 쓰기를 기다리게 하는 절대 한계 (기본값 20% -> **10% 이하로 축소**)
+-   `vm.dirty_background_ratio`: 백그라운드에서 디스크 쓰기를 시작할 메모리 비율 (기본값 10% -> **5% 이하로 축소**)
+-   `vm.dirty_ratio`: 프로세스가 쓰기를 멈추고 디스크 쓰기를 기다리게 하는 절대 한계 (기본값 20% -> **10% 이하로 축소**)
 
 ```bash
 sysctl -w vm.dirty_background_ratio=5

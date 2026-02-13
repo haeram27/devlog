@@ -116,7 +116,7 @@ public interface CLibrary extends Library {
     int POSIX_FADV_NOREUSE = 5;
 
     /**
-     * int posix_fadvise(int fd, off_t offset, off_t len, int advice);
+     - int posix_fadvise(int fd, off_t offset, off_t len, int advice);
      */
     int posix_fadvise(int fd, NativeLong offset, NativeLong len, int advice);
 }
@@ -130,12 +130,12 @@ import java.lang.reflect.Field;
 
 public class CleanCache {
     /**
-     * Advise the OS to free cache pages for the entire file (len=0)
-     * Ensure offset and length are page-aligned for best results
-     * 
-     * @param fd
-     * @param offset start offset to drop cache of file. Offset 0 means from the beginning of the file.
-     * @param length length to drop cache of file from the beginning of the offset.  Length 0 means until the end of the file.
+     - Advise the OS to free cache pages for the entire file (len=0)
+     - Ensure offset and length are page-aligned for best results
+     - 
+     - @param fd
+     - @param offset start offset to drop cache of file. Offset 0 means from the beginning of the file.
+     - @param length length to drop cache of file from the beginning of the offset.  Length 0 means until the end of the file.
      */
     private void dropPageCache(FileDescriptor fd, long offset, long length) {
         if (!Platform.isLinux()) return;

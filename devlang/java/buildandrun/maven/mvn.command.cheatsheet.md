@@ -16,9 +16,9 @@ PS> mvn -e install '-Dcheckstyle.skip' '-Dpmd.skip=true' '-Dcpd.skip=true' '-Dma
 mvn -e -T $(nproc) -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true install
 ```
 
-* `-D,--define <arg>` Define a system property
-* `-e,--errors` Produce execution error messages
-* `-T,--threads <arg>` Thread count
+- `-D,--define <arg>` Define a system property
+- `-e,--errors` Produce execution error messages
+- `-T,--threads <arg>` Thread count
 
 ### Jar 실행 명령
 
@@ -26,14 +26,14 @@ mvn -e -T $(nproc) -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.tes
 java -jar -Xms512m -Xmx2048m -Dmax.threads=512 -Dspring.profiles.active=debug  ${RUNNALBE_JAR} | tee /tmp/debug-run-${RUNNALBE_JAR}-$(date -u +%Y%m%d%H%M%S%N).log
 ```
 
-* `-D<name>=<value>` set a system property
-* `-Xms<size>` set initial Java heap size
-* `-Xmx<size>` set maximum Java heap size
+- `-D<name>=<value>` set a system property
+- `-Xms<size>` set initial Java heap size
+- `-Xmx<size>` set maximum Java heap size
 
 ## 현재 모듈의 최종 pom 보기
 
-* 상속된 상위 설정 머지된 최종 pom 완성본
-* mvn 명령 실행 시 참조되는 최종 pom 내용 확인시 사용
+- 상속된 상위 설정 머지된 최종 pom 완성본
+- mvn 명령 실행 시 참조되는 최종 pom 내용 확인시 사용
 
 ```bash
 mvn help:effective-pom

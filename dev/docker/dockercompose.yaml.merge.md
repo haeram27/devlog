@@ -4,8 +4,8 @@
 
 ### 기본 Compose 구조
 
-* `docker compose.yaml`: 공통 설정
-* `docker compose.override.yaml`: 개발/테스트용 설정 자동 병합
+- `docker compose.yaml`: 공통 설정
+- `docker compose.override.yaml`: 개발/테스트용 설정 자동 병합
 
 *예제:*
 
@@ -19,8 +19,8 @@ services:
       - DEBUG=true
 ```
 
-* `docker compose up` 시 자동으로 .override.yaml 파일이 자동으로 overwrite 적용됨
-* 프로덕션에서는 override 파일 없이 실행해야 함 (사용할 환경 변수 파일만 -f로 지정)
+- `docker compose up` 시 자동으로 .override.yaml 파일이 자동으로 overwrite 적용됨
+- 프로덕션에서는 override 파일 없이 실행해야 함 (사용할 환경 변수 파일만 -f로 지정)
 
 ### 명시적으로 파일 지정
 
@@ -28,7 +28,7 @@ services:
 docker compose -f docker compose.yaml -f docker compose.prod.yaml up
 ```
 
-* -f 옵션 다중 정의시 **뒤에 지정된 .yaml 파일이 override 방식으로 적용됨**
+- -f 옵션 다중 정의시 **뒤에 지정된 .yaml 파일이 override 방식으로 적용됨**
 
 ---
 
@@ -61,9 +61,9 @@ docker compose -f docker compose.yaml up
 
 이렇게 하면:
 
-* `docker compose.yaml` **파일만 사용됨**
-* `docker compose.override.yaml` **무시됨**
-* 결과적으로 **프로덕션과 같은 최소 구성으로 실행**할 수 있음
+- `docker compose.yaml` **파일만 사용됨**
+- `docker compose.override.yaml` **무시됨**
+- 결과적으로 **프로덕션과 같은 최소 구성으로 실행**할 수 있음
 
 ---
 

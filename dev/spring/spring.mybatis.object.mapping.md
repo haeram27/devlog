@@ -1,14 +1,14 @@
 
 # Mybatis: RDB table - JAVA Object 매핑
 
-* Mybatis는 column의 이름을 그대로 java object의 member 이름과 매칭한다.
-  * RDB에서는 전통적으로 column의 이름에 lower_snake_case 네이밍 컨벤션을 사용한다.
-  * Java에서는 Object 필드의 이름에 lowewrCamelCase 네이밍 컨벤션을 사용한다.
-  * 두 네이밍 컨벤션을 자동으로 맵핑하려면 Mybatis의 `map-underscore-to-camel-case` 설정을 사용해야한다.
-  * Mybatis의 `map-underscore-to-camel-case=true` 설정을 하면, RDB의 lower_snake_case 이름을 자동으로 JAVA Object의 lowewrCamelCase와 맵핑해준다.
-* Mybatis용 Java Object에는 별도의 Jackson annotation(JsonNaming, JsonProperty)이 필요하지 않다.
-  * Mybatis는 자체적으로 RDB table 데이터와 Java Object를 맵핑하는 로직을 갖으며, 이 과정에 Jackson을 사용하지 않는다.
-  * JsonNaming, JsonProperty 어노테이션은 Jackson 라이브러리에서 Java Object를 Json 문서로 직렬화 또는 역직렬화 하는 과정에서 네이밍 컨벤션을 매칭하기 위하여 사용된다.
+- Mybatis는 column의 이름을 그대로 java object의 member 이름과 매칭한다.
+  - RDB에서는 전통적으로 column의 이름에 lower_snake_case 네이밍 컨벤션을 사용한다.
+  - Java에서는 Object 필드의 이름에 lowewrCamelCase 네이밍 컨벤션을 사용한다.
+  - 두 네이밍 컨벤션을 자동으로 맵핑하려면 Mybatis의 `map-underscore-to-camel-case` 설정을 사용해야한다.
+  - Mybatis의 `map-underscore-to-camel-case=true` 설정을 하면, RDB의 lower_snake_case 이름을 자동으로 JAVA Object의 lowewrCamelCase와 맵핑해준다.
+- Mybatis용 Java Object에는 별도의 Jackson annotation(JsonNaming, JsonProperty)이 필요하지 않다.
+  - Mybatis는 자체적으로 RDB table 데이터와 Java Object를 맵핑하는 로직을 갖으며, 이 과정에 Jackson을 사용하지 않는다.
+  - JsonNaming, JsonProperty 어노테이션은 Jackson 라이브러리에서 Java Object를 Json 문서로 직렬화 또는 역직렬화 하는 과정에서 네이밍 컨벤션을 매칭하기 위하여 사용된다.
 
 ## Column Naming Convention 맵핑
 
