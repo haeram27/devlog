@@ -9,22 +9,39 @@
 
 ## JsonMapper 생성
 
+- 주의: `JsonMapper`와 `YAMLMapper`를 모두 Bean으로 등록하면 둘 모두 `ObjectMapper`로 간주되어 Bean 충돌 발생이 발생하므로 둘 중 하나에 `@Primary` 어노테이션을 추가해야 한다. (`JsonMapper`를 추천) 
+
 ```java
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class JacksonConfig {
 
     @Bean
+    @Primary
     public JsonMapper jsonMapper() {
+
         return JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES) // prevent UnknownPropertyException
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build();
+    }
+
+    @Bean
+    public YAMLMapper yamlMapper() {
+
+        return YAMLMapper.builder()
             .addModule(new JavaTimeModule())
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)

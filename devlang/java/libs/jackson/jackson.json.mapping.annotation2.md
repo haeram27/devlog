@@ -87,7 +87,7 @@ Http Post 메세지의 request body 에 담긴 JSON 데이터 `{"id": "123", "na
 
 ```java
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class MyDTO {
+public class MyDTO { ... }
 ```
 
 ## annotation 대상: class
