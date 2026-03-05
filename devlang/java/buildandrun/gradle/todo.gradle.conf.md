@@ -102,9 +102,30 @@ privateMavenRepositoryUrl=https://repo1.maven.org/maven2/
 settings.gradle
 
 ```properties
-pluginManagement { repositories { maven { url privateMavenRepositoryUrl } } }
-dependencyResolutionManagement { repositories { maven { url privateMavenRepositoryUrl } } }
+pluginManagement {
+    repositories {
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
+        mavenCentral()
+    }
+}
 ```
+
+- `allowInsecureProtocol = true`
+  - repository 주소에 `https`가 아닌 `http` 사용시 insecure protocol 사용에 관한 오류가 발생하며, 해당 오류를 억제하는 옵션
 
 ### proxy 설정
 
@@ -160,6 +181,10 @@ settingsEvaluated { settings ->
     settings.pluginManagement {
         repositories {
             maven { url https://repo1.maven.org/maven2/ }
+            maven {
+                url http://insecure-protocol.private.url/maven-repo/
+                allowInsecureProtocol = true
+            }
             gradlePluginPortal()
             mavenCentral()
         }
@@ -167,19 +192,23 @@ settingsEvaluated { settings ->
 }
 
 // dependency artifactory repositories
+// privateMavenRepositoryUrl defined in ~/.gradle/gradle.properties
 initscript {
     allprojects{
         repositories {
-            maven { url privateMavenRepositoryUrl }
+            maven {
+                url privateMavenRepositoryUrl
+                allowInsecureProtocol = true
+            }
             mavenCentral()
         }
     }
 }
 ```
 
-offline 모드를 command 라인 옵션으로 설정 하려면 --offline 옵션을 사용한다.
+#### offline mode build
 
-#### running the build task
+- offline 모드를 command 라인 옵션으로 설정 하려면 --offline 옵션을 사용한다.
 
 ```bash
 gradle build --offline
@@ -194,7 +223,7 @@ gradle build --offline
 #### 주요 사용처
 
 - `pluginManagement`/`dependencyResolutionManagement` repositories 설정
-- 프로젝트 이름 명시
+- 프로젝트 이름(rootProject.name) 명시 가능
 - 멀티 모듈 프로젝트일 때, 프로젝트 구조 설정
 
 sample :
@@ -202,7 +231,10 @@ sample :
 ```properties
 pluginManagement {
     repositories {
-        maven { url privateMavenRepositoryUrl }
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
         gradlePluginPortal()
         mavenCentral()
     }
@@ -210,7 +242,10 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        maven { url privateMavenRepositoryUrl }
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
         mavenCentral()
     } 
 }
@@ -299,7 +334,10 @@ initscript { allprojects{ repositories { maven { url privateMavenRepositoryUrl }
 ```gradle
 pluginManagement {
     repositories {
-        maven { url privateMavenRepositoryUrl }
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
         gradlePluginPortal()
         mavenCentral()
     }
@@ -307,7 +345,10 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        maven { url privateMavenRepositoryUrl }
+        maven {
+            url privateMavenRepositoryUrl
+            allowInsecureProtocol = true
+        }
         mavenCentral()
     }
 }
@@ -458,13 +499,14 @@ gradle test --tests 'JunitExam*.streamTest'
 
 ### CONFIGURING에서 0%로 1분 이상 소요…
 
-repository로의 network 접속이 원할하지 않는 상태이므로, offline 모드로 동작해 본다.
-offline 설정 방법:
-1, 명령문 옵션 설정
-> $ gradle --offline
+- repository로의 network 접속이 원할하지 않는 상태이므로, offline 모드로 동작해 본다.
 
-2, settings.gradle 파일에 옵션 설정
-> startParameter.offline=true
+#### offline 설정 방법:
+
+1. cli 명령문에 옵션으로 설정
+    > gradle --offline
+1. settings.gradle 파일에 옵션 설정
+    > startParameter.offline=true
 
 ## gradle tasks
 
@@ -474,9 +516,50 @@ syntax:
 gradle <tasks...>
 ```
 
-tasks = 사용 가능한 task 리스트 출력
+- tasks = 사용 가능한 task 리스트 출력
+  - assemble
+  - test
+  - build = assemble+test
+  - clean
 
-- assemble
-- test
-- build = assemble+test
-- clean
+### 자주 사용하는 명령
+
+```bash
+    # tasks = commands list
+    $ gradle tasks
+
+        Application tasks
+        -----------------
+        bootRun - Runs this project as a Spring Boot application.
+        bootTestRun - Runs this project as a Spring Boot application using the test runtime classpath.
+
+        Build tasks
+        -----------
+        assemble - Assembles the outputs of this project.
+        bootBuildImage - Builds an OCI image of the application using the output of the bootJar task
+        bootJar - Assembles an executable jar archive containing the main classes and their dependencies.
+        build - Assembles and tests this project.
+        buildDependents - Assembles and tests this project and all projects that depend on it.
+        buildNeeded - Assembles and tests this project and all projects it depends on.
+        classes - Assembles main classes.
+        clean - Deletes the build directory.
+        jar - Assembles a jar archive containing the classes of the 'main' feature.
+        resolveMainClassName - Resolves the name of the application's main class.
+        resolveTestMainClassName - Resolves the name of the application's test main class.
+        testClasses - Assembles test classes.
+
+    # assemble = build - text
+    $ gradle assemble --refresh-dependencies
+    $ gradle build -x test --refresh-dependencies
+
+    # build = assemble + test
+    $ gradle build --refresh-dependencies
+
+    # test = run junit test
+    $ gradle test --rerun-tasks --tests "ClassTests.MethodTest"
+
+    # dependency version checked
+    $ gradle dependencies
+    $ gradle dependencyManagement
+    $ gradle dependencyInsight --dependency httpclient5
+```

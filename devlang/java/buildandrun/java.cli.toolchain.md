@@ -50,6 +50,8 @@ java -cp non-executable.jar <mainclass> --opt-arg1=value1 --opt-arg2=value2 --no
 gradle bootRun --args='--opt-arg1=value1 --opt-arg2=value2 --non-opt-arg1 0123 non-opt-arg2 -s'
 ```
 
+- `-cp`, `--class-path` <class search path of directories and zip/jar files>
+
 ## jar
 
 - jar 파일 생성/수정/추출

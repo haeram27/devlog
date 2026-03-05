@@ -7,7 +7,7 @@ $ mvn install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.ski
 ## 한 개의 JAR 안에 main 메서드가 여러 개 있을 때 실행 방법
 
 | 실행 방식 | 명령 예시 | 특징 |
-|-----------|-----------|-------|
+| --- | --- | --- |
 | **`java -jar` (매니페스트 사용)** | `java -jar myapp.jar` | `META-INF/MANIFEST.MF` 안의 **`Main-Class`** 항목에 적힌 클래스만 실행 가능. 한 JAR 당 1 개가 고정. |
 | **`java -cp` (클래스패스 직접 지정)** | `java -cp myapp.jar com.example.OtherMain` | 매니페스트를 무시하고 원하는 클래스 실행. JAR 내부에 몇 개든 `main`이 존재해도 선택 가능. |
 | **스크립트/배치 파일 래퍼** | `runA.sh`, `runB.sh` 등 | 여러 실행 지점을 자주 쓰면 OS 스크립트로 래핑해 편의성 확보. |
