@@ -4,16 +4,20 @@
 
 - `[remote]` 항목(remote repository url) 주소가 `git@`으로 시작하면 ssh protocol을 이용해 remote git repository 통신한다
 
-url = https://github.com/myproject.git
-url = git@github.com/myproject.git
+- http protocol로 clone 한 경우
+  - `url = https://github.com/myproject.git`
+- ssh protocol로 clone 한 경우
+  - `url = git@github.com/myproject.git`
 
 ### github ssh 주소 예
+
+#### Url
 
 ```plain
 git@github.com:myid/myproject.git
 ```
 
-File. `.git/config`
+#### File: `.git/config`
 
 ```plain
 [user]
