@@ -1,11 +1,29 @@
 # Mybatis Type Handler
 
-mybatis + spring jackson 환경에서 RDB(postgresql)와 사용자정의 Java Object의 type mapping을 위한 typehandler 정의 및 사용법 
+이 문서는 mybatis + spring jackson 환경에서 사용자정의 Class 또는 Generic Type을 RDB에 `json/jsonb` 형식으로 쓰고 읽기 위한 mybatis용 `typehandler`를 설명한다.
 
-- RDB Table내 데이터의 type이 jsonb(json binary)일 때, mybatis가 java \<-\> RDB 간 해당 데이터의 상호 변환을 위해서 `Json` 변환용 typehandler를 구현해 사용해야 한다.
-- 다시말해, mybatis의 `TypeHander`는 특정 data 아이템을 변환할 때 사용하는 변환 도구이다.
+- mybatis의 `TypeHander`는 Java의 사용자 정의 DataType(Class 또는 Generic Type)을 DB의 Object(data item) 타입으로 부터 변환하는데 사용되는 도구이다.
+- Java와 DB 간에 데이터의 타입이 유사하지 않을 때 이 둘을 연결해 주기 위해서 사용한다.
+
+mybatis의 `TypeHander`가 필요한 경우
+
+- Java의 데이터와 DB의 데이터를 기본적인 맵핑 방식으로 데이터를 전환하지 못할때(type miss match 발생 등)
+- Java의 사용자 정의 Class 또는 Generic Type을 DB의 json/jsonb type으로 저장
+
+## mybatis TypeHandler 주의 사항
+
+- mybatis는 typehandler를 이용해 Java의 data를 RDB의 data로 serialize/deserialize 한다.
+- typehandler는 mybatis용 `mapper.xml`에서 보통 참조되는 class이다.
+- mybatis는 `mapper.xml`을 보고 현재 RDB 데이터가 Java의 어떤 데이터로 변환이 될지 타입 추론(Type Inference)이 가능하다.
+- mybatis의 타입 추론은 Java의 Type이 non-generic 단일 Class 인 경우에만 정상 동작한다.
+- Java의 Type이 GenericType(`List<MyDto>` 등)인 경우에 mybatis는 타입 추론이 불가능하므로(`List`까지만 이해 가능하며 그 내부의 타입은 추론이 불가) 반드시 `TypeHandler`를 통해서 Java의 Type을 개발자가 개입하여 변환해 주어야 한다.
 
 ## json type handler 구현
+
+- 이 `JsonTypeHandler` 구현은 java의 `Class<T>`, `TypeReference<T>`(jackson), `JavaType`(jackson) 타입을 RDB의 `json/jsonb` type과 맵핑(변환)을 하는데 사용하는 mybatis용 `BaseTypeHandler` 구현체이다.
+- `JsonTypeHandler`이 하는 역할은 `Java Obejct(app) - String(Jackson) - PGObject(JDBC/postgresql)` 단계로 상호간 데이터를 맵핑하는 것이다.
+- ⚠️ 기본적으로 RDB의 `json/jsonb` 타입은 Java의 `String` 타입으로 자동 맵핑(JDBC가 `String`으로 변환)된다.
+- RDB의 type은 `getPgType()` 메서드로 지정하는데, 리턴 값을 변경하면 해당 Type에 맞는 TypeHandler로 변환하여 사용 가능하다.
 
 ```java
 package com.example.typehandler;
@@ -72,7 +90,9 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
         this.explicitClassType = null;
     }
 
-    /** serialize: transform object to jsonb (postgresql) */
+    /** serialize: transform object to jsonb (postgresql)
+     * Java Object -> Java String (by jackson) -> jsonb
+     */
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
         PGobject object = new PGobject();
@@ -85,19 +105,25 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
         ps.setObject(i, object);
     }
 
-    /** deserialize: transform jsonb (postgresql) to object */
+    /** deserialize: transform jsonb (postgresql) to object
+     * Java String(json) -> Java Object (by jackson)
+     */
     @Override
     public T getNullableResult(ResultSet rs, String columnName) throws SQLException {
         return toObject(rs.getString(columnName));
     }
 
-    /** deserialize: transform jsonb (postgresql) to object */
+    /** deserialize: transform jsonb (postgresql) to object
+     * Java String(json) -> Java Object (by jackson)
+    */
     @Override
     public T getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         return toObject(rs.getString(columnIndex));
     }
 
-    /** deserialize: transform jsonb (postgresql) to object */
+    /** deserialize: transform jsonb (postgresql) to object
+     * Java String(json) -> Java Object (by jackson)
+    */
     @Override
     public T getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         return toObject(cs.getString(columnIndex));
@@ -171,6 +197,8 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 
 ## 사용예제
 
+- RDB의 `json/jsonb` 타입을 Java의 `String` 또는 `List<String>`으로 변환하는 경우에는 별도의 type 명시를 위한 wrapper 클래스를 작성하지 않고 `JsonTypeHandler`를 `mapper.xml`에서 지접 지정이 가능하다.
+
 ### mybatis
 
 #### Class type
@@ -194,7 +222,7 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
     }
     ```
 
-  - 암시적 타입 정보 전달 (chile class 생성자 미사용하고 JsonTypeHandler 기본 생성자 사용시), method OVERRIDE 방식
+  - 암시적 타입 정보 전달 (child class 생성자 미사용하고 JsonTypeHandler 기본 생성자 사용시), method OVERRIDE 방식
 
     ```java
     package com.example.typehandler;
@@ -206,8 +234,8 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 
     public class MyDtoJsonTypeHandler extends JsonTypeHandler<MyDto> {
          @Override
-        protected TypeReference<List<Ip4Range>> getTypeReference() {
-            return new TypeReference<List<Ip4Range>>() {};
+        protected TypeReference<MyDto> getTypeReference() {
+            return new TypeReference<MyDto>() {};
         }
 
         @Override
@@ -364,4 +392,3 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
         idx=#{id}
 </update>
 ```
-
