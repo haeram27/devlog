@@ -71,7 +71,8 @@ systemProp.org.gradle.internal.repository.initial.backoff=500
 org.gradle.jvmargs=-Xmx2048M
 org.gradle.parallel=true
 
-#privateMavenRepositoryUrl=https://private.host.com/artifactory/maven-repos/
+## if need to use private maven repository server
+privateMavenRepositoryUrl=https://private.host.com/artifactory/maven-repos/
 ```
 
 위치: `GRADLE_USER_HOME=${HOME}/.gradle`
@@ -106,7 +107,15 @@ pluginManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -117,7 +126,15 @@ dependencyResolutionManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         mavenCentral()
     }
@@ -233,7 +250,15 @@ pluginManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -244,7 +269,15 @@ dependencyResolutionManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         mavenCentral()
     } 
@@ -336,7 +369,15 @@ pluginManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -347,7 +388,15 @@ dependencyResolutionManagement {
     repositories {
         maven {
             url privateMavenRepositoryUrl
-            allowInsecureProtocol = true
+
+            // if url is NOT secure (like http)
+            // allowInsecureProtocol = true
+
+            // if ahthentication is required
+            // credentials {
+            //     username = "user"
+            //     password = "password"
+            // }
         }
         mavenCentral()
     }

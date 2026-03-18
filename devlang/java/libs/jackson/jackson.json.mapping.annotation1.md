@@ -81,7 +81,7 @@ jackson이 json 직렬화/역직렬화 할 때, java object의 getter/setter를 
 
 - 대상: 클래스
 - 용도: 직렬화
-- java 객체를 json으로 직렬화(Serialize)할 때, java 필드 값이 non-null인 필드만 직렬화함
+- java 객체를 json으로 직렬화(Serialize)할 때, java 필드 값이 null이 아닌 필드만 직렬화함
 - null인 java 필드는 json 에 생성하지 않음
 
 ### `@JsonIgnore`

@@ -1,14 +1,17 @@
 # Jackson annotation (Json DTO, VO 구현시 사용)
 
-## @JsonInclude(Include.NON_NULL)
+## `@JsonInclude(Include.NON_NULL)`
 
-- ALWAYS
-- NON_NULL - level:class, non-null인 property만 직렬화
-- NON_ABSENT
-- NON_EMPTY - level:class, non-empty인 property만 직렬화
-- NON_DEFAULT
-- CUSTOM
-- USE_DEFAULTS
+- level: class
+- 직렬화(객체 → JSON)할 때 값이 null인 Object의 필드는 JSON에 넣지 않도록 함
+- values:
+  - ALWAYS - default, filed의 값이 null이어도 JSON에 모두 포함하여 직렬화
+  - NON_NULL - non-null인 property(필드)만 직렬화
+  - NON_ABSENT
+  - NON_EMPTY - non-empty인 property(필드)만 직렬화
+  - NON_DEFAULT
+  - CUSTOM
+  - USE_DEFAULTS
 
 ## `@JsonIgnore`
 
@@ -29,6 +32,27 @@
 
 - level:class
 - level:class
+
+## Json Mapping용 class 선언 기본형
+
+```java
+package com.example.httpclient.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import lombok.Data;
+
+@Data
+@JsonInclude(Include.NON_NULL) // serialize
+@JsonIgnoreProperties(ignoreUnknown = true) // deserialize
+public class ApiResponseHeader {
+    Boolean isSuccessful;
+    Integer resultCode;
+    String resultMessage;
+}
+```
 
 ## Jackson Spring web 연동시 @RequestBody 자동 맵핑
 
