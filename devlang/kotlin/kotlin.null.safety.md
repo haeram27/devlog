@@ -67,7 +67,7 @@ purpose:
 syntax :
 
 ```text
-<nullable-var>.<value-expr> ?: `<value>
+<nullable-var>.<value-expr> ?: <value>
 ```
 
 example :
