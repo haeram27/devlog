@@ -1,125 +1,117 @@
-# Method References Example(TODO)
+# Method References Example
 
+[Oracle Java 튜토리얼: 메서드 참조](https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html)
 
-메소드 참조가 함수형 인터페이스로 자동 변환되기 때문입니다.
+## Method Reference (메서드 참조)란
 
-JavaHttpStatusCode::is2xxSuccessful 은 다음과 같이 동작합니다:
-
-1. HttpStatusCode 인터페이스에 정의된 메소드 시그니처:
-
-```java
-boolean is2xxSuccessful();
-```
-
-2. 메소드 참조 변환:
-`HttpStatusCode::is2xxSuccessful` 은 다음처럼 해석됩니다:
-
-```java
-(HttpStatusCode statusCode) -> statusCode.is2xxSuccessful()
-```
-
-3. Predicate 매칭:
-```java
-// Predicate<HttpStatusCode>의 추상 메소드
-boolean test(HttpStatusCode t);
-
-// 메소드 참조의 시그니처
-(HttpStatusCode) -> boolean
-```
-
-두 시그니처가 일치하므로, Java 컴파일러가 자동으로 메소드 참조를 Predicate로 변환합니다.
-
-핵심 개념
-
-메소드 참조는 3가지 형태가 있습니다:
-
-1. **Static method reference**
-
-   ```java
-   ClassName::staticMethod
-   // (param) -> ClassName.staticMethod(param)
+- `@FuntionalInterface`는 람다와 매칭 되는 타입이다.
+- `@FuntionalInterface` 타입에 람다 대신 클래스의 메소드를 매칭 시킬수 있다.
+- 이 문법을 `Method Reference`라고 한다.
+- 이는 컴파일러가 메소드참조를 람다 인스턴스로 변환하기 때문에 가능하다.
+- ***`메서드 참조`를 람다 표현식으로 변환했을때 람다 시그니처가 `함수형 인터페이스`의 람다 시그니처와 같으면 유효한 문법이 된다.***
+- 람다 시그니처는 파라미터 타입과 반환 타입이다
+   ```text
+      (param1-type, param2-type, ...) -> return-type
    ```
 
-2. **Instance method reference (bound)**
-
+- `@FunctionalInterface` 예제
    ```java
-   instance::instanceMethod
-   // () -> instance.instanceMethod()
+   @FunctionalInterface
+   public interface Function<T, R> {
+
+      /**
+       * Applies this function to the given argument.
+       *
+       * @param t the function argument
+       * @return the function result
+       */
+      R apply(T t);
+   }
+
+   // Function의 람다 시그니처 `(T) -> R`
    ```
 
-3. **Instance method reference (unbound)**
+## 메소드 참조의 형태
 
+1. **Constructor method reference**
    ```java
-   ClassName::instanceMethod
-   // (instance, param) -> instance.instanceMethod(param)
+   ClassName::new
+   // 람다 변환: () -> new ClassName()
+   ```
+   - 주의: 인자를 받는 생성자의 경우 `메서드 참조` 대신 람다 표현을 사용해야 한다.
+   ```java
+   인자가 있는 생성자 호출 람다식:
+   (param) -> new ClassName(param);
+   (n) -> new int[n];
    ```
 
-현재 경우는 **3번 unbound** 형태입니다:
+2. **Static method reference**
 
-- `HttpStatusCode::is2xxSuccessful`은 첫 번째 파라미터로 HttpStatusCode 인스턴스를 받습니다
-- 결과: `(HttpStatusCode statusCode) -> statusCode.is2xxSuccessful()`
-- 이것은 `Predicate<HttpStatusCode>`의 `test(HttpStatusCode t)` 시그니처와 정확히 일치합니다
+   ```java
+   ClassName::staticMethod(param)
+   // 람다 변환: (param) -> ClassName.staticMethod(param)
+   ```
 
-따라서 "형식이 다르다"고 보이지만, Java의 메소드 참조 변환 규칙에 의해 완벽하게 호환되는 것이 정상입니다.
+3. **Bound Instance method reference**
+   - 인스턴스의 메소드 지정
+   ```java
+   instance::instanceMethod(param)
+   // 람다 변환: (param) -> instance.instanceMethod(param)
+   ```
 
-## Instance method reference에서 bound와 unbound의 차이
+4. **Unbound Instance method reference**
+   - 인스턴스가 아닌 class 또는 type의 메소드 지정
+   - 주의: 언바운드 메소드 레퍼런스 사용시 함수형 인터페이스(람다)의 첫 파라미터로 인스턴스가 전달되어야 하며, 첫 인자로 전달되는 인스턴스를 파라미터를 `리시버` 라고 함
+   - `리시버` 때문에 **함수형 인터페이스에 선언된 파라미터 개수는 언바운드 메서드 레퍼런스의 파라미터 수보다 항상 1개 많다.** (함수형 인터페이스의 첫번째 인자에는 메서드의 인스턴스를 지정해야 하므로)
+   - 만약 함수형 인터페이스의 파라미터가 3개라면 파라미터 2개인 언바운드 메서드 레퍼런스만 대입이 가능하다.
+   ```java
+   ClassName::instanceMethod(param)
+   // 람다 변환: (instance, param) -> instance.instanceMethod(param)
+   ```
 
-**어떤 인스턴스에 메소드가 묶여(bound) 있는지** 여부의 차이입니다.
+- Instance method reference에서 bound와 unbound의 차이는 ** 인스턴스에 메소드가 묶여(bound) 있는지** 여부의 차이다
 
----
-
-## Bound (특정 인스턴스에 묶임)
-
-```java
-String str = "hello";
-Supplier<String> s = str::toUpperCase;
-// () -> str.toUpperCase()
-```
-
-- 메소드 참조 생성 시점에 이미 **특정 인스턴스(`str`)가 고정**됩니다.
-- 나중에 어떤 인스턴스를 쓸지 고민할 필요 없이, 항상 `str`에 대해 실행됩니다.
-- 함수형 인터페이스에서 **인스턴스 파라미터가 필요 없습니다**.
-  - `Supplier<String>` → `String get()` (파라미터 없음)
-
----
-
-## Unbound (인스턴스가 묶이지 않음)
-
-```java
-Function<String, String> f = String::toUpperCase;
-// (String s) -> s.toUpperCase()
-```
-
-- 어떤 인스턴스에 실행할지가 **호출 시점에 결정**됩니다.
-- 함수형 인터페이스에서 **첫 번째 파라미터가 인스턴스 역할**을 합니다.
-  - `Function<String, String>` → `String apply(String s)` (인스턴스를 파라미터로 받음)
-
----
-
-## 비교 요약
+### Bound/Unbound Instance Method Reference 비교
 
 | 구분 | 형태 | 인스턴스 결정 시점 | 함수형 인터페이스 |
 |---|---|---|---|
 | Bound | `instance::method` | 메소드 참조 생성 시 고정 | 인스턴스 파라미터 없음 |
-| Unbound | `ClassName::instanceMethod` | 호출 시 첫 파라미터로 전달 | 첫 파라미터가 인스턴스 |
+| Unbound | `ClassName::instanceMethod` | 호출 시 첫 파라미터로 전달 | 함수형 인터페이스의 첫 파라미터에 인스턴스가 전달됨|
 
----
+## 함수형 인터페이스 타입과 메소드 참조의 매칭 기준(시그니처)
 
-## 앞서 나온 실제 예시
+컴파일러는 `함수형 인터페이스`와 `메소드 참조`를 파라미터 타입과 반환 타입을 매칭의 기준으로 사용한다. 이 매칭의 기준이 되는 형식을 `시그니처`라고 한다. 람다 표현식이 파라미터와 반환값을 나타내는 표현식이란 것을 생각해보면 매칭의 시그니처가 람다 형식과 유사한것이 이해가 간다.
+
+***결국, `메서드 참조`를 람다 형식으로 변환했을때 시그니처가 `함수형 인터페이스`와 같으면 유효한 문법이 된다.***
+
+다음의 예제로 확인해보면,
 
 ```java
-// Unbound - HttpStatusCode 인스턴스가 호출 시점에 Predicate의 파라미터로 전달됨
-Predicate<HttpStatusCode> p = HttpStatusCode::is2xxSuccessful;
-// (HttpStatusCode code) -> code.is2xxSuccessful()
-
-// 만약 Bound였다면 (특정 인스턴스 고정)
-HttpStatusCode specific = HttpStatus.OK;
-Supplier<Boolean> s = specific::is2xxSuccessful;
-// () -> specific.is2xxSuccessful()
+FunctionalInterface
+public interface Predicate<T> {
+   boolean test(T t);
+}
 ```
 
-한 줄 요약:
+```java
+public sealed interface HttpStatusCode {
+   boolean is2xxSuccessful();
+}
+```
 
-- **Bound** = "이 인스턴스로 실행해"
-- **Unbound** = "어떤 인스턴스로 실행할지는 나중에 알려줘"
+```java
+interface ResponseSpec {
+   ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate);
+}
+```
+
+```java
+refSpec.onStatus(HttpStatusCode::is2xxSuccessful());
+```
+
+이 예제는 `Predicate<HttpStatusCode>` 타입의 `statusPredicate`파라미터에 `HttpStatusCode::is2xxSuccessful()` 메서드 참조를 사용하는 예제이다.
+
+- `statusPredicate` 파라미터의 타입인 `Predicate<HttpStatusCode>` 의 시그니처는 `(HttpStatusCode) -> boolean` 이다.
+- `HttpStatusCode::is2xxSuccessful()`의 메서드 참조 시그니처는 `(HttpStatusCode) -> boolean` 이다. 이 시그니처의 인자는 리시버(HttpStatusCode의 인스턴스)이다.
+- 두 시그니처가 같으므로 `statusPredicate` 파라미터에 `HttpStatusCode::is2xxSuccessful()` 메서드 레퍼런스 사용이 가능하다.
 

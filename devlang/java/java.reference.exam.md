@@ -2,10 +2,10 @@
 
 There are four distinct forms of references in the JVM, and indeed many of these apply to other garbage collected languages.
 
-- Strong references
-- Soft references
-- Weak references
-- Phantom references
+- Strong references : 절대 JVM 대상이 되지 않는다.
+- Soft references : JVM이 절대적으로 메모리가 필요할 때만 GC 대상이 된다.
+- Weak references : GC timing 마다 GC의 대상이 된다.
+- Phantom references : Strong reference가 reachable이 끊겨도 GC 대상이 되지 않도록 한다.
 
 It's important to know the differences, what affect they have on the collector and when you should be using them.
 

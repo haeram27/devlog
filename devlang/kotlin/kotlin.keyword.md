@@ -23,7 +23,7 @@ Kotlin의 키워드는 용도에 따라 세 가지로 분류됩니다.
 
 #### kotlin 전용 
   - when : switch 대용
-    - when(x) { (boolean || 'x == y') -> ... else -> "no-match" }
+    - when(x) { (boolean || 'x == y') -> "match" ... else -> "no-match" }
     - examples
     ```kotlin
     fun whatToDo(dayOfWeek: Any) = when (dayOfWeek) {

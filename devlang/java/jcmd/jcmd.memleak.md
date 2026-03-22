@@ -1,6 +1,6 @@
 # jcmd를 이용한 memory-leak 분석
 
-- **Java 실행 시** JVM 분석용 JVM 옵션을 추가하여 jcmd 런타임 진단 도구로 정보 추출
+- **Java 실행 시** JVM 분석용 옵션을 추가한 후 jcmd 런타임 진단 도구로 정보 추출
 
 ## 메모리 릭 분석용 JVM 옵션
 
