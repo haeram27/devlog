@@ -16,41 +16,73 @@
 ### 단일 Thread 생성
 
 ```Java
-Thread.startVirtualThread(Runnable task);
-Thread.ofVirtual.start(Runnable task);
+// 즉시 실행
+Thread t = Thread.startVirtualThread(Runnable task);
+
+// 설정 가능
+Thread t = Thread.ofVirtual().start(Runnable task);
+```
+
+#### `Thread.ofVirtual()`에서 사용 가능한 메소드 목록
+
+1. 속성 설정 메서드 (Configuration)
+스레드의 이름, 예외 처리 등 핵심 속성을 정의합니다.
+
+- name(String name): 스레드의 이름을 직접 지정합니다.
+- name(String prefix, long start): 지정한 접두어(prefix)에 숫자를 붙여 스레드 이름을 자동 생성합니다. 여러 스레드를 만들 때 유용합니다.
+- inheritInheritableThreadLocals(boolean inherit): 부모 스레드의 InheritableThreadLocal 변수 값을 상속받을지 여부를 결정합니다. (기본값: true)
+- uncaughtExceptionHandler(Thread.UncaughtExceptionHandler ueh): 스레드 실행 중 예외가 발생했을 때 이를 처리할 핸들러를 등록합니다.
+
+2. 생성 및 실행 메서드 (Terminal)
+설정을 마친 후 실제로 스레드나 팩토리를 생성하는 최종 단계 메서드입니다.
+
+- start(Runnable task): 설정한 속성으로 가상 스레드를 즉시 생성하고 시작합니다.
+- unstarted(Runnable task): 설정한 속성으로 가상 스레드 객체를 생성하지만, 시작은 하지 않습니다. 나중에 thread.start()로 직접 실행해야 합니다.
+- factory(): 설정한 속성을 그대로 사용하는 ThreadFactory 객체를 반환합니다. ExecutorService 등에서 스레드를 반복 생성할 때 사용합니다.
+
+Thread 설정 예:
+
+```java
+Thread thread = Thread.ofVirtual()
+    .name("my-virtual-", 0)                  // 이름 패턴 설정
+    .uncaughtExceptionHandler((t, e) -> ...) // 예외 핸들러 설정
+    .start(() -> {                           // 즉시 시작
+        System.out.println("가상 스레드 실행 중");
+    });
 ```
 
 ### Executor 생성
 
 ```java
-        var list = new ArrayList<Integer>();
-        for (int i=0; i<300; i++) list.add(i);
+    var list = new ArrayList<Integer>();
+    for (int i=0; i<300; i++) list.add(i);
 
-        // Executors.newVirtualThreadPerTaskExecutor() makes unbounded size thread 
-        try (var es = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<Future<Integer>> futures = list.stream()
-                .map(i -> es.submit(() -> {
-                    log.info("val: "+ i);
-                    Thread.sleep(1000);
-                    return i;
-                }))
-                .toList();
+    // Executors.newVirtualThreadPerTaskExecutor() makes unbounded size thread 
+    try (var es = Executors.newVirtualThreadPerTaskExecutor()) {
+        List<Future<Integer>> futures = list.stream()
+            .map(i -> es.submit(() -> {
+                log.info("val: "+ i);
+                Thread.sleep(1000);
+                return i;
+            }))
+            .toList();
 
-            boolean allDone = futures.stream().allMatch(Future::isDone);
-            log.info("alldone: " + allDone); // alldone: false here
+        // Future::isDone() is non-blocking method, just check future's done status when it invoked
+        boolean allDone = futures.stream().allMatch(Future::isDone);
+        log.info("alldone: " + allDone); // alldone: false here
 
-            for (var f : futures) {
-                // Future.get() block invoking current thread
-                log.info("result: "+ f.get(2, java.util.concurrent.TimeUnit.SECONDS));
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        for (var f : futures) {
+            // Future.get() block invoking current thread
+            log.info("result: "+ f.get(2, java.util.concurrent.TimeUnit.SECONDS));
+        }
+    } catch (Exception e) {
+        log.error(e.getMessage(), e);
         }
 ```
 
-## Spring
+## Spring 전용
 
-### VirtualThreadTaskExecutor 생성
+### VirtualThreadTaskExecutor
 
 ```Java
 @EnableAsync
