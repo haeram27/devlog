@@ -108,11 +108,13 @@ public class PagenationUtil {
      */
     public static int getTotalPages(int totalCount, int pageSize) {
         if (totalCount < 0) {
-            throw new IllegalArgumentException("Total count cannot be negative.");
+            // "Total count cannot be negative"
+            return 0;
         }
 
         if (pageSize <= 0) {
-            throw new IllegalArgumentException("Page size must be greater than 0.");
+            // Page size must be greater than 0
+            return 0;
         }
 
         // Math.ceil is used to round up the total pages, ensuring that any remaining items are accounted for in an additional page
@@ -130,20 +132,22 @@ public class PagenationUtil {
      */
     public static <T> List<T> pagenationList(List<T> list, int pageSize, int pageNumber) {
         if (pageSize < 1 || pageNumber < 1) {
-            throw new IllegalArgumentException("Page size and page number must be greater than 0.");
+            // Page size and page number must be greater than 0
+            return List.of(); // Return an empty list if there are no items 
         }
 
         if (list == null) {
-            throw new IllegalArgumentException("List cannot be null.");
+            // "List cannot be null
+            return List.of();
         }
 
         int totalCount = list.size();
-        if (totalCount == 0) {
-            return List.of(); // Return an empty list if there are no items
+        if (totalCount <= 0) {
+            return List.of();
         }
 
         int startInclusive = Math.min((pageNumber - 1) * pageSize, totalCount);
-        int endExclusive = Math.min(startIndex + pageSize, totalCount);
+        int endExclusive = Math.min(startInclusive + pageSize, totalCount);
 
         return list.subList(startInclusive, endExclusive);
     }
