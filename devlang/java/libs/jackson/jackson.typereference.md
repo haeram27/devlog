@@ -3,6 +3,7 @@
 ## jackson JsonNode를 java object로 mapping 하는 예제
 
 ```java
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -20,14 +21,14 @@ JsonNode jsonNode = ...
 if (node.isObject()) {
     ObjectNode node = (ObjectNode) jsonNode;
     Map<String, Object> map = mapper.convertValue(node,
-        new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>() {});
+        new TypeReference<Map<String,Object>>() {});
     // var map = jsonMapper.treeToValue(node, Map.class);
     list = new ArrayList<Map<String, Object>>();
     list.add(map);
 } else if (node.isArray()) {
     ArrayNode node = (ArrayNode) jsonNode;
     list = mapper.convertValue(node,
-        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String,Object>>>() {});
+        new TypeReference<List<Map<String,Object>>>() {});
 }
 ```
 
