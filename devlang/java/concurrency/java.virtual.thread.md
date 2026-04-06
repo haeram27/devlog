@@ -3,24 +3,33 @@
 - https://tech.kakaopay.com/post/ro-spring-virtual-thread/
 - https://0soo.tistory.com/259
 
+## 사용법
+
+- `ThreadPool`을 사용하지 말라, 가상 스레드는 생성 후 재사용 하지 말고, 필요할 때마다 신규로 생성하는 방식으로 사용한다
+- Platform Thread를 사용하는 기존의 비동기 실행 메소드 API 사용을 지양하고 Blocking이 예상되는 동기 메소드를 가상 스레드로 실행시켜라
+
 ## 특징
 
 - daemon thread
-  - 가상 스레드는 플랫폼 스레드(OS 스레드)와 달리 JVM이 관리하는 경량 스레드로, 프로그램 종료를 막지 않는 데몬 스레드로 설계되었으며 Java 메인 프로그램(메인 스레드=일반 스레드) 종료시 함께 즉시 종료됨
+  - 가상 스레드는 플랫폼 스레드(OS 스레드)와 달리 JVM이 관리하는 경량 스레드로, 프로그램 종료를 막지 않는 `데몬 스레드`로 설계되었으며 Java 메인 프로그램(메인 스레드=일반 스레드) 종료시 함께 즉시 종료됨
   - 가상 스레드는 일반 스레드(OS 스레드)로 변경할 수 없음
 - 무제한 사용 가능
-  - 수만~수백만 개를 생성할 수 있으며, I/O 작업 중 블로킹되어도 OS 스레드를 점유하지 않아 효율적
+  - 수만~수백만 개를 생성 가능
+  - 생성 및 컨텍스트 스위칭 비용이 매우 저렴하여 I/O 작업 중 블로킹되어도 OS 스레드를 점유하지 않아 효율적
+- 설계 철학 및 사용 방법
+  - 별도의 `ThreadPool`을 사용하지 않는 것이 가상 스레드의 사용 목적이다.
+  - Platform Thread(OS 코어 쓰레드)를 사용할 때는 대규모 동시성 작업을 위해서는 `ThreadPool`을 반드시 사용하여 실제 동시에 실행되는 스레드를 수를 제약하는 복잡한 설계(`ExecutorService` 등)를 사용했어야 했으나 가상 스레드 사용시에는 사용을 지양한다.
+  - 가상 스레드의 동시 실행 개수 조절을 위해서는 `Semaphore`를 사용한다.
+  - Java 코드 상 메소드 중 설계 부터 비동기를 고려한 메소드 들이 있는데(`HttpClient.sendAsync()` 등) 이들을 사용하지 말고 동기화 메소드를 호출하고 Blocking 발생 지점을 가상 스레드로 감싸는 것이 훨씬 효율적이다.
 
-## Plain Java
-
-### 단일 Thread 생성
+## 단일 Thread 생성
 
 ```Java
 // 즉시 실행
 Thread t = Thread.startVirtualThread(Runnable task);
 
 // 설정 가능
-Thread t = Thread.ofVirtual().start(Runnable task);
+Thread t = Thread.ofVirtual().name("my-vthread").start(Runnable task);
 ```
 
 #### `Thread.ofVirtual()`에서 사용 가능한 메소드 목록
@@ -51,7 +60,21 @@ Thread thread = Thread.ofVirtual()
     });
 ```
 
-### Executor 생성
+## Executor 생성
+
+### Plain Java
+
+```java
+ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+// ThreadFactory 사용
+ThreadFactory factory = Thread.ofVirtual()
+                              .name("vthread-pool-", 0) // 0부터 시작하는 카운터
+                              .factory();
+ExecutorService executor = Executors.newThreadPerTaskExecutor(factory);
+```
+
+- `Callable` 결과 취합하기
 
 ```java
     var list = new ArrayList<Integer>();
@@ -80,9 +103,9 @@ Thread thread = Thread.ofVirtual()
         }
 ```
 
-## Spring 전용
+### Spring 전용
 
-### VirtualThreadTaskExecutor
+- VirtualThreadTaskExecutor
 
 ```Java
 @EnableAsync
@@ -98,7 +121,7 @@ public class AsyncConfig {
 }
 ```
 
-### spring내 virtual thread 사용 활성화
+### spring내 virtual thread 사용 활성화 설정
 
 - https://docs.spring.io/spring-boot/reference/features/spring-application.html
 
