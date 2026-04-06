@@ -49,10 +49,20 @@ sample: ~/.gradle/gradle.properties
 
 ```properties
 systemProp.proxySet=true
+## HTTP Proxy (usually same as HTTP)
 systemProp.http.keepAlive=true
 systemProp.http.proxyHost=127.0.0.1
 systemProp.http.proxyPort=9913
-systemProp.http.nonProxyHosts=localhost|*.ahnlab.com
+systemProp.http.nonProxyHosts=localhost|*.internal.com
+#systemProp.http.proxyUser=username
+#systemProp.http.proxyPassword=password
+## HTTPS Proxy (usually same as HTTP)
+systemProp.https.keepAlive=true
+systemProp.https.proxyHost=127.0.0.1
+systemProp.https.proxyPort=9913
+systemProp.https.nonProxyHosts=localhost|*.internal.com
+#systemProp.https.proxyUser=username
+#systemProp.https.proxyPassword=password
 
 ## Set the socket timeout (default 90000 msec, recomm 300000 msec(5 min) for proxy)
 systemProp.org.gradle.internal.http.connectionTimeout=300000
@@ -72,7 +82,7 @@ org.gradle.jvmargs=-Xmx2048M
 org.gradle.parallel=true
 
 ## if need to use private maven repository server
-privateMavenRepositoryUrl=https://private.host.com/artifactory/maven-repos/
+privateMavenRepositoryUrl=https://repo1.maven.org/maven2/
 ```
 
 위치: `GRADLE_USER_HOME=${HOME}/.gradle`
@@ -148,12 +158,20 @@ dependencyResolutionManagement {
 
 ```properties
 systemProp.proxySet=true
+## HTTP Proxy
 systemProp.http.keepAlive=true
 systemProp.http.proxyHost=host
 systemProp.http.proxyPort=port
 systemProp.http.proxyUser=username
 systemProp.http.proxyPassword=password
 systemProp.http.nonProxyHosts=localhost|*.host.com
+## HTTPS Proxy (usually same as HTTP)
+systemProp.https.keepAlive=true
+systemProp.https.proxyHost=host
+systemProp.https.proxyPort=port
+systemProp.https.proxyUser=username
+systemProp.https.proxyPassword=password
+systemProp.https.nonProxyHosts=localhost|*.host.com
 ```
 
 ## init.gradle
@@ -349,7 +367,7 @@ org.gradle.parallel=true
 org.gradle.daemon=true
 org.gradle.jvmargs=-Xmx2048M
 
-privateMavenRepositoryUrl=https://abis.ahnlab.com/artifactory/maven-repos
+privateMavenRepositoryUrl=https://repo1.maven.org/maven2/
 ```
 
 ### optional:: ${HOME}/.gradle/init.gradle
