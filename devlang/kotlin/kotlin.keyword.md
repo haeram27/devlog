@@ -11,7 +11,6 @@ Kotlin의 키워드는 용도에 따라 세 가지로 분류됩니다.
 - 소프트 키워드 (Soft Keywords)
 - 수식어 키워드 (Modifier Keywords)
 
-
 ### 하드 키워드 (Hard Keywords)
 
 식별자로 사용할 수 없는 고정된 키워드입니다.
@@ -22,50 +21,48 @@ Kotlin의 키워드는 용도에 따라 세 가지로 분류됩니다.
 - 기타: true, false, null, typeof
 
 #### kotlin 전용 
-  - when : switch 대용
-    - when(x) { (boolean || 'x == y') -> "match" ... else -> "no-match" }
-    - examples
-    ```kotlin
-    fun whatToDo(dayOfWeek: Any) = when (dayOfWeek) {
-        "Saturday", "Sunday" -> "Relax"
-        in listOf("Monday", "Tuesday", "Wednesday", "Thursday") -> "Work hard"
-        in 2..4 -> "Work hard"
-        "Friday" -> "Party"
-        is String -> "What?"
-        else -> "No Clue"
-    }
-    ```
-  - val : (value), declares read-only, immutable variable.
-    - 선언시 초기화 필요
-  - var : (variable), Declares a mutable variable
-  - fun : method 선언
-  - typealias : 타입 축약어 정의
-    ```kotlin
-        // 긴 제네릭 타입 축약
-        typealias UserMap = Map<String, List<User>>
+- when : java switch 대용
+  - when(x) { (boolean || 'x == y') -> "match" ... else -> "no-match" }
+  - examples
+  ```kotlin
+  fun whatToDo(dayOfWeek: Any) = when (dayOfWeek) {
+      "Saturday", "Sunday" -> "Relax"
+      in listOf("Monday", "Tuesday", "Wednesday", "Thursday") -> "Work hard"
+      in 2..4 -> "Work hard"
+      "Friday" -> "Party"
+      is String -> "What?"
+      else -> "No Clue"
+  }
+  ```
+- val : (value), declares read-only, immutable variable.
+  - 선언시 초기화 필요
+- var : (variable), Declares a mutable variable
+- fun : method 선언
+- typealias : 타입 축약어 정의
+  ```kotlin
+      // 긴 제네릭 타입 축약
+      typealias UserMap = Map<String, List<User>>
 
-        // 복잡한 함수 타입 축약
-        typealias ClickListener = (String, Int) -> Unit
+      // 복잡한 함수 타입 축약
+      typealias ClickListener = (String, Int) -> Unit
 
-        // 내부 클래스 접근 축약
-        typealias UserAdapter = com.example.app.ui.users.UserFragment.Adapter
-    ```
-  - as, as? : type casting
-    - `val x: String? = y as? String`
-    - `as?` 사용시 캐스팅 불가 exception이 발생하면 대신 null을 반환
-  - is, !is : 타입 검사(= java instalnceOf) + 타입 캐스팅, 반환 타입은 boolean
-  - in : 
-    - syntax: `in <range-expr>`
-    - examples
-    ```kotlin
-        for (i in 1..100) { ... }
-        for (i in 1 until 100) { ... }
-        for (x in 2..10 step 2) { ... }
-        for (x in 10 downTo 1) { ... }
-        if (x in 1..10) { ... }
-    ```
-
-
+      // 내부 클래스 접근 축약
+      typealias UserAdapter = com.example.app.ui.users.UserFragment.Adapter
+  ```
+- as, as? : type casting
+  - `val x: String? = y as? String`
+  - `as?` 사용시 캐스팅 불가 exception이 발생하면 대신 null을 반환
+- is, !is : 타입 검사(= java instalnceOf) + 타입 캐스팅, 반환 타입은 boolean
+- in : 
+  - syntax: `in <range-expr>`
+  - examples
+  ```kotlin
+      for (i in 1..100) { ... }
+      for (i in 1 until 100) { ... }
+      for (x in 2..10 step 2) { ... }
+      for (x in 10 downTo 1) { ... }
+      if (x in 1..10) { ... }
+  ```
 
 ### 소프트 키워드 (Soft Keywords)
 특정 문맥에서만 키워드로 작동하며, 그 외에는 식별자로 사용할 수 있습니다.
@@ -76,35 +73,49 @@ Kotlin의 키워드는 용도에 따라 세 가지로 분류됩니다.
 선언에 추가적인 의미를 부여할 때 사용합니다.
 
 - 접근 제한자(가시성 변경자): public, private, protected, internal
-  - 모든 접근 제한자는 필드, 생성자, 메소드에 지정 가능하며 public, proteced는 class에 추가로 지정 가능
-  - public : 접근 제한 없음
-  - private : 선언된 클래스 내에서 접근 가능
-  - protected : 선언된 클래스 또는 하위 클래스에서만 접근 가능  
+  - 모든 접근 제한자는 필드, 생성자, 메소드에 지정 가능하며 public, proteced는 class에만 추가로 지정 가능
+  - public : 접근 제한 없음, default
   - internal : 동일 모듈(module)내에서 접근 가능
+  - protected : 선언된 클래스와 자식 클래스에서만 접근 가능
+  - private : 선언된 클래스 내에서 접근 가능
 - 클래스 특성: abstract, final, open, sealed, data, enum, inner, companion
 - 함수 특성: inline, noinline, crossinline, reified, tailrec, operator, infix, suspend, external
 - 기타: lateinit, const, override, expect, actual, annotation
 
-#### kotlin 전용
-- sealed
-- data
-- inner
-- companion
-- noinline
-- crossinline
-- reified
-- tailrec
-- operator
-- infix
-- suspend
-- external
-- lateinit
-- const
-- expect
-- actual
-- annotation
+#### 접근 제한자
 
-------------------------------
+- 선언 위치 별 접근 가능 범위
+
+| 대상 | public | internal | protected | private |
+|---|---|---|---|---|
+| 최상위 선언 (파일 직속: 클래스, 함수, 변수) | 가능 (기본) | 가능 (모듈 내) | 불가능 | 가능 (파일 내) |
+| 클래스 멤버 (함수, 변수) | 가능 (기본) | 가능 (모듈 내) | 가능 (자식까지) | 가능 (클래스 내) |
+
+#### kotlin 전용
+
+- 클래스 특성
+  - sealed: 봉인된 클래스. 자기 클래스를 상속받는 자식 클래스 종류를 제한합니다. when 식에서 모든 타입을 체크할 때 유용합니다.
+  - data: 데이터를 저장하는 목적의 클래스. equals(), hashCode(), toString(), copy() 등을 자동으로 생성해 줍니다. getter, setter 구현 불필요
+  - inner: 내부 클래스. 바깥 클래스의 참조를 가집니다. 바깥 클래스의 멤버에 접근할 수 있습니다.
+  - companion: 동반 객체. 클래스 내부에 정의하며, 자바의 static 변수나 메서드처럼 클래스 이름을 통해 접근할 수 있게 합니다.
+
+- 함수 특성
+  - noinline: inline 함수에서 특정 람다 매개변수만 인라인화되지 않도록 제외할 때 사용합니다.
+  - crossinline: inline 함수에 전달된 람다 내에서 return을 사용해 호출 함수를 종료(non-local return)하지 못하도록 제한합니다.
+  - reified: inline 함수 내에서 제네릭 타입 T를 런타임에 실제 클래스 정보로 사용할 수 있게 합니다.
+  - tailrec: 꼬리 재귀 함수. 재귀 호출을 루프 코드로 변환하여 스택 오버플로우를 방지해 줍니다.
+  - operator: 연산자 오버로딩. +, -, * 같은 연산자를 특정 함수(예: plus)로 정의하여 사용할 수 있게 합니다.
+  - infix: 중위 함수. obj method arg처럼 점(.)과 괄호 없이 함수를 호출할 수 있게 합니다.
+  - suspend: 코루틴 함수. 실행을 일시 중단하고 나중에 다시 시작할 수 있음을 나타냅니다.
+  - external: 외부(C, C++ 등) JNI를 통해 구현된 함수임을 나타냅니다.
+
+- 기타
+  - lateinit: 가변 변수(var)의 초기화를 나중에 하겠다고 선언합니다. (Primitive 타입은 불가)
+  - const: 컴파일 타임 상수. val보다 더 엄격하며 컴파일 시점에 값이 결정됩니다.
+  - expect: 멀티플랫폼 프로젝트(KMP)의 공통 모듈에서 선언하는 구현 예정 함수/클래스입니다.
+  - actual: expect로 선언된 대상을 각 플랫폼(Android, iOS 등) 모듈에서 실제로 구현한 것입니다.
+  - annotation: 주석(애노테이션) 클래스를 선언할 때 사용하며, 코드에 메타데이터를 추가합니다.
+
 ## 연산자 (Operators)
 Kotlin의 연산자는 내부적으로 정해진 이름의 함수 호출로 변환되는 '관례(Convention)'를 따릅니다.
 

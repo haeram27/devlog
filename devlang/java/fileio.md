@@ -43,6 +43,7 @@
 ## `java.io` (Classic IO - 비권장)
 
 전통적인 블로킹(Blocking) I/O 방식입니다.
+파일 작업의 모든 경우에서 nio 인터페이스(Files, FileChannel)가 대응 가능하므로 파일 작업에 classic io 사용은 비권장 됩니다.
 
 ### **바이트 기반 (이미지, 동영상, 바이너리 데이터)**
 
