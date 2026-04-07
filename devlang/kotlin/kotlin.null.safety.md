@@ -8,11 +8,15 @@
 
 ---
 
+- kotlin의 변수는 기본 적으로 Non-null 속성 가짐
+- `?` 는 Nullable 타입으로 변수 선언
+- `?.`, `?:`, `!!`은 Nullable 타입의 변수 참조시 null 핸들링 방법 지정, `?` 타입으로 생성된 변수에만 사용하는 연산자
+
 ## ? ([nullable](https://kotlinlang.org/docs/null-safety.html#nullable-types-and-non-nullable-types))
 
 purpose:
 
-- indicate variable CAN be `nullable`
+- indicate variable CAN be `nullable`, kotlin basically every variable is `non-null`
 - following three expressions ***(safe-call, elvis operator, not NULL asserttion)*** can be apply only for `nullable` object
 
 syntax :
@@ -47,7 +51,7 @@ example :
 
 ```kotlin
 val str: String? = "ABC"
-str.length   // error
+str.length   // NPE error
 str?.length  // ok
 ```
 
@@ -67,7 +71,7 @@ purpose:
 syntax :
 
 ```text
-<nullable-var>.<value-expr> ?: <value>
+<nullable-var>.<value-expr> ?: <defaul-value>
 ```
 
 example :
@@ -96,7 +100,7 @@ action:
 
 purpose :
 
-- suppress `NPE` warning.  
+- suppress `NPE` warning.
 
 syntax :
 
