@@ -8,18 +8,18 @@
 java \
   # Native Memory Tracking (필수)
   -XX:NativeMemoryTracking=detail \
-  
+
   # Heap Dump 자동 생성 (OOM 발생 시)
   -XX:+HeapDumpOnOutOfMemoryError \
   -XX:HeapDumpPath=/dumps/heap_dump.hprof \
-  
+
   # GC 로그 (메모리 패턴 분석용)
   -Xlog:gc*:file=/logs/gc.log:time,tags:filecount=5,filesize=100M \
-  
+
   # 기본 메모리 설정
   -Xmx4G \
   -Xms4G \
-  
+
   -jar your-app.jar
 ```
 

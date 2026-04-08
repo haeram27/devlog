@@ -55,7 +55,7 @@ class Person {
     this.name = name;
     this.age = age;
   }
-  
+
   greet() {
     console.log(`Hello, ${this.name}`);
   }
@@ -167,9 +167,9 @@ function Car(brand) {
   // new와 함께 호출되면
   // 1. 빈 객체가 자동으로 생성됨
   // 2. this가 그 객체를 가리킴
-  
+
   this.brand = brand;
-  
+
   // 3. this가 자동으로 반환됨
 }
 

@@ -242,7 +242,7 @@ String jsonString = mapper.writeValueAsString(userVO);
 
 // 포맷팅하여 스트링으로 변환
 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(userVO);
-  
+
 // 포맷팅하여 파일로 저장
 mapper.writerWithDefaultPrettyPrinter().writeValue(new File("result.json"), userVO);
 ```

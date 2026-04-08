@@ -4,13 +4,12 @@
 
 ## Method Reference (메서드 참조)란
 
-- `@FuntionalInterface`는 람다와 매칭 되는 타입이다.
+- `@FuntionalInterface`는 람다를 담는 타입이다.
 - `@FuntionalInterface`를 타입으로 하는 파라미터에는 `@FuntionalInterface`의 SAM(Single Abstract Method)과 동일한 람다 시그니처를 갖는 람다를 할당할 수 있다. 
-- `@FuntionalInterface` 타입에 람다 대신 클래스의 메소드를 매칭 시킬수 있다.
-- 이 문법을 `Method Reference`라고 한다.
-- 이는 컴파일러가 메소드참조를 람다 인스턴스로 변환하기 때문에 가능하다.
-- ***`메서드 참조`를 람다 표현식으로 변환했을때 람다 시그니처가 `함수형 인터페이스`의 람다 시그니처와 같으면 유효한 문법이 된다.***
-- 람다 시그니처는 파라미터 타입과 반환 타입이다
+- `@FuntionalInterface` 타입의 파라미터에 람다 대신 클래스의 메소드를 지정 할 수 있으며, 이 문법을 `Method Reference`라고 한다.
+- `Method Reference`는 컴파일러가 메소드를 람다 인스턴스로 변환해 주기 때문에 가능하다.
+- ***`메서드 참조`를 람다 표현식으로 변환했을때 그 람다 시그니처가 `@FuntionalInterface`의 람다 시그니처와 같으면 유효한 문법이 된다.***
+- 람다 시그니처는 파라미터 목록(개수, 순서, 타입)과 반환 타입이다
    ```text
       (param1-type, param2-type, ...) -> return-type
    ```
@@ -34,8 +33,8 @@
 
 ## `@Functional Interface`와 Method Reference에 사용된 메소드의 매칭 허용 규칙
 
-- `@Functional Interface`의 람다 시그니처와 메소드의 람다 변환 결과 비교하여 람다 시그니처가 동일하면 메소드 참조가 허용된다.
-- 람다 시그니처의 매칭 비교 기준은 파라미터 개수와 타입, 반환 타입이다.
+- `@Functional Interface`의 람다 시그니처와 메소드의 람다 변환 결과 비교하여 두 람다의 시그니처가 동일하면 메소드 참조가 허용된다.
+- 람다 시그니처의 매칭 비교 기준은 파라미터 목록(개수, 순서, 타입), 반환 타입이다.
 - 주의: 단, `@Functional Interface`의 SAM의 반환 값이 void인 경우 참조에 사용된 메소드의 반환 타입은 무시되며, void로 처리될 수 있다.
 
 ## 메소드 참조의 형태
@@ -70,10 +69,14 @@
 
 4. **Unbound Instance method reference**
    - 인스턴스가 아닌 class 또는 type의 메소드 지정
-   - 주의: 언바운드 메소드 레퍼런스 사용시 함수형 인터페이스(람다)의 첫 파라미터로 인스턴스가 전달되어야 하며, 첫 인자로 전달되는 인스턴스를 파라미터를 `리시버` 라고 함
+   - 주의: 언바운드 메소드 레퍼런스 사용시 함수형 인터페이스(람다)의 첫 파라미터로 클래스의 인스턴스가 전달되며, 첫 인자로 전달되는 인스턴스를 파라미터를 `리시버` 라고 함
+   - `Unbound Instance method reference`는 주로 첫 번째 파라미터를 어떤 객체의 인스턴스로 받는 `@FunctionalInterface`에 사용된다.
+   - 대부분의 경우 단일 파라미터(이 파라미터가 객체의 인스턴스)를 받는 `@FunctionalInterface`에 사용되는 경우가 많다.
    - `리시버` 때문에 **함수형 인터페이스에 선언된 파라미터 개수는 언바운드 메서드 레퍼런스의 파라미터 수보다 항상 1개 많다.** (함수형 인터페이스의 첫번째 인자에는 메서드의 인스턴스를 지정해야 하므로)
    - 만약 함수형 인터페이스의 파라미터가 3개라면 파라미터 2개인 언바운드 메서드 레퍼런스만 대입이 가능하다.
    ```java
+   ClassName::instanceMethod()
+   // 람다 변환: (instance) -> instance.instanceMethod()
    ClassName::instanceMethod(param)
    // 람다 변환: (instance, param) -> instance.instanceMethod(param)
    ```
@@ -96,25 +99,30 @@
 다음의 예제로 확인해보면,
 
 ```java
-FunctionalInterface
+@FunctionalInterface
 public interface Predicate<T> {
    boolean test(T t);
 }
+// 람다 시그니처: (T) -> boolean
 ```
 
 ```java
 public sealed interface HttpStatusCode {
    boolean is2xxSuccessful();
 }
+// 람다 변환: (HttpStatusCode instance) -> instance.is2xxSuccessful()
+// 람다 시그니처: (HttpStatusCode) -> boolean
 ```
 
 ```java
+// `@FunctionalInterface` Predicate를 파라미터로 받는 메소드 onStatus() 정의
 interface ResponseSpec {
    ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate);
 }
 ```
 
 ```java
+// Unbound Instance method reference 사용
 refSpec.onStatus(HttpStatusCode::is2xxSuccessful());
 ```
 

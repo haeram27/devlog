@@ -64,7 +64,7 @@ public abstract class ResumableFileUploadService {
     // JNA CLibrary 인터페이스 확장
     public interface CLibrary extends com.sun.jna.Library {
         CLibrary INSTANCE = com.sun.jna.Native.load("c", CLibrary.class);
-        
+
         int open(String path, int flags, int mode);
         int close(int fd);
         // pwrite는 file offset을 변경하지 않고 특정 위치에 씀 (스레드 안전)
@@ -81,11 +81,11 @@ public abstract class ResumableFileUploadService {
 
         String targetFile = filePath + '/' + info.getFlowFilename() + ".temp";
         long startOffset = (flowChunkNumber - 1) * info.getFlowChunkSize();
-        
+
         // 1. O_DIRECT로 파일 열기
         // 주의: O_DIRECT는 Linux 전용이며, 파일 시스템이 지원해야 함.
         int fd = CLibrary.INSTANCE.open(targetFile, O_WRONLY | O_CREAT | O_DIRECT, 0644);
-        
+
         if (fd < 0) {
             // O_DIRECT 실패 시(지원 안하는 FS 등) 일반 모드로 재시도 하거나 예외 처리
             log.warn("O_DIRECT open failed, fallback to normal open. errno: " + Native.getLastError());
@@ -94,17 +94,17 @@ public abstract class ResumableFileUploadService {
 
         try (InputStream is = request.getInputStream()) {
             long contentLength = request.getContentLength();
-            
+
             // 2. Aligned Buffer 준비 (Direct Memory)
             // O_DIRECT는 블록 사이즈(보통 4096) 정렬이 필수입니다.
             int bufferSize = 1024 * 1024; // 1MB
             long bytesWritten = 0;
-            
+
             // JNA Memory는 기본적으로 page-aligned 됨
             Memory buffer = new Memory(bufferSize); 
 
             byte[] javaBuffer = new byte[bufferSize];
-            
+
             while (bytesWritten < contentLength) {
                 int readLen = is.read(javaBuffer);
                 if (readLen == -1) break;
@@ -117,15 +117,15 @@ public abstract class ResumableFileUploadService {
                 // 마지막 청크가 블록 사이즈와 맞지 않으면 O_DIRECT 쓰기가 실패할 수 있으므로
                 // 마지막 조각은 일반 I/O로 처리하거나 패딩 처리가 필요할 수 있음.
                 long written = CLibrary.INSTANCE.pwrite(fd, buffer, readLen, startOffset + bytesWritten);
-                
+
                 if (written < 0) {
                      throw new IOException("pwrite failed: " + CLibrary.INSTANCE.strerror(Native.getLastError()));
                 }
                 bytesWritten += written;
             }
-            
+
             // O_DIRECT는 OS 캐시를 안 거치므로 sync/dropCache 불필요
-            
+
         } catch (Exception e) {
             log.error("File write error", e);
             throw new IOException(e);

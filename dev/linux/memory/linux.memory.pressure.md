@@ -193,19 +193,19 @@ echo 3 > /proc/sys/vm/drop_caches  # 모든 캐시 버림
 
 while true; do
     echo "=== $(date) ==="
-    
+
     # PSI 확인
     echo "Memory Pressure:"
     cat /proc/pressure/memory
-    
+
     # 메모리 상태
     echo -e "\nMemory Status:"
     free -h | grep Mem
-    
+
     # kswapd 활동
     echo -e "\nkswapd activity:"
     ps aux | grep kswapd | grep -v grep
-    
+
     sleep 5
 done
 ```

@@ -123,10 +123,10 @@ if (r == depth) {
 for (int i = start; i < data.length; i++) {
     // 1. 선택 (Choose)
     out[depth] = data[i];
-    
+
     // 2. 탐색 (Explore)
     combination(data, out, r, depth + 1, i + 1);
-    
+
     // 3. 복구 (Unchoose) - 이 코드에서는 별도 복구가 필요 없음
 }
 ```

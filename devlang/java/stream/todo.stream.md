@@ -326,13 +326,13 @@ Java 스트림 Stream (1) 총정리
         § Stream.builder() / Stream.generate() / Stream.iterate()
         § 기본 타입형 / String / 파일 스트림
         § 병렬 스트림 / 스트림 연결하기
-     
+
     · 가공하기
         § Filtering
         § Mapping
         § Sorting
         § Iterating
-     
+
     · 결과 만들기
         § Calculating
         § Reduction
@@ -454,7 +454,7 @@ Stream<String> lineStream =
 스트림 생성 시 사용하는 stream 대신 parallelStream 메소드를 사용해서 병렬 스트림을 쉽게 생성할 수 있습니다. 내부적으로는 쓰레드를 처리하기 위해 자바 7부터 도입된 Fork/Join framework 를 사용합니다.
 // 병렬 스트림 생성
 Stream<Product> parallelStream = productList.parallelStream();
- 
+
 // 병렬 여부 확인
 boolean isParallel = parallelStream.isParallel();
 
@@ -571,12 +571,12 @@ IntStream.of(14, 11, 20, 39, 23)
 인자를 넘기는 경우와 비교해보겠습니다. 스트링 리스트에서 알파벳 순으로 정렬한 코드와 Comparator 를 넘겨서 역순으로 정렬한 코드입니다.
 List<String> lang = 
   Arrays.asList("Java", "Scala", "Groovy", "Python", "Go", "Swift");
- 
+
 lang.stream()
   .sorted()
   .collect(Collectors.toList());
 // [Go, Groovy, Java, Python, Scala, Swift]
- 
+
 lang.stream()
   .sorted(Comparator.reverseOrder())
   .collect(Collectors.toList());
@@ -591,7 +591,7 @@ lang.stream()
   .sorted(Comparator.comparingInt(String::length))
   .collect(Collectors.toList());
 // [Go, Java, Scala, Swift, Groovy, Python]
- 
+
 lang.stream()
   .sorted((s1, s2) -> s2.length() - s1.length())
   .collect(Collectors.toList());
@@ -641,10 +641,10 @@ Reduction
 병렬(parallel) 스트림에서 나눠 계산한 결과를 하나로 합치는 동작하는 로직.
 // 1개 (accumulator)
 Optional<T> reduce(BinaryOperator<T> accumulator);
- 
+
 // 2개 (identity)
 T reduce(T identity, BinaryOperator<T> accumulator);
- 
+
 // 3개 (combiner)
 <U> U reduce(U identity,
   BiFunction<U, ? super T, U> accumulator,
@@ -929,7 +929,7 @@ System.out.println(counter); // 1
 Stream<String> stream = 
   Stream.of("Eric", "Elena", "Java")
   .filter(name -> name.contains("a"));
- 
+
 Optional<String> firstElement = stream.findFirst();
 // IllegalStateException: stream has already been operated upon or closed
 Optional<String> anyElement = stream.findAny(); 
@@ -1068,7 +1068,7 @@ collection.stream().forEach()
 다음 경우에서는 동기화(synchronized)는 차이가 있습니다.
 // not synchronized
 Collections.synchronizedList(...).stream().forEach()
-  
+
 // synchronized
 Collections.synchronizedList(...).forEach()
 

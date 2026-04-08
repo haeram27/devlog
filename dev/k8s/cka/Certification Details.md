@@ -1,7 +1,7 @@
 # CKA
 
 Below are some references:
-  
+
 Certified Kubernetes Administrator: [https://www.cncf.io/certification/cka/](https://www.cncf.io/certification/cka/)
 
 Exam Curriculum (Topics): [https://github.com/cncf/curriculum](https://github.com/cncf/curriculum)

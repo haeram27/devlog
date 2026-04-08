@@ -114,7 +114,7 @@ http {
             400 401 402 403 404 405 406 408 409 410 411 412 413 414 415 416 421 429 497
             500 501 502 503 504 505 507
             /common-error.html;
-   
+
         location = /common-error.html {
             internal;
             alias /permanent/etc/nginx/html/error.html;

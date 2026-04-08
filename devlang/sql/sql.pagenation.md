@@ -85,7 +85,7 @@ TRUNCATE TABLE <table> RESTART IDENTITY;
 참고: 별도의 옵션을 주지 않으면 기본값은 `CONTINUE IDENTITY`로 작동하여, 테이블을 비워도 다음 데이터 삽입 시 이전 번호에 이어서 생성함.
 
 - 이미 데이터를 삭제(DELETE)한 경우 sequence를 수동 리셋 하는 방법
-  
+
 ```sql
 -- 시퀀스 이름을 모를 경우 확인 방법
 SELECT pg_get_serial_sequence('테이블명', '컬럼명');

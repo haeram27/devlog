@@ -1,4 +1,4 @@
-# Github Copilot
+# Github Copilot Chatting Interface
 
 ## Mode
 
@@ -31,6 +31,9 @@
 ### `/` (슬래시 명령, 단축 명령)
 
 - 프롬프트를 작성하지 않고도 일반적인 작업을 빠르게 수행할 명령을 호출
+- 사전 정의된 prompt 호출 가능
+  - `~/.copilot/prompts`
+  - `{project}/.git/prompts`
 - 채팅 입력란에 /를 입력하면 사용 가능한 전체 명령 목록 출력
   - /explain: 활성 편집기의 코드를 설명
   - /fix: 선택한 코드의 문제에 대한 수정을 제안
@@ -46,7 +49,8 @@
   - @workspace: 전체 작업 공간의 컨텍스트를 제공하여 AI 에이전트가 workspace 내용을 기반으로 답변
   - @vscode: VS Code 자체의 기능(예: 설정, 키 바인딩 변경 방법 등)에 대한 질의 가능
   - @terminal: 터미널/CLI 관련 질문에 사용됩니다.
-  파일/이슈/PR: 특정 파일, 이슈, 또는 Pull Request를 멘션하여 해당 내용에 대한 질의 가능
+  - @codebase: 코드를 기반으로 질의
+  - 파일/이슈/PR: 특정 파일, 이슈, 또는 Pull Request를 멘션하여 해당 내용에 대한 질의 가능
 
 ### `#` (채팅 변수)
 

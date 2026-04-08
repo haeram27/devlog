@@ -33,10 +33,14 @@ public enum EnumSingleton {
 기본형:
 
 ````java
+// final: 상속 불가
 public final class LazyHolderSingleton implements Serializable {
+    // private: 외부에서 생성자 접근 불가
     private LazyHolderSingleton() {
     }
 
+    // private: 외부에서 접근 불가
+    // static inner class : 지연 초기화,`Holder` Inner class는 outter class가 로드될 때 인스턴스화 되지 않음, 직접 호출되었을 때만 인스턴스화 됨
     private static class Holder {
         private static final LazyHolderSingleton INSTANCE = new LazyHolderSingleton();
     }
@@ -75,6 +79,7 @@ public final class LazyHolderSingleton implements Serializable {
 }
 ````
 
+## Lazy Holder 패턴 우회(breaking) 방법
 
 ### 리플렉션을 이용한 LazyHolderSingleton 중복 인스턴스 생성
 

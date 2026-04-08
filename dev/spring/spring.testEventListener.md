@@ -155,7 +155,7 @@ public class TestEventListener {
 
     private void writeTestFile(String fileName, byte[] sourceData) throws IOException {
         File targetFile = new File(TEST_FILE_PATH, fileName);
-        
+
         // 1. Input Stream 준비 (메모리 데이터를 스트림으로 변환)
         InputStream is = new ByteArrayInputStream(sourceData);
 
@@ -163,7 +163,7 @@ public class TestEventListener {
             // 2. RandomAccessFile & FileChannel 열기
             RandomAccessFile raf = new RandomAccessFile(targetFile, "rw");
             FileChannel fileChannel = raf.getChannel();
-            
+
             // 3. InputStream을 ReadableByteChannel로 변환
             ReadableByteChannel inputChannel = Channels.newChannel(is)
         ) {

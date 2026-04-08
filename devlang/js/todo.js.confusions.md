@@ -168,7 +168,7 @@ class Counter {
   constructor() {
     this.count = 0;
   }
-  
+
   // 일반 함수 사용 시 - bind 필요
   startRegular() {
     setInterval(function() {
@@ -176,7 +176,7 @@ class Counter {
       console.log(this.count);
     }.bind(this), 1000);  // bind 필요
   }
-  
+
   // 화살표 함수 사용 시 - bind 불필요
   startArrow() {
     setInterval(() => {
@@ -234,19 +234,19 @@ sumRest(1, 2, 3, 4, 5);  // 15
 ```javascript
 const calculator = {
   value: 0,
-  
+
   // 잘못된 방법: 화살표 함수
   addWrong: (n) => {
     this.value += n;  // this가 calculator가 아님!
     return this.value;
   },
-  
+
   // 올바른 방법 1: 일반 함수
   add: function(n) {
     this.value += n;  // this가 calculator
     return this.value;
   },
-  
+
   // 올바른 방법 2: 단축 메서드 구문
   subtract(n) {
     this.value -= n;  // this가 calculator

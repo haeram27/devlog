@@ -276,7 +276,7 @@ docker-ce version 확인
 
 ```bash
 $ dnf list docker-ce --showduplicates | sort -r
- 
+
 docker-ce.x86_64    3:28.5.1-1.fc41    docker-ce-stable
 docker-ce.x86_64    3:28.5.0-1.fc41    docker-ce-stable
 ...

@@ -49,7 +49,7 @@ new SuperType(constructorArgs…) {
     public void someMethod() {
         // 구현부
     }
-    
+
     // 추가 메서드
     public void helper() { … }
 };

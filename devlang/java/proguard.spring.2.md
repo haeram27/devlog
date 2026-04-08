@@ -135,7 +135,7 @@ application source module의 root directory에 위치
                         <artifactId>proguard-base</artifactId>
                         <version>7.7.0</version>
                     </dependency>
-                    
+
                     <dependency>
                         <groupId>com.guardsquare</groupId>
                         <artifactId>proguard-core</artifactId>

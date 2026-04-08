@@ -8,23 +8,23 @@
 ┌─────────────────────────────────────────────────────┐
 │              Host Linux Kernel                      │
 │                                                     │
-│  ┌───────────────────────────────────────────────┐ │
-│  │    Global Memory Reclaim System (하나!)      │ │
-│  │    - kswapd (백그라운드 회수)                 │ │
-│  │    - direct reclaim (즉시 회수)              │ │
-│  └───────────────┬───────────────────────────────┘ │
+│  ┌───────────────────────────────────────────-────┐ │
+│  │    Global Memory Reclaim System (하나!)        │ │
+│  │    - kswapd (백그라운드 회수)                  │ │
+│  │    - direct reclaim (즉시 회수)                │ │
+│  └───────────────┬────────────────────────────-───┘ │
 │                  │                                  │
 │                  ▼                                  │
-│  "전체 시스템 메모리가 부족한가?"                    │
+│  "전체 시스템 메모리가 부족한가?"                   │
 │           ├─ Yes → 전역 회수 시작                   │
 │           └─ No → 아무 일도 안 함                   │
 │                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │ cgroup A │  │ cgroup B │  │ cgroup C │         │
-│  │ limit:2G │  │ limit:4G │  │ limit:1G │         │
-│  └──────────┘  └──────────┘  └──────────┘         │
-│       ↑              ↑              ↑              │
-│       └──────────────┴──────────────┘              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ cgroup A │  │ cgroup B │  │ cgroup C │           │
+│  │ limit:2G │  │ limit:4G │  │ limit:1G │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+│       ↑              ↑              ↑               │
+│       └──────────────┴──────────────┘               │
 │              "cgroup은 제약 조건일 뿐"              │
 └─────────────────────────────────────────────────────┘
 ```
@@ -32,6 +32,7 @@
 ## 2. 메모리 회수 트리거 시나리오
 
 ### 시나리오 1: 전역 메모리 부족 (호스트 메모리 부족)
+
 ```bash
 # 호스트 메모리: 16GB
 # 사용 중: 15GB
@@ -50,21 +51,22 @@ void kswapd_main_loop(void) {
     while (1) {
         // 1. 전체 시스템 메모리 확인
         if (global_memory_below_watermark()) {
-            
+
             // 2. 시스템 전체에서 회수
             //    cgroup 경계 무시!
             reclaim_from_all_zones();
-            
+
             // 3. 모든 cgroup의 페이지를 후보로
             scan_all_lru_lists();  // ← 전역 스캔!
         }
-        
+
         sleep_interruptible();
     }
 }
 ```
 
 ### 시나리오 2: 특정 cgroup 제한 도달 (컨테이너 제한)
+
 ```bash
 # 호스트 메모리: 16GB
 # 사용 중: 8GB
@@ -85,17 +87,17 @@ void kswapd_main_loop(void) {
 void *malloc_with_memcg(size_t size, struct mem_cgroup *memcg) {
     // 1. 이 cgroup 사용량 확인
     if (memcg->usage >= memcg->limit) {
-        
+
         // 2. 이 cgroup 범위에서만 회수
         //    전역 회수 시스템은 작동 안 함!
         try_to_free_mem_cgroup_pages(memcg);
-        
+
         // 3. 여전히 부족하면 이 프로세스만 블로킹
         if (memcg->usage >= memcg->limit) {
             return NULL;  // or OOM
         }
     }
-    
+
     return allocate_pages(size);
 }
 ```
@@ -103,6 +105,7 @@ void *malloc_with_memcg(size_t size, struct mem_cgroup *memcg) {
 ## 3. 실제 확인 - kswapd 모니터링
 
 ### 전역 vs cgroup 회수 구분
+
 ```bash
 #!/bin/bash
 
@@ -127,10 +130,10 @@ for i in {1..6}; do
     sleep 5
     # kswapd CPU 사용률
     ps -p $(pgrep kswapd) -o %cpu,stat,cmd 2>/dev/null || echo "kswapd not running"
-    
+
     # 전역 메모리 상태
     free -h | grep Mem
-    
+
     # 전역 회수 통계
     grep -E "pgpgin|pgpgout|pgscan|pgsteal" /proc/vmstat | head -4
     echo "---"
@@ -156,7 +159,7 @@ for i in {1..6}; do
     sleep 5
     # kswapd는 활동 안 함! (호스트 메모리 충분)
     ps -p $(pgrep kswapd) -o %cpu,stat,cmd 2>/dev/null
-    
+
     # cgroup 회수 통계
     CONTAINER_ID=$(docker inspect -f '{{.Id}}' cgroup_limit)
     echo "Container memory:"
@@ -169,6 +172,7 @@ docker rm cgroup_limit
 ```
 
 ### 예상 출력
+
 ```
 === 시나리오 1: 호스트 메모리 부족 시 ===
 대량 메모리 할당 (호스트 메모리 압박)...
@@ -201,41 +205,43 @@ pgscan_kswapd 0           ← kswapd 활동 없음!
 ## 4. Direct Reclaim vs Background Reclaim
 
 ### 두 가지 회수 메커니즘
+
 ```
 ┌──────────────────────────────────────────┐
 │  1. Background Reclaim (kswapd)          │
-│     - 전역 메모리 부족 시                 │
-│     - 백그라운드 프로세스                 │
+│     - 전역 메모리 부족 시                │
+│     - 백그라운드 프로세스                │
 │     - 모든 cgroup에서 회수               │
-│     - 프로세스 블로킹 없음                │
+│     - 프로세스 블로킹 없음               │
 └──────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────┐
 │  2. Direct Reclaim                       │
 │     - cgroup 제한 도달 시                │
-│     - 할당 요청한 프로세스가 직접         │
+│     - 할당 요청한 프로세스가 직접        │
 │     - 해당 cgroup에서만 회수             │
-│     - 프로세스 블로킹됨!                  │
+│     - 프로세스 블로킹됨!                 │
 └──────────────────────────────────────────┘
 ```
 
 ### 실제 커널 흐름
+
 ```c
 // 메모리 할당 요청
 
 void *allocate_pages(size_t nr_pages) {
     struct mem_cgroup *memcg = current->memcg;
-    
+
     // 1. cgroup 제한 확인
     if (memcg && memcg_over_limit(memcg)) {
         // ← Direct Reclaim (이 프로세스가 블로킹됨)
         try_to_free_mem_cgroup_pages(memcg);
-        
+
         if (still_over_limit(memcg)) {
             return NULL;  // 실패
         }
     }
-    
+
     // 2. 전역 메모리 확인
     if (global_memory_low()) {
         // ← Direct Reclaim (전역)
@@ -246,7 +252,7 @@ void *allocate_pages(size_t nr_pages) {
             wakeup_kswapd();      // kswapd 깨우기
         }
     }
-    
+
     // 3. 실제 할당
     return get_free_pages(nr_pages);
 }
@@ -255,31 +261,33 @@ void *allocate_pages(size_t nr_pages) {
 ## 5. 전역 스캔 시 cgroup 고려
 
 ### kswapd의 전역 스캔
+
 ```c
 // kswapd가 전역 회수할 때
 
 unsigned long kswapd_shrink_zone(struct zone *zone) {
     unsigned long nr_reclaimed = 0;
-    
+
     // 전역 LRU 리스트 순회
     for_each_lruvec(lruvec, zone) {
-        
+
         // 각 lruvec은 cgroup에 속할 수 있음
         struct mem_cgroup *memcg = lruvec_memcg(lruvec);
-        
+
         // cgroup의 swappiness 고려
         unsigned long swappiness = memcg ? 
             memcg->swappiness : vm_swappiness;
-        
+
         // 회수 수행
         nr_reclaimed += shrink_lruvec(lruvec, swappiness);
     }
-    
+
     return nr_reclaimed;
 }
 ```
 
 ### 실제 동작 예시
+
 ```bash
 # 호스트 메모리 부족 시
 
@@ -294,6 +302,7 @@ unsigned long kswapd_shrink_zone(struct zone *zone) {
 ## 6. 실제 확인 - vmstat 분석
 
 ### 전역 회수 통계
+
 ```bash
 # 전역 회수 이벤트 (모든 프로세스 대상)
 cat /proc/vmstat | grep -E "pgscan_kswapd|pgsteal_kswapd"
@@ -310,6 +319,7 @@ cat /sys/fs/cgroup/memory/docker/$CONTAINER_ID/memory.stat | grep pgscan
 ```
 
 ### 비교 실험
+
 ```python
 #!/usr/bin/env python3
 import subprocess
@@ -331,7 +341,7 @@ def get_cgroup_stats(container_name):
     cmd = f"docker inspect -f '{{{{.Id}}}}' {container_name}"
     cid = subprocess.run(cmd, shell=True, 
                         capture_output=True, text=True).stdout.strip()
-    
+
     path = f"/sys/fs/cgroup/memory/docker/{cid}/memory.stat"
     try:
         with open(path) as f:
@@ -346,10 +356,10 @@ def get_cgroup_stats(container_name):
 def test_global_pressure():
     """전역 메모리 압박 테스트"""
     print("=== 전역 메모리 압박 테스트 ===")
-    
+
     # 초기 통계
     before_global = get_global_stats()
-    
+
     # 호스트에서 직접 메모리 할당
     print("호스트 메모리 할당 중...")
     proc = subprocess.Popen(
@@ -357,36 +367,36 @@ def test_global_pressure():
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
-    
+
     time.sleep(15)
-    
+
     # 최종 통계
     after_global = get_global_stats()
-    
+
     # kswapd 활동
     kswapd_scan = after_global.get('pgscan_kswapd_normal', 0) - \
                   before_global.get('pgscan_kswapd_normal', 0)
-    
+
     print(f"kswapd 스캔: {kswapd_scan} pages")
     print(f"→ 전역 회수 시스템 작동!\n")
-    
+
     proc.wait()
 
 def test_cgroup_pressure():
     """cgroup 메모리 압박 테스트"""
     print("=== cgroup 메모리 압박 테스트 ===")
-    
+
     # 컨테이너 시작
     subprocess.run(['docker', 'run', '-d', '--name', 'cgtest',
                    '--memory', '1g', 'ubuntu', 'sleep', 'infinity'],
                   stdout=subprocess.DEVNULL)
-    
+
     time.sleep(2)
-    
+
     # 초기 통계
     before_global = get_global_stats()
     before_cgroup = get_cgroup_stats('cgtest')
-    
+
     # 컨테이너에서 메모리 할당
     print("컨테이너 메모리 할당 중...")
     subprocess.run(['docker', 'exec', 'cgtest', 'bash', '-c',
@@ -394,26 +404,26 @@ def test_cgroup_pressure():
                    'stress-ng --vm 1 --vm-bytes 950M --timeout 20s'],
                   stdout=subprocess.DEVNULL,
                   stderr=subprocess.DEVNULL)
-    
+
     time.sleep(2)
-    
+
     # 최종 통계
     after_global = get_global_stats()
     after_cgroup = get_cgroup_stats('cgtest')
-    
+
     # kswapd 활동 (전역)
     kswapd_scan = after_global.get('pgscan_kswapd_normal', 0) - \
                   before_global.get('pgscan_kswapd_normal', 0)
-    
+
     # direct reclaim (cgroup)
     if before_cgroup and after_cgroup:
         direct_scan = after_cgroup.get('pgscan_direct', 0) - \
                      before_cgroup.get('pgscan_direct', 0)
-        
+
         print(f"kswapd 스캔 (전역): {kswapd_scan} pages")
         print(f"direct 스캔 (cgroup): {direct_scan} pages")
         print(f"→ cgroup 자체 회수만 작동!\n")
-    
+
     # 정리
     subprocess.run(['docker', 'stop', 'cgtest'], 
                   stdout=subprocess.DEVNULL)
@@ -443,6 +453,7 @@ direct 스캔 (cgroup): 245760 pages ← direct reclaim만 작동
 ## 7. 정리 다이어그램
 
 ### 실제 메모리 회수 구조
+
 ```
                     메모리 할당 요청
                           ↓
@@ -466,7 +477,8 @@ direct 스캔 (cgroup): 245760 pages ← direct reclaim만 작동
 ```
 
 ### cgroup별 독립 vs 전역 통합
-```
+
+```text
 ❌ 잘못된 이해:
 ┌──────────┐  ┌──────────┐  ┌──────────┐
 │ cgroup A │  │ cgroup B │  │ cgroup C │
@@ -477,7 +489,7 @@ direct 스캔 (cgroup): 245760 pages ← direct reclaim만 작동
 
 ✅ 올바른 이해:
 ┌─────────────────────────────────────────┐
-│       하나의 전역 회수 시스템            │
+│       하나의 전역 회수 시스템           │
 │       - kswapd (하나)                   │
 │       - direct reclaim (프로세스별)     │
 └─────────┬───────────────────────────────┘
@@ -515,7 +527,8 @@ direct 스캔 (cgroup): 245760 pages ← direct reclaim만 작동
    - 회수 범위를 제한 (이 cgroup의 페이지만)
 
 ### 비유
-```
+
+```text
 cgroup은 "구역"이고, 커널은 "청소부"
 
 ❌ 틀린 이해:
@@ -536,26 +549,26 @@ cgroup은 "구역"이고, 커널은 "청소부"
 ### Anonymous Pages vs File-backed Pages
 
 ```txt
-┌─────────────────────────────────────────────────────┐
-│              프로세스 메모리                        │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌─────────────────────────────────────────-─┐      │
-│  │  Anonymous Pages (익명 페이지)            │      │
-│  │  - malloc(), new로 할당한 메모리          │      │
-│  │  - 스택, 힙                               │      │
-│  │  - 디스크 백업 없음                       │      │
-│  │  → Swap으로 내보냄 ✅                    │      │
-│  └─────────────────────────────────────────-─┘      │
-│                                                     │
-│  ┌────────────────────────────────────────-──┐      │
-│  │  File-backed Pages (파일 백업 페이지)     │      │
-│  │  - mmap()으로 매핑한 파일                 │      │
-│  │  - 실행 파일 코드 영역                    │      │
-│  │  - 공유 라이브러리                        │      │
-│  │  - Page Cache                             │      │
-│  │  - 디스크 백업 있음                       │      │
-│  │  → 그냥 버림 (evict) ❌ Swap 안 씀       │      │
-│  └────────────────────────────────────────-──┘      │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│              프로세스 메모리                    │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  ┌─────────────────────────────────────────-─┐  │
+│  │  Anonymous Pages (익명 페이지)            │  │
+│  │  - malloc(), new로 할당한 메모리          │  │
+│  │  - 스택, 힙                               │  │
+│  │  - 디스크 백업 없음                       │  │
+│  │  → Swap으로 내보냄 ✅                    │  │
+│  └─────────────────────────────────────────-─┘  │
+│                                                 │
+│  ┌────────────────────────────────────────-──┐  │
+│  │  File-backed Pages (파일 백업 페이지)     │  │
+│  │  - mmap()으로 매핑한 파일                 │  │
+│  │  - 실행 파일 코드 영역                    │  │
+│  │  - 공유 라이브러리                        │  │
+│  │  - Page Cache                             │  │
+│  │  - 디스크 백업 있음                       │  │
+│  │  → 그냥 버림 (evict) ❌ Swap 안 씀       │  │
+│  └────────────────────────────────────────-──┘  │
+└─────────────────────────────────────────────────┘
 ```

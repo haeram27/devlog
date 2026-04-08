@@ -256,7 +256,7 @@ public class ClassPhantom {
         if (reference != null) {
             // remove references against queued PhantomReference
             System.out.println(cleanUpMap.remove(reference));
-            
+
             //remove phantom reachable so that referent's memory can be retrieved by gc
             reference.clear();
         }

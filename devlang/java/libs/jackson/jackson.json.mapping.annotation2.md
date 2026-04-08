@@ -160,14 +160,14 @@ import lombok.Data;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Data
 public class NodeHW {
- 
+
   private Integer nodeId;
 
   private String biosName;
 
   //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm a z")
   private Date biosDate;
-  
+
   private Boolean updateStatus;
 }
 ```

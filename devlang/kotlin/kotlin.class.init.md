@@ -25,7 +25,7 @@ open class Parent(val name: String) { // 주 생성자
     constructor(name: String, age: Int) : this(name) {
         println("4. Parent class 2nd constructor body (age: $age)")
     }
-    
+
     init {
         println("3. Parent class 2nd init block")
     }
@@ -59,8 +59,8 @@ fun main() {
     // 부 생성자를 호출하여 'name'과 'age'를 전달
     val child = Child(name = "foo", age = 25)
 }
-
 ```
+
 - result:
 
 ```plain

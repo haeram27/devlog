@@ -133,10 +133,10 @@ for (int i = 0; i < data.length; i++) {
         // 1. 선택 (Choose)
         out[depth] = data[i];
         visited[i] = true;
-        
+
         // 2. 탐색 (Explore)
         permutationA(data, out, r, depth + 1, visited);
-        
+
         // 3. 복구 (Unchoose / Backtrack)
         visited[i] = false;
     }
