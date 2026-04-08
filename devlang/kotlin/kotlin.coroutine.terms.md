@@ -13,8 +13,8 @@
 
 실행 중인 코루틴의 상태를 관리하거나 결과를 기다립니다.
 
-- suspend: 함수를 일시 중단(실행중인 Thread를 현재 코루틴에서 detach하여 현재 코루틴은 잠시 실행이 멈추고, Thread는 다른 코루틴을 실행) 가능하게 만드는 마법의 키워드입니다.
-- await: async의 결과를 비차단(Non-blocking) 방식으로 기다립니다.
+- suspend: 함수가 실행중 일시 중단(실행중인 Thread를 현재 코루틴에서 detach하여 현재 코루틴은 잠시 실행이 멈추고, Thread는 다른 코루틴을 실행) 가능한 CoroutineScope 임을 명시
+- await: async의 결과를 `비차단(Non-blocking) 방식`(thread detach)으로 기다립니다.
 - join: launch로 시작된 작업이 완료될 때까지 기다립니다.
 - cancel: 실행 중인 코루틴을 중단시킵니다.
 - delay: 스레드를 차단하지 않고 정해진 시간 동안 코루틴을 잠재웁니다.
