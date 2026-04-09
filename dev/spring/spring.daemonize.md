@@ -37,149 +37,219 @@ public class SpringApplication {
 
 ## non-web spring daemonize
 
-- 방법 1: main()에서 무한 루프 Thread 사용
-  - 사용처: 테스트용 어플리케이션
-  - 장점: 실행중 여부를 판단(hear beat)하기 위한 로그 출력 가능
-  - 단점: main 메소드가 복잡해짐
+CountDownLatch를 이용하는 것이 가장 깔끔
 
-- 방법 2: main()에서 Condition await() 사용
-  - 사용처: 상용 서비스
-  - 장점: main() 메소드가 깔끔해짐
-  - 단점: 별도로 로그가 거의 없는 어플리케이션의 경우 실행중 여부를 판단하기 어려움
+- CountDownLatch: daemonize(프로세스 생존 유지) 담당
+- scheduler: 주기적인 작업에 권장
 
-### main()에서 무한 루프 Thread 사용하여 daemonize
-
-spring-web이 아닌 경우 별도로 main thread의 종료를 막아 daemonize 함
-
-#### ServiceApplication.java
+### Java: ServiceApplication.java
 
 ```java
 package com.example.service;
 
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CountDownLatch;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.Banner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
-import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @Slf4j
 public class ServiceApplication {
 
-    public static void main(String[] args) {
+    private static final CountDownLatch shutdownLatch = new CountDownLatch(1);
+    private static final AtomicInteger counter = new AtomicInteger(0);
+    private static final ScheduledExecutorService scheduler =
+            Executors.newSingleThreadScheduledExecutor();
+
+    public static void main(String[] args) throws InterruptedException {
         new SpringApplicationBuilder(ServiceApplication.class)
-                .listeners(new ApplicationListener<ApplicationEvent>() {
-                    private static AtomicInteger ai = new AtomicInteger(0);
+                .web(WebApplicationType.NONE)
+                .bannerMode(Banner.Mode.OFF)
+                .listeners((ApplicationListener<ApplicationEvent>) event -> {
+                    log.info("event={}", event.getClass().getSimpleName());
 
-                    @Override
-                    public void onApplicationEvent(ApplicationEvent event) {
-                        // log.info(":: springboot :: event :: " + event.toString());
-                        if (event instanceof ApplicationReadyEvent) {
-                            // implementations under HERE after springboot initialization
+                    if (event instanceof ApplicationReadyEvent) {
+                        scheduler.scheduleAtFixedRate(() -> {
+                            int id = counter.incrementAndGet();
+                            log.info("tick id={}", id);
+                        }, 0, 200, TimeUnit.MILLISECONDS);
+                    }
 
-                            Thread.startVirtualThread({
-                                try {
-                                    while (true) {
-                                        log.info("log message ID:"
-                                                + String.valueOf(ai.incrementAndGet()));
-                                        Thread.sleep(200);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("Exception: ", e);
-                                }
-                            });
-                        } else if (event instanceof ContextClosedEvent) {
-                            // implementations under HERE before applcation closed
+                    if (event instanceof ContextClosedEvent) {
+                        scheduler.shutdown();
+                        try {
+                            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                                scheduler.shutdownNow();
+                            }
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            scheduler.shutdownNow();
+                        } finally {
+                            shutdownLatch.countDown();
                         }
                     }
-                }).run(args);
+                })
+                .run(args);
 
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-                        log.info("heart beat");
-                        Thread.sleep(1000);
-                    }
-                } catch (Exception e) {
-                    log.error("Exception: ", e);
-                }
-            }
-        }.start();
+        shutdownLatch.await();
     }
 }
 ```
 
-### main()에서 main thread에 Condition await() 사용하여 daemonize
+### Kotlin : ServiceApplication.kt
 
-#### ServiceApplication.java
+```kotlin
+package com.example.service
 
-```java
-package com.example.service;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.EventListener;
-import lombok.extern.slf4j.Slf4j;
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import org.springframework.boot.Banner
+import org.springframework.boot.WebApplicationType
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.ApplicationListener
+import org.springframework.context.event.ContextClosedEvent
 
 @SpringBootApplication
-@Slf4j
-public class ServiceApplication {
+class ServiceApplication
 
-    private static ReentrantLock LOCK_TERM = new ReentrantLock();
-    private static Condition COND_TERM = LOCK_TERM.newCondition();
-    private static AtomicInteger ATOM_INT = new AtomicInteger(0);
+private val log = KotlinLogging.logger {}
+private val shutdownLatch = CountDownLatch(1)
+private val counter = AtomicInteger(0)
+private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
-    @EventListener
-    public void onApplicationEvent(ApplicationReadyEvent e) {
-        // applicaiton started
-        log.info("@@@ ApplicationReadyEvent");
+fun main(args: Array<String>) {
+    SpringApplicationBuilder(ServiceApplication::class.java)
+        .web(WebApplicationType.NONE)
+        .bannerMode(Banner.Mode.OFF)
+        .listeners(
+            ApplicationListener<ApplicationEvent> { event ->
+                log.info { "event=${event.javaClass.simpleName}" }
 
-        Thread.startVirtualThread({
-            try {
-                while (true) {
-                    log.info("log message ID:" + String.valueOf(ai.incrementAndGet()));
-                    Thread.sleep(200);
+                if (event is ApplicationReadyEvent) {
+                    scheduler.scheduleAtFixedRate(
+                        {
+                            val id = counter.incrementAndGet()
+                            log.info { "tick id=$id" }
+                        },
+                        0,
+                        200,
+                        TimeUnit.MILLISECONDS,
+                    )
                 }
-            } catch (Exception e) {
-                log.error("Exception: ", e);
+
+                if (event is ContextClosedEvent) {
+                    scheduler.shutdown()
+                    try {
+                        if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                            scheduler.shutdownNow()
+                        }
+                    } catch (e: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        scheduler.shutdownNow()
+                    } finally {
+                        shutdownLatch.countDown()
+                    }
+                }
             }
-        });
-    }
+        )
+        .run(*args)
 
-    @EventListener
-    public void onApplicationEvent(ContextClosedEvent e) {
-        // applicaiton terminated
-        log.info("@@@ ContextClosedEvent");
+    shutdownLatch.await()
+}
+```
 
-        // wakeup main thread
-        LOCK_TERM.lock(); // acquire lock object
-        try {
-            COND_TERM.signalAll(); // send signal to all waiting thread
-        } finally {
-            LOCK_TERM.unlock(); // release lock object
+## Non-Spring Daemonize
+
+### Kotlin: CountDownLatch 기반 (가장 단순한 daemonize)
+
+```kotlin
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
+
+private val running = AtomicBoolean(true)
+private val shutdownLatch = CountDownLatch(1)
+
+fun main() {
+    // 종료 훅: Ctrl+C(SIGINT)나 정상 종료 시 호출
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            println("shutdown hook called")
+            running.set(false)
+            shutdownLatch.countDown()
         }
-    }
+    )
 
-    public static void main(String[] args) throws Exception {
-        new SpringApplicationBuilder(ServiceApplication.class).run(args);
-
-        // wait on main thread
-        LOCK_TERM.lock(); // acquire lock object
-        try {
-            COND_TERM.await(); // make main thread wait status
-        } finally {
-            LOCK_TERM.unlock(); // release lock object
+    // 실제 작업 스레드(예: 폴링/소비 루프)
+    Thread.startVirtualThread {
+        while (running.get()) {
+            println("worker alive...")
+            Thread.sleep(1000)
         }
+        println("worker stopped")
     }
+
+    // 메인 스레드 대기 (프로세스 유지)
+    shutdownLatch.await()
+    println("main exit")
+}
+```
+
+### Kotlin: CountDownLatch + Scheduler 기반 (주기 작업(heartbeat, polling, batch) 에 권장)
+
+```kotlin
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+
+private val shutdownLatch = CountDownLatch(1)
+private val counter = AtomicInteger(0)
+private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+
+fun main() {
+    // 종료 훅: Ctrl+C(SIGINT)나 정상 종료 시 호출
+    Runtime.getRuntime().addShutdownHook(
+        Thread {
+            println("shutdown hook called")
+            scheduler.shutdown()
+            try {
+                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow()
+                }
+            } finally {
+                shutdownLatch.countDown()
+            }
+        }
+    )
+
+    scheduler.scheduleAtFixedRate(
+        {
+            val id = counter.incrementAndGet()
+            println("heartbeat #$id")
+        },
+        0,
+        1,
+        TimeUnit.SECONDS,
+    )
+
+    // 메인 스레드 대기 (프로세스 유지)
+    shutdownLatch.await()
+    println("main exit")
 }
 ```

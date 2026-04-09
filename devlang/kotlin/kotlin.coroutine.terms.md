@@ -1,20 +1,31 @@
 # kotlin coroutine terms
 
+## 코루틴이란
+
+- 어플리케이션 레벨에서 제공하는 실행흐름
+- 코드의 특정 영역에서 Thread를 attach/detach 가능하도록 하여 코드의 실행 흐름을 제어, 
+- 코루틴이 suspend(thread detach)될 때 코드 위치가 따로 저장되며 추후 해당 지점에서 resume 됨(thread attach) 하는 방식
+- 코루틴을 사용할수 있는 영역을 coroutineScope라고 하며, 이 영역은 runBlocking, launch, async 키워드를 이용하여 생성 가능
+- Thread는 내부 쓰레드 풀을 이용(Dispatcher.MAIN/IO/DEFAULT)
+- 코틀린에서 동시성 제어를 위한 Collection은 별도로 없으며, 자바의 concurrent collection이나 atomic 타입을 이용해야 함
+
 ## 1. 코루틴 빌더 (Coroutine Builders)
 
 코루틴을 생성하고 시작하는 함수들입니다.
 
-- launch: 결과값 없이 실행만 하는 'Fire-and-forget' 빌더. Job을 반환합니다.
-- async: 결과값이 필요한 비동기 작업 빌더. `Deferred<T>`를 반환하며 `Deferred.await()`로 결과를 받습니다.
-- runBlocking: 현재 스레드를 차단(Blocking)하며 코루틴이 끝날 때까지 대기합니다. (주로 테스트나 메인 함수에서 사용)
+- launch: 결과값 없이 실행만 하는 'Fire-and-forget' 빌더. Job을 반환합니다. 현재 스레드 Blocking 안함.
+- async: 결과값이 필요한 비동기 작업 빌더. `Deferred<T>`를 반환하며 `Deferred.await()`로 결과를 받습니다. 현재 스레드 Blocking 안함.
+- runBlocking: 현재 스레드를 차단(Blocking)하며 코루틴이 끝날 때까지 대기합니다. (주로 테스트나 메인 함수에서만 사용)
 - produce: 데이터를 생산하고 ReceiveChannel을 반환하는 빌더입니다.
 
 ## 2. 제어 및 대기 (Control & Await)
 
 실행 중인 코루틴의 상태를 관리하거나 결과를 기다립니다.
+다음의 키워드 들은 coroutine 영역(lauch, async, runBlocking에 의해 생성된 Coroutine Scope)에서만 사용할 수 있다.
+이 키워드들의 사용된 곳에서 위로 거슬러 올라가면 반드시 코루틴 빌더들을 만나게 된다.
 
-- suspend: 함수가 실행중 일시 중단(실행중인 Thread를 현재 코루틴에서 detach하여 현재 코루틴은 잠시 실행이 멈추고, Thread는 다른 코루틴을 실행) 가능한 CoroutineScope 임을 명시
-- await: async의 결과를 `비차단(Non-blocking) 방식`(thread detach)으로 기다립니다.
+- suspend: 함수가 실행중 suspend 가능한 CoroutineScope 임을 명시, suspend란 실행중인 Thread를 현재 코루틴에서 detach하여 현재 코루틴은 잠시 실행이 멈추고, Thread는 다른 코루틴을 실행하는 것
+- await: async의 결과를 비차단(Non-blocking) 방식으로 기다립니다. `Deferred`, `CompletableDeferred`의 멤버 함수
 - join: launch로 시작된 작업이 완료될 때까지 기다립니다.
 - cancel: 실행 중인 코루틴을 중단시킵니다.
 - delay: 스레드를 차단하지 않고 정해진 시간 동안 코루틴을 잠재웁니다.
@@ -99,7 +110,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 
 // 1. Virtual Thread 기반의 Executor 생성
-// 2. .asCoroutineDispatcher()를 사용하여 코루틴 디스패처로 변환
+// 2. .asCoroutineDispatcher()를 사용하여 Executor를 코루틴 디스패처로 변환
 val VirtualThreadDispatcher = Executors.newVirtualThreadPerTaskExecutor().asCoroutineDispatcher()
 
 fun main() = runBlocking {

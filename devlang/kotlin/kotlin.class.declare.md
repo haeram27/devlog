@@ -2,7 +2,7 @@
 
 ## 1. 일반 클래스 (Final Class)
 
-기본적으로 상속이 불가능한 상태입니다.
+기본적으로 상속이 불가능한(final) 상태입니다.
 
 ```kotlin
 class Person(val name: String)
@@ -290,6 +290,26 @@ public final class MyClass {
 }
 ```
 
+## 중첩(nested) 클래스 차이 요약
+
+**차이**
+
+|중첩클래스 타입|인스턴스 생성시 생성자 호출 필요|생성시 외부클래스 참조 방식|외부클래스 인스턴스 참조 가능|인스턴스 여러개 생성 가능|멤버 호출시 클래스 이름 필요|
+|---|---|---|---|---|---|
+|Nested inner class|O|instance|O|O|X (인스턴스로 호출)|
+|Nested class|O|class|X|O|X (인스턴스로 호출)|
+|Nested object|X|class|X|X|O|
+|companion class|X|class|X|X|X (생략가능)|
+
+**용도**
+
+|중첩클래스 타입|용도|
+|---|---|
+|Nested inner class|외부 클래스 인스턴스에 종속적인 nested 클래스 생성 (거의 사용되지 않음)|
+|Nested class|외부 클래스 인스턴스에 독립적인 nested 클래스 생성|
+|Nested object|외부 클래스의 정적 멤버 생성, 멤버의 namespace(grouping) 역할|
+|companion class|외부클래스의 정적 멤버 생성|
+
 ## object와 companion object 차이
 
 object와 companion object는 둘 다 싱글톤(인스턴스가 하나만 존재)을 만든다는 공통점이 있지만, 어디에 선언되느냐와 어떻게 접근하느냐가 핵심 차이점입니다.
@@ -345,3 +365,119 @@ println(User.MAX_AGE)
 
 요약하자면:
 혼자서도 잘 노는 독립적인 싱글톤은 object, 특정 클래스의 '단짝 친구'처럼 붙어서 정적 멤버 역할을 하는 것은 companion object입니다.
+
+## Nested Object와 Nested Class 차이
+
+핵심 차이는 인스턴스 생성 방식과 상태 관리에 있습니다.
+둘 다 외부 클래스의 인스턴스 멤버에 직접 접근할 수 없다는 점(Java의 static과 유사)은 같지만, 사용 목적이 다릅니다.
+
+### 1. 주요 차이점 비교
+
+| 구분 | Nested Class (중첩 클래스) | Nested Object (중첩 객체) |
+|---|---|---|
+| 선언 방식 | class Nested | object Nested |
+| 인스턴스화 | Outer.Nested()로 여러 개 생성 가능 | 싱글톤 (단 하나의 인스턴스만 존재) |
+| 상태 관리 | 각 인스턴스마다 고유한 상태를 가짐 | 애플리케이션 전역에서 상태를 공유함 |
+| 호출 방법 | 생성자를 호출하여 객체 생성 후 사용 | 클래스 이름을 통해 바로 멤버에 접근 |
+
+### 2. 코드 예시로 보기
+
+```kotlin
+class Outer {
+    // Nested Class: 필요할 때마다 붕어빵처럼 찍어낼 수 있음
+    class NestedClass {
+        fun hello() = "I am a Class instance"
+    }
+
+    // Nested Object: 딱 하나만 존재하는 관리자나 유틸리티 역할
+    object NestedObject {
+        fun hello() = "I am a Singleton Object"
+    }
+}
+fun main() {
+    // 1. Nested Class는 호출할 때마다 새로운 객체가 생깁니다.
+    val instance1 = Outer.NestedClass()
+    val instance2 = Outer.NestedClass()
+
+    // 2. Nested Object는 생성자 호출 없이 바로 사용하며, 어디서든 동일한 인스턴스입니다.
+    println(Outer.NestedObject.hello())
+}
+```
+
+### 3. 언제 무엇을 쓸까?
+
+- Nested Class: 외부 클래스와 논리적으로 연관되어 있으면서, 여러 개의 데이터를 개별적으로 담는 객체가 필요할 때 사용합니다. (예: RecyclerView.ViewHolder)
+- Nested Object: 외부 클래스 내에서 공통으로 쓰이는 유틸리티 함수나 상수, 혹은 특정 인터페이스의 단일 구현체가 필요할 때 사용합니다.
+
+
+## Nested Object와 Companion Object 차이
+
+둘 다 클래스 내부에 선언되는 object(싱글톤)라는 점은 같지만, 클래스와의 결합도와 호출 방식에서 결정적인 차이가 있습니다.
+
+### 1. 핵심 차이 요약
+
+|구분|Nested Object (일반 중첩 객체)|Companion Object (동반 객체)|
+|---|---|---|
+|선언 방식| object Name { ... } | companion object { ... }|
+|개수 제한| 한 클래스 내에 여러 개 선언 가능 |클래스당 단 하나만 가능|
+|호출 방식| ClassName.ObjectName.method() |ClassName.method() (클래스 이름 생략 가능)|
+|주요 용어| 명시적인 이름을 가져야 함 |이름 생략 시 기본값 Companion 사용|
+|Java 비유| static 내부 클래스의 싱글톤 인스턴스 |Java의 static 멤버와 가장 흡사함|
+
+### 2. 코드 비교
+
+**Nested Object (명시적 중첩)**
+
+특정 목적(설정, 유틸리티 등)을 위해 이름을 붙여 그룹화할 때 사용합니다.
+이는 Java에서 static nested class를 선언하는 것과 같음
+
+```kotlin
+
+class MyClass {
+    object Config {
+        const val TIMEOUT = 5000
+    }
+    object Utils {
+        fun log(msg: String) = println(msg)
+    }
+}
+
+// 호출 시 반드시 객체 이름을 거쳐야 함
+MyClass.Config.TIMEOUT
+MyClass.Utils.log("Hello")
+```
+
+코드를 사용할 때는 주의가 필요합니다.
+
+**Companion Object (클래스와 동행)**
+
+클래스의 인스턴스 없이 메서드나 프로퍼티를 호출하고 싶을 때(팩토리 메서드 등) 사용합니다.
+Outter Class에 속한 정적(static) 속성의 함수, 변수를 선언하려고 하는데 사용
+이는 Java에서 Class내 필드 static 함수, 변수를 선언하는 것과 같음
+
+```kotlin
+class MyClass {
+    companion object {
+        const val MAX_COUNT = 10
+        fun create() = MyClass()
+    }
+}
+
+// 클래스 이름에서 직접 호출 가능 (Java의 static처럼 동작)
+MyClass.MAX_COUNT
+MyClass.create()
+```
+
+코드를 사용할 때는 주의가 필요합니다.
+
+### 3. 결정적인 차이점 (상속과 인터페이스)
+
+- Companion Object는 인터페이스를 구현하거나 다른 클래스를 상속받을 수 있으며, 클래스 이름 자체를 해당 인터페이스 타입의 객체처럼 다룰 수 있습니다.
+- 예를 들어, MyClass 자체가 특정 인터페이스를 구현한 Companion을 가지고 있다면, 함수 인자로 MyClass를 직접 넘기는 것이 가능합니다.
+
+### 4. 실무 선택 기준
+
+- Static 메서드나 팩토리 메서드를 만들고 싶다 👉 Companion Object
+- 클래스 내부에서 관련된 상수나 기능을 카테고리별로 묶고 싶다 👉 Nested Object
+
+혹시 이 개념들이 Java에서 호출될 때(@JvmStatic) 어떻게 변하는지도 궁금하신가요?

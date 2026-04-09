@@ -1,4 +1,5 @@
 ---
+name: beast
 description: '궁극의 투명 사고 Beast Mode'
 ---
 
