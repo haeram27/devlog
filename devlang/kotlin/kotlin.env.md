@@ -1,7 +1,8 @@
 # kotlin 개발 환경
 
-- [jdk](https://jdk.java.net/archive/)
-- [kotlinc](https://github.com/JetBrains/kotlin/releases)
+- Download compilers
+  - [jdk](https://jdk.java.net/archive/)
+  - [kotlinc](https://github.com/JetBrains/kotlin/releases)
 
 ## kotlin path
 
