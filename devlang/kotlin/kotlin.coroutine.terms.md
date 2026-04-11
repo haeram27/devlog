@@ -3,7 +3,7 @@
 ## 코루틴이란
 
 - 어플리케이션 레벨에서 제공하는 실행흐름
-- 코드의 특정 영역에서 Thread를 attach/detach 가능하도록 하여 코드의 실행 흐름을 제어, 
+- 코드의 특정 영역에서 Thread를 attach/detach 가능하도록 하여 코드의 실행 흐름을 제어
 - 코루틴이 suspend(thread detach)될 때 코드 위치가 따로 저장되며 추후 해당 지점에서 resume 됨(thread attach) 하는 방식
 - 코루틴을 사용할수 있는 영역을 coroutineScope라고 하며, 이 영역은 runBlocking, launch, async 키워드를 이용하여 생성 가능
 - Thread는 내부 쓰레드 풀을 이용(Dispatcher.MAIN/IO/DEFAULT)

@@ -5,16 +5,21 @@
 
 ## .properties와 .gradle 설정 파일
 
-gradle의 주 설정 파일은 크게 gradle 프로세스 실행 `환경 설정`용 파일(.properties)과 프로젝트 `빌드 설정`용 파일(.gradle)로 나뉘어진다.
+gradle의 주 설정 파일은 크게 `.properties` 파일과 `.gradle` 파일로 나뉜다.
+- `.properties`은 빌드 실행 환경 변수 선언, `.gradle`은 빌드용 스크립트 파일이다. 
+- `.properties` 파일은 gradle 실행시 빌드용 jvm과 스크립트(settings/build.gradle) 파일에 참조할 수 있는 system.propoery 변수를 선언한다.
+- `.gradle` 파일은 DSL 스크립트 파일이며, gradle 빌드 수행시 자동 참조 되는 빌드 스크립트 파일이다.
 
 ### gradle 프로세스 실행 환경 설정(.properties)
-
-- `${GRADLE_USER_HOME}/gradle.properties`
-- `gradle.properties` 파일은 gradle 프로세스의 실행 환경을 설정하는데 사용하며, 실행 옵션 등을 지정해 줄 수 있다.
+- `gradle.properties` 파일 위치
+  - `${GRADLE_HOME}/gradle.properties`
+  - `${GRADLE_USER_HOME}/gradle.properties`
+  - `${workspaceFolder}/gradle.properties`
+- `gradle.properties` 파일은 gradle 실행 시 환경 변수 설정하는데 사용하며, 선언된 변수는 실행 jvm 및 `settings.gradle`, `build.gradle`에서 참조된다.
 
 > `GRADLE_USER_HOME=${HOME}/.gradle`
 
-### 프로젝트 빌드 설정용 파일(.gradle)
+### 프로젝트 빌드 설정용 dsl script 파일(.gradle)
 
 .gradle 설정 파일은 gradle 프로젝트의 빌드 관련 설정 담당하며, 사용자>프로젝트>모듈 scope로 계층적 구성을 할 수 있도록 하고 있다.
 
@@ -32,11 +37,11 @@ gradle의 주 설정 파일은 크게 gradle 프로세스 실행 `환경 설정`
 |Priority|Method|Location|Details|
 |---|---|---|---|
 |1|Command line interface|.| In the command line using `-D`.|
-|2|gradle.properties file|GRADLE_USER_HOME|Stored in a gradle.properties file in the GRADLE_USER_HOME.|
-|3|gradle.properties file|Project Root Dir|Stored in a gradle.properties file in a project directory, then its parent project’s directory up to the project’s root directory.|
+|2|gradle.properties file|Project Root Dir|Stored in a gradle.properties file in a project directory, then its parent project’s directory up to the project’s root directory.|
+|3|gradle.properties file|GRADLE_USER_HOME|Stored in a gradle.properties file in the GRADLE_USER_HOME.|
 |4|gradle.properties file|GRADLE_HOME|Stored in a gradle.properties file in the GRADLE_HOME, the optional Gradle installation directory.|
 
-`Hsw 필수`: ~/.gradle/gradle.properties
+`my 필수`: ~/.gradle/gradle.properties
 
 ```properties
 org.gradle.jvmargs=-Xmx2048M
@@ -115,17 +120,22 @@ settings.gradle
 ```properties
 pluginManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -134,17 +144,22 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         mavenCentral()
     }
@@ -176,7 +191,7 @@ systemProp.https.nonProxyHosts=localhost|*.host.com
 
 ## init.gradle
 
-- 사용자 범위 gradle 설정, 시스템내 모든 gradle 프로젝트를 대상으로 공통으로 적용되는 `.gradle` 설정을 명시하는데 사용
+- 사용자 범위 gradle 설정, 시스템내 모든 gradle 프로젝트를 대상으로 공통으로 적용되는 `.gradle` script을 명시하는데 사용
 - 초기화 스크립트라고 하며, build시에 가장 먼저 실행되는 스크립트
 - 프로젝트 범위의 스크립트에 의해서 override 됨
 - 다른 .gradle 파일과 마찬가지로 plugin/dependency artifactory repositories를 설정하는데 사용할 수 있음
@@ -187,7 +202,7 @@ systemProp.https.nonProxyHosts=localhost|*.host.com
 
 ```properties
 GRADLE_USER_HOME=/home/${USER}/.gradle
-GRADLE_HOME=/opt/gradle/gradle-8.3
+GRADLE_HOME=/opt/gradle/gradle-x.x.x
 ${GRADLE_USER_HOME}/init.gradle
 ${GRADLE_USER_HOME}/init.d/<any-name>.gradle
 ${GRADLE_HOME}/init.d/<any-name>.gradle
@@ -231,9 +246,22 @@ settingsEvaluated { settings ->
 initscript {
     allprojects{
         repositories {
-            maven {
-                url privateMavenRepositoryUrl
-                allowInsecureProtocol = true
+            if (settings.hasProperty('privateMavenRepositoryUrl') && 
+                privateMavenRepositoryUrl != null && 
+                !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+                
+                maven {
+                    url privateMavenRepositoryUrl
+                    
+                    // if url is NOT https
+                    // allowInsecureProtocol = true
+
+                    // if ahthentication is required
+                    // credentials {
+                    //     username = "user"
+                    //     password = "password"
+                    // }
+                }
             }
             mavenCentral()
         }
@@ -266,17 +294,22 @@ sample :
 ```properties
 pluginManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -285,17 +318,22 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         mavenCentral()
     } 
@@ -321,12 +359,6 @@ rootProject.name = 'spring'
 
 - `build.gradle`의 `repositories` 설정은 `settings.gradle`의 `dependencyResolutionManagement:repositories` 설정을 override 함
 - `settings.gradle`의 내용을 그대로 사용할 것이라면 `build.gradle`의 `repositories` block을 삭제할 수 있음
-
-```gradle
-repositories {
-    maven { url privateMavenRepositoryUrl }
-}
-```
 
 ### repository 설정시 url과 artifactUrls 차이
 
@@ -385,17 +417,22 @@ initscript { allprojects{ repositories { maven { url privateMavenRepositoryUrl }
 ```gradle
 pluginManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         gradlePluginPortal()
         mavenCentral()
@@ -404,17 +441,22 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        maven {
-            url privateMavenRepositoryUrl
+        if (settings.hasProperty('privateMavenRepositoryUrl') && 
+            privateMavenRepositoryUrl != null && 
+            !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
+            
+            maven {
+                url privateMavenRepositoryUrl
+                
+                // if url is NOT https
+                // allowInsecureProtocol = true
 
-            // if url is NOT secure (like http)
-            // allowInsecureProtocol = true
-
-            // if ahthentication is required
-            // credentials {
-            //     username = "user"
-            //     password = "password"
-            // }
+                // if ahthentication is required
+                // credentials {
+                //     username = "user"
+                //     password = "password"
+                // }
+            }
         }
         mavenCentral()
     }
@@ -593,7 +635,7 @@ gradle <tasks...>
 
 ```bash
     # tasks = commands list
-    $ gradle tasks
+    $ gradle tasks --all
 
         Application tasks
         -----------------
