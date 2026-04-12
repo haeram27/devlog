@@ -106,7 +106,7 @@ org.gradle.jvmargs=-Xmx2048M
 
 ### .gradle 파일에서 공통 변수 정의
 
-- 시스템 전역 gradle properties 파일은 `~/.gradle/gradle.properties` 임
+- User scope gradle.properties 파일은 `~/.gradle/gradle.properties` 임
 - `gradle.properties` 파일에 선언된 변수는 "init|settings|build.gradle" 파일에서 값으로 참조 가능
 
 gradle.properties
@@ -292,15 +292,15 @@ gradle build --offline
 sample :
 
 ```properties
+// plugin repositories
 pluginManagement {
     repositories {
         if (settings.hasProperty('privateMavenRepositoryUrl') && 
             privateMavenRepositoryUrl != null && 
             !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
-            
             maven {
                 url privateMavenRepositoryUrl
-                
+
                 // if url is NOT https
                 // allowInsecureProtocol = true
 
@@ -310,21 +310,31 @@ pluginManagement {
                 //     password = "password"
                 // }
             }
+        } else {
+            println "pluginManagement: No private maven repository url provided, fallback to public maven repositories."
         }
         gradlePluginPortal()
         mavenCentral()
+        google()
+    }
+
+    plugins {
+        id 'org.springframework.boot' version "${springBootPluginVersion}"
+        id 'io.spring.dependency-management' version "${springDependencyManagementPluginVersion}"
+        // jdk toolchain resolver plugin for jdk auto download and setup
+        id 'org.gradle.toolchains.foojay-resolver-convention' version "${fooJayVersion}"
     }
 }
 
+// dependency repositories
 dependencyResolutionManagement {
     repositories {
         if (settings.hasProperty('privateMavenRepositoryUrl') && 
             privateMavenRepositoryUrl != null && 
             !privateMavenRepositoryUrl.toString().trim().isEmpty()) {
-            
             maven {
                 url privateMavenRepositoryUrl
-                
+
                 // if url is NOT https
                 // allowInsecureProtocol = true
 
@@ -334,12 +344,13 @@ dependencyResolutionManagement {
                 //     password = "password"
                 // }
             }
+        } else {
+            println "dependencyResolutionManagement: No private maven repository url provided, fallback to public maven repositories."
         }
         mavenCentral()
     } 
 }
 
-// offline 옵션 사용시 repository 연결을 위한 network 접속 대기를 하지 않는다.
 startParameter.offline=false
 if (startParameter.offline) {
         println "======================"
@@ -347,7 +358,7 @@ if (startParameter.offline) {
         println "======================"
 }
 
-rootProject.name = 'spring'
+rootProject.name = 'springex'
 ```
 
 ### {module}/build.gradle
