@@ -37,11 +37,36 @@ if (node.isObject()) {
 - 제네릭 타입 정보를 담기 위한 빈 클래스
 - Jackson에서 제네릭 타입 정보를 런타임에 유지하려고 만든 클래스
 - Jackson은 제네릭 타입을 정보를 런타임에 유지 하여 메소드 간 전달 및 reflection을 이용한 제너릭 타입 참조등에 사용한다
-- 제네릭 타입 정보를 가지는 것 외에 TypeReference클래스는 어떤 정보나 특정 행위를 위한 메소드를 갖지 않는다
+- 제네릭 타입 정보(`java.lang.reflect.Type`)를 보유하는 것 외에 TypeReference클래스는 어떤 정보나 특정 행위를 위한 메소드를 갖지 않는다
 - 그래서 TypeReference 클래스의 구현체에는 어떠한 내용도 상속하거나 구현할 필요가 없다
-- TypeReference 클래스는 제네릭 타입 정보를 메소드의 인자로 넘겨주기 용도로 자주 사용된다
+- TypeReference 클래스는 제네릭 타입 정보를 메소드의 인자로 넘겨주기 용도로 사용된다
 
-## `new TypeReference<>() {}` 의 의미
+```java
+## 구현 내용
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+public abstract class TypeReference<T> implements Comparable<TypeReference<T>>
+{
+    protected final Type _type;
+
+    protected TypeReference()
+    {
+        Type superClass = getClass().getGenericSuperclass();
+        if (superClass instanceof Class<?>) { // sanity check, should never happen
+            throw new IllegalArgumentException("Internal error: TypeReference constructed without actual type information");
+        }
+        _type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
+    }
+
+    public Type getType() { return _type; }
+
+    @Override
+    public int compareTo(TypeReference<T> o) { return 0; }
+}
+```
+
+## `new TypeReference<T>() {}` 의 의미
 
 - `TypeReference<T>` 는 **추상 클래스**이지만 abstract method를 갖지 않는다
 - 추상 클래스는 **그 자체로 인스턴스를 만들 수 없고**, 반드시 **구현체(서브클래스)** 가 필요하다
@@ -51,7 +76,7 @@ if (node.isObject()) {
 즉,
 
 ```java
-new TypeReference<>() {};
+new TypeReference<T>() {};
 ```
 
 는 **TypeReference의 익명 하위 클래스를 정의하고 동시에 인스턴스화**하는 코드이다
@@ -66,7 +91,7 @@ new TypeReference<>() {};
   new TypeReference<>();
   ```
 
-  → 단순히 **추상 클래스 인스턴스를 만들려는 시도**라서 컴파일 에러가 발생
+  → 단순히 **추상 클래스의 인스턴스를 만들려는 시도**라서 컴파일 에러가 발생
 
 - 반면,
 
@@ -74,7 +99,7 @@ new TypeReference<>() {};
   new TypeReference<>() {};
   ```
 
-  → **본문이 비어 있는 익명 클래스**를 선언해서 인스턴스를 만들기 때문에 유효하다
+  **본문이 비어 있는 익명 클래스**를 선언해서 클래스 구현체의 `인스턴스`를 만들기 때문에 유효하다
   (추상 메소드가 없으므로 override 할 건 없고, 그냥 껍데기 클래스가 만들어짐)
 
 ---

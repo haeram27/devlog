@@ -20,8 +20,8 @@
 
 ## 주의: JsonMapper.readValue() 호출시 `Class<T>` vs `TypeReference<T>` 사용 차이
 
-- Generic 파라미터를 가지는 ParamterizedType에 매핑하는 경우 TypeReference를 사용하라
-  - TypeReference를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 ParameterizedType이 가져야하는 제너릭 타입에 대한 type check를 해준다.
+- Generic 파라미터를 가지는 ParamterizedType에 매핑하는 경우 `TypeReference<T>`를 사용하라
+  - `TypeReference<T>`를 사용하면 jackson은 런타임에도 역직렬화 중 databind시 `ParameterizedType`이 가져야하는 제너릭 타입에 대한 type check를 해준다.
   - 그래서 런타임에 json 데이터가 개발자가 의도한 타입이 아니라면 Exception을 발생시킨다.
 
 ## 단순 구분 조건 (추천)
@@ -36,6 +36,28 @@ T가 Non-ParameterizedType이면 `Class<T>` 사용
 1. T가 ParameterizedType (Generic 파라미터를 사용하는 타입 - List, Map, 사용자 정의 ParameterizedType)
 1. Generic 파라미터가 Object 타입이 아님
 1. databinding 시 강한 type check 원함(실제 값이 Generic 타입과 불일치할 경우 Exception 발생)
+
+### ParameterizedType 이란
+
+ParameterizedType은 java.lang.reflect 패키지에 있는 인터페이스로, `List<String>`이나 `Map<Integer, User>`처럼 `제네릭 타입이 실제 타입 매개변수(String, User 등)와 함께 사용된 상태`를 런타임에 리플렉션으로 표현하는 객체
+
+- 용도: 컴파일 시점에 타입 정보가 지워지는(Type Erasure) 제네릭 타입을 런타임 시에 실제 타입 파라미터 정보와 함께 가져오기 위해 사용합니다.
+- 특징: Type 인터페이스를 상속받으며, 원시 타입(Raw Type)과 실제 타입 인자(Actual Type Arguments)를 제공합니다.
+- 사용법: Field.getGenericType(), Method.getGenericReturnType() 등을 통해 획득하여 List의 제네릭이 무엇인지 런타임에 확인 가능합니다
+
+```java
+import java.lang.reflect.ParameterizedType;
+
+// 예: List<String> field;
+Type genericType = field.getGenericType();
+if (genericType instanceof ParameterizedType) {
+    ParameterizedType pType = (ParameterizedType) genericType;
+    // List 출력
+    System.out.println("Raw type: " + pType.getRawType());
+    // String 출력
+    System.out.println("Actual type: " + pType.getActualTypeArguments()[0]);
+}
+```
 
 ## `Class<T>`를 사용하는 경우: TypeReference를 사용하지 않는 거의 모든 경우
 
