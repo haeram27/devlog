@@ -26,9 +26,9 @@
 
 # 윈도우의 정의
 
-**윈도우(Window)**는 SELECT된 행들의 집합 중, 특정 행에 대해 누적/집계 연산을 수행할 때 참조할 수 있도록 정의한 **논리적 행의 집합(범위)**입니다.
+**윈도우(Window)** 는 SELECT된 행들의 집합 중, 특정 행에 대해 누적/집계 연산을 수행할 때 참조할 수 있도록 정의한 **논리적 행의 집합(범위)** 입니다.
 
-관계형 데이터베이스(Relational Database)에서 **윈도우(Window)**는 윈도우 함수를 사용하기 위한 논리적 그룹의 개념입니다. 윈도우는 `OVER` 절에 의해서 정의 되며, "윈도우 함수"의 "윈도우"는 **"창문을 통해 주변을 보듯이, 현재 행에서 다른 행들을 볼 수 있는 관점/범위"**를 의미합니다.
+관계형 데이터베이스(Relational Database)에서 **윈도우(Window)** 는 윈도우 함수를 사용하기 위한 논리적 그룹의 개념입니다. 윈도우는 `OVER` 절에 의해서 정의 되며, "윈도우 함수"의 "윈도우"는 **"창문을 통해 주변을 보듯이, 현재 행에서 다른 행들을 볼 수 있는 관점/범위"** 를 의미합니다.
 
 | 관점 | 의미 |
 |------|------|
@@ -43,9 +43,9 @@
 
 PostgreSQL 문서에서는 이렇게 구분합니다:
 
-- Window definition (윈도우 정의): OVER 절 전체
-- Partition (파티션): PARTITION BY로 나눈 그룹
-- Window frame (윈도우 프레임): ROWS/RANGE/GROUPS로 지정, 현재행에서 함수 연산시 참조할 파티션내 데이터의 범위, 함수가 바라보는 연산의 영역, 파티션 경계를 넘지 못함
+- Window definition (윈도우 정의): OVER 절 전체, 파티션의 그룹
+- Partition (파티션): PARTITION BY로 나뉘어진 각 그룹, PARTITION BY에 지정된 column들의 각각의 값이 모두 동일한 행들을 모아 파티션을 구성, 예: `PARTION BY a, b`라면 어떤 행이 a=1, b=2의 값을 가진다면 이 행은 a=1, b=2이 값을 가진 파티션에 소속되며, a=1, b=2 값을 가진 모든 행이 모여 하나의 파티션(그룹)을 구성 한다.
+- Window frame (윈도우 프레임): ROWS/RANGE/GROUPS로 지정, 현재행에서 함수 연산시, 현재 행이 속한 파티션내에서 연산의 대상이 되는 데이터의 범위, 함수가 바라보는 연산의 영역, 파티션 경계를 넘지 못함
 
 ## 윈도우, 파티션, 프레임의 계층 구조
 
@@ -54,7 +54,7 @@ PostgreSQL 문서에서는 이렇게 구분합니다:
 │  Window = OVER 절 전체                          │
 │  ┌───────────────────────────────────────────┐  │
 │  │  Partition (파티션)                       │  │
-│  │  - PARTITION BY로 나눈 그룹               │  │
+│  │  - PARTITION BY로 나뉜 그룹               │  │
 │  │  ┌─────────────────────────────────────┐  │  │
 │  │  │  Window Frame (윈도우 프레임)       │  │  │
 │  │  │  - 각 행의 실제 계산 범위           │  │  │
@@ -64,8 +64,9 @@ PostgreSQL 문서에서는 이렇게 구분합니다:
 └─────────────────────────────────────────────────┘
 ```
 
-`PARTITIION BY`를 생략하면 `윈도우 = 파티션`이 됩니다.
-프레임 정의(ROWS/RANGE/GROUPS)를 생략하면 `프레임 = 파티션`이 됩니다.
+파티션 정의(`PARTITIION BY`)를 생략하면 `파티션 = 테이블 전체`이 됩니다.
+
+프레임 정의(ROWS/RANGE/GROUPS)를 생략하면 기본 프레임 정의(하위에 설명)가 자동 적용됩니다.
 
 ## 윈도우(Window) 함수
 
@@ -73,7 +74,7 @@ PostgreSQL 문서에서는 이렇게 구분합니다:
 
 윈도우는 OVER(...) 구문을 이용하여 생성 합니다.
 
-일반적인 `GROUP BY` 집계와 달리, **윈도우 함수를 사용하기 위한 PARTITION BY는 묶음시 행을 제거하지 않고 원본 데이터를 유지**하면서 계산 결과를 옆에 추가해줍니다.
+일반적인 `GROUP BY` 집계와 달리, **윈도우 함수를 사용하기 위한 PARTITION BY는 출력시 원본 테이블의 행을 제거하지 않으며** SELECT 문에서 윈도우 함수를 사용한 column에 각 행별 연산 결과를 넣어 준다. 정리하면, `GROUP BY`는 각 `그룹별 결과`를 하나의 행에 출력해주고 윈도우 함수는 각 행의 윈도우 함수 결과를 돌려준다(그래서 윈도우 함수 사용을 SELECT 문 안의 column 자리에서 하는 것).
 
 - 윈도우 함수 = **"행을 유지하면서 집계·순위·이전/다음 참조 등을 계산"**
 - `OVER()` 절 안에서 `PARTITION BY`, `ORDER BY`, `ROWS BETWEEN ... AND ...` 등을 조합해 윈도우 구성
@@ -89,7 +90,7 @@ SELECT
     window_function() OVER (
         PARTITION BY group_column    -- 파티션: 데이터를 그룹으로 나눔
         ORDER BY sort_column         -- 정렬: 파티션 내에서 순서 지정
-        ROWS BETWEEN ... AND ...     -- 윈도우 프레임: 현재 행에서 함수를 수행할 때 연산의 대상이 되는 범위
+        ROWS BETWEEN ... AND ...     -- 윈도우 프레임: 현재 행에서 함수를 수행할 때, 파티션 내에서 연산의 대상이 되는 범위
     )
 FROM table;
 ```
@@ -112,7 +113,7 @@ FROM employees;
 ```
 
 - `OVER (...)`은 윈도우를 정의하는 부분.
-- `PARTITION BY <column>`: 파티션 정의, 여기서는 department_id가 같은 값들끼리 하나의 파티션을 구성하게 됨.
+- `PARTITION BY <column,..>`: 파티션 정의, 여기서는 department_id가 **같은 값** 들끼리 하나의 파티션을 구성하게 됨.
 - `AVG(salary)`: 윈도우 함수. 윈도우 그룹별 평균 값
 
 ---
@@ -167,7 +168,7 @@ SELECT
     day,
     amount,
     SUM(amount) OVER (
-        PARTITION BY product              -- 파티션
+        PARTITION BY product  -- 파티션
         ORDER BY day
         ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING  -- 윈도우 프레임
     ) AS moving_sum
@@ -220,7 +221,7 @@ B       | 3   | 210    | 430        | 220 + 210
 | **Window Frame** | 각 행마다 실제 계산에 사용되는 범위 (파티션을 벗어나지 못함) | 현재 행 ± N개 행 |
 
 ```sql
--- 파티션만 있는 경우 (윈도우 프레임 = 전체 파티션)
+-- 파티션만 있는 경우 (윈도우 프레임 = 파티션 전체)
 SELECT 
     product,
     SUM(amount) OVER (PARTITION BY product) AS total_per_product
