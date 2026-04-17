@@ -17,16 +17,19 @@ dependencies {
 ```
 
 - [`"org.springframework.boot:spring-boot-dependencies:4.0.5"`](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom)는 maven 저장소(repository)의 artifact를 가리키는 URI 이다. `:` 구분자는 maven 저장소의 url에서 `/`로 변환되어 사용된다.
-- maven 저정소는 `artifact` 라는 단위로 데이터를 보관하며, `artifact`는 여러 파일의 묶음을 의미한다.
+- maven 저장소는 `artifact` 라는 단위로 데이터를 보관하며, `artifact`는 java 패키지의 배포를 위한 파일들의 구성을 의미한다.
+- artifact 에서는 세가지 타입의 파일을 배포하고 있다
+  - `.pom`: 배포 패키지(`.jar`와 `.module`)에서 사용하는 의존 패키지의 목록과 버전 정보를 담고 있다. ***Gradle은 `.pom` 파일의 `<dependencyManagement`안의 `<dependendency>`에서는 버전 정보만 참고 한다. top 레벨에 정의된 `<dependendencies>`안의  `<dependendency>`에 정의된 패키지들은 로컬에 다운로드 하여 사용한다.
+  - `.jar`: class와 metadata file을 묶음 java 패키지 파일
+  - `.module`: java 9+ 이상부터 지원된 신규 형식의 패키지 파일 `.jar`대비 더 많은 메타 정보를 담고 있음
 - maven 저장소의 artifact는 주로 java 패키지 파일(`.jar` 또는 `.module`)과 의존성 정보 BOM(`.pom`) 파일을 배포하는 저장소 이다.
-- JAR(Java ARchive)는 클래스와 리소스를 압축한 단순 파일 포맷(라이브러리)인 반면, 모듈(Java 9+ Module)은 module-info.java를 포함하여 의존성, 공개 범위, 구성을 명시하는 더 강력한 패키지 이다.
+- JAR(Java Archive)는 클래스와 리소스를 압축한 단순 파일 포맷(라이브러리)인 반면, 모듈(Java 9+ Module)은 module-info.java를 포함하여 의존성, 공개 범위, 구성을 명시하는 더 강력한 패키지 이다.
 - `platform()`과 `spring-boot-starter-xxx`는 모두 의존성 파일(BOM == `.pom`)을 가져오는 것을 목적으로 한다.
 - maven repository 에는 BOM(.pom 파일)을 두가지 artifact 방식으로 배포 하고 있다.
   - `.jar`없이 `.pom` 파일만 배포 (`platform()`으로 사용 가능), 비 일반적인 artifact 구성
     - 예: [`org.springframework.boot:spring-boot-dependencies:x.x.x` artifact](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom)
   - 빈(empty) `.jar` 파일과 `.pom` 파일을 함께 배포 (`spring-boot-starter-xxx` 방식), 일반적인 artifact 구성
     - 예: [`org.springframework.boot:spring-boot-starter-web` artifact](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-starter-web/4.0.5/)
-
 - `platform()`은 maven repository에 직접 배포된 `.pom`파일을 다루기 위한 gradle 함수 이다.
 - `implementation(platform())`은 `platform()`에 정의된 의존성을 graldle 프로젝트의 `implementation` 단계에서 참조하겠다는 의미이다.
 
@@ -88,22 +91,20 @@ implementation 'org.springframework.boot:spring-boot-starter-web'
 - **실제 패키지**: Maven/Gradle에서 사용하는 `.jar`와 함께 배포되지만, BOM의 핵심은 **POM(Project Object Model) 파일**
 - **저장소**: Maven Central Repository 등에서 `.pom` 파일로 제공
 
-### BOM(POM 파일) 내부에 담고 있는 정보
+### POM 파일 형식
 
-다음은 maven repository에서 제공되고 있는 [`spring-boot-dependencies`](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/4.0.5)의 pom 파일 내용이다.
-
-[`~/.m2/repository/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom`](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom)
+-`.pom` 파일은 [maven repository](https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.25.4/)나 [maven repository web page의 Files](https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core/2.25.4)에서 확인 가능
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-dependencies</artifactId>
+  <groupId>my.package.group</groupId>
+  <artifactId>my-application-library</artifactId>
   <version>4.0.5</version>
   <packaging>pom</packaging>
-  <name>spring-boot-dependencies</name>
-  <description>Spring Boot Dependencies</description>
+  <name>my-library</name>
+  <description>Hello World</description>
   <url>https://spring.io/projects/spring-boot</url>
   <licenses>
     ...
@@ -116,46 +117,41 @@ implementation 'org.springframework.boot:spring-boot-starter-web'
   </scm>
   <issueManagement/>
   <properties>
-    <!-- pom.xml 안에서 사용될 verstion 값 정의 -->
+    <!-- dependency 에서 사용될 version 값을 변수로 정의 -->
     <spring-framework.version>7.0.6</spring-framework.version>
     ...
   </properties>
   <dependencyManagement>
+    <!-- dependencyManagement 이하의 dependency 목록에서는 버전 정보만 참고함. 목록의 패키지를 사용하고자 하면 명시된 호환 버전을 사용하도록 하는 것이 목적. -->
     <dependencies>
       <!-- 수백 개의 의존성 정의 -->
-      <!-- springframework.boot group의 의존성 pom 파일을 jar로 감싸서 제공 () -->
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter</artifactId>
         <version>4.0.5</version>
       </dependency>
-      <!-- springframework group의 의존성 pom 파일 직접 제공 -->
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-framework-bom</artifactId>
-        <version>${spring-framework.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <!-- ... 더 많은 의존성 ... -->
+      ...
     </dependencies>
   </dependencyManagement>
+  <dependencies>
+    <!-- top level에 정의된 dependencies 이하의 dependency 패키지는 빌드 도구가 로컬에 다운로드 하여 사용. 현재 패키지를 실행하는데 직접적으로 필요한 패키지 목록-->
+    <dependency>
+      <groupId>org.required.to.run</groupId>
+      <artifactId>dep-package</artifactId>
+      <version>${spring-framework.version}$</version>
+    </dependency>
+    ...
+  </dependencies>
   <build>
     <pluginManagement>
       <plugins>
-        ## plugins for build maven/gradle project
+        <!-- 빌드 도구에서 사용되는 빌드용 플러그인 패키지 -->
       </plugins>
     </pluginManagement>
   </build>
 </project>
 
 ```
-
-**포함 내용:**
-
-- 호환되는 모든 라이브러리의 **버전 번호** (수백 개)
-- 각 라이브러리 간의 **호환성 정보**
-- 의존성 솔루션(실제 JAR/AAR 파일 아님)
 
 ### `platform()` 함수의 역할
 
