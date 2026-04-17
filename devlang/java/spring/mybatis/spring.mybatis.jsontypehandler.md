@@ -1,16 +1,30 @@
-# Mybatis Type Handler
+# Mybatis Type Handler for jsonb
 
-이 문서는 mybatis + spring jackson 환경에서 사용자정의 Class 또는 Generic Type을 RDB에 `json/jsonb` 형식으로 쓰고 읽기 위한 mybatis용 `typehandler`를 설명한다.
+이 문서는 mybatis + spring jackson 환경에서 사용자정의 Class 또는 Generic Type을 RDB에 `json/jsonb` 형식으로 읽고(deserialize) 쓰기(serialize) 위한 mybatis용 `typehandler`를 설명한다.
 
-- mybatis의 `TypeHander`는 Java의 사용자 정의 DataType(Class 또는 Generic Type)을 DB의 Object(data item) 타입으로 부터 변환하는데 사용되는 도구이다.
-- Java와 DB 간에 데이터의 타입이 유사하지 않을 때 이 둘을 연결해 주기 위해서 사용한다.
+## Postgresql `json/jsonb` type
+
+`json/jsonb` type은 사실상 `json` 문서에 대응 하는 타입이다.
+Postgresql에서 어떤 데이터의 타입이 `json/jsonb`라고 하면 단지 TEXT인데 `json`문서 형식을 담은 타입이다 라는 의미이다.
+`json` 문서는 Java 등의 프로그래밍 언어에서는 String으로 다룰수 있고, Postgresql도 기본적으로는 사실상 TEXT type처럼 기록하고 다루게 된다. 그래서 Postgresql의 `json/jsonb` 데이터는 JDBC에서 `String`이나 `List<String>` 으로 맵핑해도 아무런 문제가 발생하지 않는다.
+
+하지만 Postgresql은 `json` 문서 데이터를 다루기 위한 좀 더우 유연한 방식을 지원하기 위하여 `jsonb` 타입을 만들었고 `jsonb` 타입에만 사용할 수 있는 다양한 json 핸들링 용 함수를 제공한다.
+
+정리하면, Postgresql 입장에서 `json` 문서는 TEXT와 마찬가지다, 하지만 `json` 문서를 좀더 효율적으로 탐색하고 변경하기 위한 목적으로 `jsonb` 타입을 만들었으며, Postgresql에 `jsonb` 타입으로 `json` 문서가 저장되면 json 데이터의 node 검색을 위한 인덱스를 자동 생성하며, `json` 문서를 다루기 위한 다양한 함수를 사용할 수 있게 된다.
+
+Postgresql의 `json` 타입은 `jsonb` 타입 보다 이전의 방식이며, Postgresql 내에서 지원 되는 기능이 많이 부족하다. 거의 '`json` 문서를 저장한 TEXT 타입이다'의 방식으로 다루어 지게 된다.
+
+## mybatis TypeHandler 
+
+- mybatis의 `TypeHander`는 Java의 사용자 정의 DataType(Class 또는 Generic Type)을 DB의 Object(data item) 타입과 상호 변환하는데 사용되는 도구이다.
+- Java와 DB 간에 데이터의 타입이 유사하지 않을 때 이 둘을 상호 변환하기 위해서 사용한다.
 
 mybatis의 `TypeHander`가 필요한 경우
 
 - Java의 데이터와 DB의 데이터를 기본적인 맵핑 방식으로 데이터를 전환하지 못할때(type miss match 발생 등)
 - Java의 사용자 정의 Class 또는 Generic Type을 DB의 json/jsonb type으로 저장
 
-## mybatis TypeHandler 주의 사항
+### mybatis TypeHandler 주의 사항
 
 - mybatis는 typehandler를 이용해 Java의 data를 RDB의 data로 serialize/deserialize 한다.
 - typehandler는 mybatis용 `mapper.xml`에서 보통 참조되는 class이다.
@@ -182,7 +196,7 @@ public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 - `TypeReference<T>`와 `JavaType` 는 둘 모두 jackson에서 `Generic Type` 정보를 저장하는데 사용 Class이다.
 - 개발자가 실제 사용시에도 `TypeReference`나 `JavaType` 모두 동일한 목적(제너릭 타입 정보 보존)으로 사용할 수 있다.
 - `TypeReference<T>` 사람이 읽기 쉬운 표현식이 필요할 때 사용
-- `JavaType`은 jackson library 내부적으로 사용하는 기능적으로 좀 더 유연한 지원을하는 type이다.
+- `JavaType`은 jackson library 내부적으로 사용하는 기능적으로 좀 더 유연한 지원을 하는 type이다.
 - jackson은 사용자 코드에서 TypeReference로 type을 전달받으면 내부적으로 이를 JavaType으로 저장해서 처리하는 방식을 사용한다.
 
 - TypeReference가 더 좋은 경우

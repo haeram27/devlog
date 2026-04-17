@@ -21,16 +21,16 @@
         }
     }
 
-@Data
-// converter = using StdConverter, post-process after jackson convets Object
-@JsonDeserialize(converter = JsonDoc.PostProcess.class)
-public class JsonDoc {
+    @Data
+    // converter = using StdConverter, post-process after jackson convets Object
+    @JsonDeserialize(converter = JsonDoc.PostProcess.class)
+    public class JsonDoc {
 
 
 
-    @JsonProperty("data")
-    // using JsonDeserializer, json deserialize this item using assigned JsonDeserializer
-    @JsonDeserialize(using = EmptyToNullStringDeserializer.class)
-    private String data;
-}
+        @JsonProperty("data")
+        // using JsonDeserializer, json deserialize this item using assigned JsonDeserializer
+        @JsonDeserialize(using = EmptyToNullStringDeserializer.class)
+        private String data;
+    }
 ```

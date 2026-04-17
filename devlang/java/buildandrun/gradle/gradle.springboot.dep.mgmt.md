@@ -1,6 +1,6 @@
 # gradle에서 springboot 프로젝트의 의존성 관리
 
-- `platform()` 방식 (최신 권장 방식)
+- `dependencies { platform()` 방식 (최신 권장 방식)
 - `io.spring.dependency-management` plugin 사용
 - 버전 직접 입력 방식 : `spring-boot-dependencies-${springBootVersion}.pom` 파일에 명시되지 않은 라이브러리들에 사용
 
