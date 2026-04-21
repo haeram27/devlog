@@ -280,10 +280,3 @@ settings 단계에 개입하는 예도 있습니다.
         project.version = "2.0"
     }
 ```
-
-원하면 다음으로
-1. repository 설정 충돌 예제
-2. dependency 버전 강제 예제
-3. 현재 프로젝트 기준으로 init.gradle 샘플 하나
-
-중 하나를 이어서 구체적으로 보여드릴 수 있습니다.

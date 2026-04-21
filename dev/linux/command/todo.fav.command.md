@@ -1,5 +1,17 @@
 # 자주쓰는 명령어
 
+## 디렉토리 복사
+
+```bash
+# copy files in directory
+# impotant: /path/from followed by '/*'
+echo cp -rf /path/from/* /path/to
+
+# sync: remove files /path/to not exists in /path/from/ after copy files
+# impotant: /path/from followed by '/'
+echo rsync -av --delete /path/from/ /path/to
+```
+
 
 ## find
 
@@ -10,7 +22,6 @@ syntax: path 생략시 현재 디렉토리(`.`) 의미
 ```
 
 ```bash
-
 find . -type d -exec chmod 755 {} \;
 find . -type f -name "*.sh" -exec chmod 755 {} \;
 find . -maxdepth 2 -type d 
@@ -19,6 +30,8 @@ find -name "*.log" -exec cat {} \;
 find -name '*.java' -print0 | xargs -0rx echo
 find -name '*.java' | xargs -0rxi echo {}
 find -name '*.java' | xargs -0rxi grep CSF_INCOMING_CALL_FRAUD
+
+# ./arch/x86/libffmpeg.mx.so -> a/libffmpeg.mx.so.x86
 find -name "libffmpeg.mx.so" -exec bash -c 'cp {} a/$(basename {}).$(basename $(dirname {}))' \;
 
 mkdir /tmp/lib64; find /usr/lib64/libssl.* -exec ln -sf {} /tmp/lib64 \;
@@ -27,6 +40,18 @@ mkdir /tmp/lib64; find /usr/lib64/libssl.* -exec ln -sf {} /tmp/lib64 \;
 find /opt/myapp ! -user root -o ! -group root
 find /opt/myapp ! -user 0 -o ! -group 0
 find /opt/myapp \( ! -user 0 -o ! -group 0 \) -a -name '*.sh'
+```
+
+### 일괄 파일 이름 변경
+
+```bash
+# change name with multiple files
+# remove 'echo' from 'echo mv' is to check change list before apply, please remove echo when it needs action
+find . -type f -name "*old*" -exec bash -c 'echo mv "$0" "${0/old/new}"' {} \;
+# change file-name prefix
+find . -type f -name "prefix_*" -exec bash -c 'echo mv "$0" "${0/#prefix_/new_}"' {} \;
+# change file extension
+find . -type f -name "*.txt" -exec bash -c 'echo mv "$0" "${0/%.txt/.doc}"' {} \;
 ```
 
 ### find 와 xargs 연동
@@ -481,9 +506,15 @@ openssl enc -d -k secretpassword123 -aes-256-cbc -a -md sha512 -pbkdf2 -iter 112
   - UTC 시각으로 11시 30분에 브라더 프린터에서 인쇄하도록 작업을 스케줄링한다.
 
 ### 데브옵스 도구: 앤서블로 서버 환경 배치하기
-- add-apt-repository ppa:ansible/ansible 우분투/데비안 컴퓨터에 앤서블을 설치할 수 있게 앤서블 소프트웨어 저장소를 추가한다.
-- ansible webservers -m ping webservers 호스트 그룹에 있는 모든 호스트의 네트워크 연결을 테스트한다.
-- ansible webservers -m copy -a "src=/home/ubuntu/stuff.html dest=/var/www/html/" webservers 그룹에 있는 모든 호스트의 지정 위치에 로컬 파일을 복사한다.
-- ansible-doc apt apt 모듈에 대한 구문과 사용법을 보여준다.
-- ansible-playbook site.yml site.yml 플레이북을 기반으로 작업을 실행한다.
-- ansible-playbook site.yml --ask-vault-pass 볼트 패스워드로 호스트에 인증하고 플레이북 작업을 실행한다
+- add-apt-repository ppa:ansible/ansible
+  - 우분투/데비안 컴퓨터에 앤서블을 설치할 수 있게 앤서블 소프트웨어 저장소를 추가한다.
+- ansible webservers -m ping webservers
+  -  호스트 그룹에 있는 모든 호스트의 네트워크 연결을 테스트한다.
+- ansible webservers -m copy -a "src=/home/ubuntu/stuff.html dest=/var/www/html/" webservers
+  -  그룹에 있는 모든 호스트의 지정 위치에 로컬 파일을 복사한다.
+- ansible-doc apt
+  -  apt 모듈에 대한 구문과 사용법을 보여준다.
+- ansible-playbook site.yml site.yml
+  -  플레이북을 기반으로 작업을 실행한다.
+- ansible-playbook site.yml --ask-vault-pass
+  -  볼트 패스워드로 호스트에 인증하고 플레이북 작업을 실행한다

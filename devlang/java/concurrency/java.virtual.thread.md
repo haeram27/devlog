@@ -32,7 +32,7 @@ Thread t = Thread.startVirtualThread(Runnable task);
 Thread t = Thread.ofVirtual().name("my-vthread").start(Runnable task);
 ```
 
-#### `Thread.ofVirtual()`에서 사용 가능한 메소드 목록
+### `Thread.ofVirtual()`에서 사용 가능한 메소드 목록
 
 1. 속성 설정 메서드 (Configuration)
 스레드의 이름, 예외 처리 등 핵심 속성을 정의합니다.

@@ -37,6 +37,7 @@
     - DiscardOldestPolicy: 큐의 맨 앞에 있는(가장 오래된) 작업을 삭제하고 새 작업을 다시 시도합니다.
 
 ## 예제 - RejectedExecutionHandler Policy 변경하여 ThreadPoolExecutor 생성
+
 ```java
 import java.util.concurrent.*;
 

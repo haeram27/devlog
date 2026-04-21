@@ -9,6 +9,58 @@
   - Prompt Files
   - Custom agents
 
+## .github 디렉토리 표준 파일 위치
+
+* **{repo-root}/AGENTS.md**
+  * 역할: Copilot 에이전트(코드 분석, 빌드, 테스트 등)에서 참조 되는 공용 지침 파일입니다.
+  * 명령 쿼리에 참조 방식: 항상 자동 포함
+* **{repo-root}/CLAUDE.md**
+  * 역할: 에이전트 지침 파일
+  * 명령 쿼리에 참조 방식: 조건부 자동 포함, Anthropic's Claude model 사용시
+* **{repo-root}/GEMINI.md**
+  * 역할: 에이전트 지침 파일
+  * 명령 쿼리에 참조 방식: 조건부 자동 포함, Google Gemini model 사용시
+* **{repo-root}/.github/copilot-instructions.md**
+  * 역할: 리포지토리 전체에 적용되는 전역 지침입니다. 모든 채팅 및 인라인 요청에 자동으로 포함됩니다.
+  * 참조 방식: 항상 자동 포함
+* **{repo-root}/.github/agents/*.agent.md**
+  * 역할: 특정 페르소나와 도구(Tools) 권한을 가진 사용자 정의 에이전트를 정의합니다.
+  * 명령 쿼리에 참조 방식: 수동(사용자 호출), 채팅에서 `@에이전트명`으로 명시적으로 호출하여 사용
+* **{repo-root}/.github/instructions/*.instructions.md**
+  * 역할: 경로별(Path-specific) 지침 파일입니다. 파일 상단에 applyTo 패턴을 작성하여 특정 폴더나 파일 형식 작업 시에만 컨텍스트에 포함되도록 설정합니다.
+  * 명령 쿼리에 참조 방식: 조건부 자동(file context의 경로 패턴), 채팅창에서 `current file context`나 `#`으로 추가한 `file context`의 경로나 파일 이름이 `instructions.md`의 `applyTo` 항목과 매칭 되면 참조됨
+    ```md
+    # java.instructions.md
+    ---
+    name: Java Coding Standards
+    description: Java 프로젝트를 위한 코딩 규칙
+    applyTo:
+    - "src/main/java/**/*.java"  # 특정 경로의 Java 파일에만 적용
+    - "**/*.gradle"              # Gradle 설정 파일에도 적용 가능
+    ---
+    # 여기에 Java 관련 지침 작성
+    ```
+
+* **{repo-root}/.github/prompts/*.prompt.md**
+  * 역할: 자주 쓰는 복잡한 프롬프트를 템플릿화한 파일입니다.
+  * 작성 내용: 사용자가 자주 사용하는 혹은 복잡한 작업 요청을 템플릿으로 작성
+  * 명령 쿼리에 참조 방식: 수동(사용자 호출), 채팅 창에서 `/프롬프트명`으로 명시적으로 호출하여 사용
+* **{repo-root}/.github/skills/skill-name/SKILL.md**
+  * 역할: 에이전트가 수행할 수 있는 특정 기술(Skill)이나 워크플로 지침을 정의합니다.
+  * 작성 내용: 에이전트가 수행 가능한 기능을 정의함. 기능의 목표 및 수행하기 위한 작업 순서 내용 및 커맨드 라인 명령어 등을 상세 작성
+  * 명령 쿼리에 참조 방식: agent.md 에서 참조, agent.md의 파일 상단에 메타 정보로서 `skills:`에 경로를 명시
+    ```md
+    # code-reviewer.agent.md
+    ---
+    name: code-reviewer
+    description: 코드 리뷰 전문 에이전트
+    # 해당 에이전트가 참조할 스킬들을 명시
+    skills:
+    - .github/skills/refactoring.skill.md
+    - .github/skills/security-check.skill.md
+    ---
+    ```
+
 ## .github 디렉토리 예제
 
 ```text
@@ -20,13 +72,9 @@ project/
     ├── commit-message.style.md                 # 커밋 메시지 스타일 가이드
     ├── security-patterns.md                    # 보안 규칙
     ├── agents/                                 # Custom Agent 설정 파일들 (역할별 페르소나 및 특수기능 활성화)
-    │   ├── explainer.agent.md                  # 기술 설명 모드 (개념/코드 설명)
     │   ├── janitor.agent.md                    # 코드 정리 모드 (기술 부채 제거)
-    │   ├── mentor.agent.md                     # 멘토링 모드 (가이드 및 조언)
     │   ├── plan.agent.md                       # 계획 수립 모드
-    │   ├── prd.agent.md                        # PRD 문서 생성 모드
-    │   ├── specification.agent.md              # 사양 문서 생성 모드
-    │   └── beast.agent.md                      # 무한 작업 에이전트, 현재 Autopilot 이라는 기능으로 github 공식 agent로 지원 예정(preview)
+    │   └── prd.agent.md                        # PRD 문서 생성 모드
     ├── instructions/                           # Cumstom Instrunction 설정 파일들, 모든 프롬프트에 자동 적용되는 context
     │   ├── security-patterns.instructions.md   # 보안 코딩 패턴 가이드
     │   ├── error-handling.instructions.md      # 에러 처리 표준 패턴

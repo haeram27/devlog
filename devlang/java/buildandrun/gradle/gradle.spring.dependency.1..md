@@ -84,7 +84,6 @@ implementation 'org.springframework.boot:spring-boot-starter-web'
 - **실제 패키지**: Maven/Gradle에서 사용하는 `.jar`와 함께 배포되지만, BOM의 핵심은 **POM(Project Object Model) 파일**
 - **저장소**: Maven Central Repository 등에서 `.pom` 파일로 제공
 
-
 ### `platform()` 함수의 역할
 
 `platform()`은 Gradle 5.0+에서 제공하는 **BOM 가져오기 메커니즘** 을 구현한 함수:
