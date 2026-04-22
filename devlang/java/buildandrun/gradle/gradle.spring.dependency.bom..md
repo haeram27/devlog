@@ -1,6 +1,6 @@
 # gradle에서 spring 의존성 다루기
 
-## gardle에서 maven repository의 artifact 참조 방식
+## gradle에서 maven repository의 artifact 참조 방식
 
 ```gradle
 # build.gradle
