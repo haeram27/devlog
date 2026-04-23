@@ -75,40 +75,32 @@ web access
 
 ```bash
 # http connect and get response (html etc)
-curl -fsSL <HTTP-address>
-curl -fksSL <HTTPS-address>
-
-# file down
-curl -fsSLO <HTTP-file-address>
-curl -fksSLO <HTTPS-file-address>
+curl -fksSL https://github.com
+curl -fksSLo github.html --connect-timeout 2 -w "%{response_code}" https://github.com
 
 # Use Proxy
 curl -x [protocol://]host[:port] -fksSL <HTTP URL>
 curl -x http://127.0.0.1:9913 -fksSL https://github.com
 curl -x socks5://127.0.0.1:9998 -fksSL http://10.101.10.1:8081
 
-
 # REST API call
 curl -ks -X POST 'https://<ip>:<port>/api/get' \
 -H "Authorization: bearer <token>" \
 -H "Content-Type: application/json" \
--d '{"refresh_token" : "589d727c-a669-4e16-a807-6bd424e7acc1"}'
+-d '{"key" : "value"}'
 ```
 
 file download
 
 ```bash
-curl -LO <HTTP-file-address>
-curl -fLO <HTTP-file-address>
-curl -kLO <HTTPS-file-address>
-curl -fkLO <HTTPS-file-address>
-curl -fkLOu <user> <HTTP-file-address>
-curl -fkLo <local/file/path/to/download> <HTTPS-file-address>
-curl -sSL <HTTP-file-address>
-curl -fsSL <HTTP-file-address>
-curl -fsSLO <HTTPS-file-address>
-curl -fksSLO <HTTPS-file-address>
-curl -fsSLo <local/file/path/to/download> <HTTPS-file-address>
+# print download progress
+curl -fkLO <HTTPS-file-address> [-u <user>]
+
+# rename downloaded file
+curl -fkLo </local/path/to/new-file-name> <HTTPS-file-address> [-u <user>]
+
+# print error only
+curl -fksSLO <HTTPS-file-address> -[-u <user>]
 ```
 
 | 옵션 | 내용 |
@@ -116,7 +108,7 @@ curl -fsSLo <local/file/path/to/download> <HTTPS-file-address>
 | -f | HTTP 서버 오류시 오류 문서 다운로드 안함 |
 | -k | --insecure, https 연결시 TLS 검증을 하지 않음 |
 | -s | --silent, progress 출력 않함 |
-| -S | --show-error, -s 옵션과 함께 사용하여 에러 메시지만 출력한다.<br>이 옵션을 사용하면 -s 사용중 -S 옵션을 사용하지 않아도 에러 내용을 볼 수 있다.|
+| -S | --show-error, -s 옵션과 함께 사용하여 에러 메시지만 출력한다.<br>이 옵션을 사용하면 -s 사용중에도 에러 내용을 볼 수 있다.|
 | -v | --verbose, HTTP Req/Resp 내용(REQ line, header) 출력 |
 | -L | --location, redirection을 따라감 |
 | -o, --output <file> | 다운로드된 uri 컨텐츠를 지정된 로컬 파일로 저장, `-o /dev/null` : 다운로드된 uri 컨텐츠를 /dev/null로 보냄 |

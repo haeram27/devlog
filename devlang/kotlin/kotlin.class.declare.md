@@ -298,8 +298,8 @@ public final class MyClass {
 |---|---|---|---|---|---|
 |Nested inner class|O|instance|O|O|X (인스턴스로 호출)|
 |Nested class|O|class|X|O|X (인스턴스로 호출)|
-|Nested object|X|class|X|X|O|
-|companion class|X|class|X|X|X (생략가능)|
+|Nested object|X|class|X|X|O<br>외부:`Outer.ObjecName.variable`<br>내부:`ObjecName.variable`|
+|companion class|X|class|X|X|선언 class 또는 interface 외부: O, `Outer.variable` <br> 내부: X (생략가능)|
 
 **용도**
 
