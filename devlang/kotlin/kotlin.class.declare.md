@@ -190,7 +190,7 @@ public final class DatabaseConfig {
 - kotlin
 
 ```kotlin
-class Outter {
+class Outer {
     object Inner {
         val url = "jdbc:mysql://localhost:3306"
     }
@@ -200,11 +200,11 @@ class Outter {
 - java 변환
 
 ```java
-public final class Outter {
+public final class Outer {
 
     public static final class Inner {
         // 1. 싱글톤 인스턴스 생성
-        public static final Outter.Inner INSTANCE = new Outter.Inner();
+        public static final Outer.Inner INSTANCE = new Outer.Inner();
 
         private final String url = "jdbc:mysql://localhost:3306";
 
@@ -221,10 +221,10 @@ public final class Outter {
 
 ## 11. 동반 객체 (Companion Object)
 
-outter 클래스에 속한 단일 싱글톤 객체를 생성합니다.
+outer 클래스에 속한 단일 싱글톤 객체를 생성합니다.
 클래스 당 내부에 단 하나의 `compnion object`만 선언할 수 있습니다.
-outter 클래스가 클래스 로더에 로딩 될 때 `compnion object`는 단 한번 인스턴스화 됩니다.
-outter 클래스는 여러 개의 객체로 인스턴스화 될 수 있지만, companion object는 단 한번만 인스턴스화 됩니다.
+outer 클래스가 클래스 로더에 로딩 될 때 `compnion object`는 단 한번 인스턴스화 됩니다.
+outer 클래스는 여러 개의 객체로 인스턴스화 될 수 있지만, companion object는 단 한번만 인스턴스화 됩니다.
 컴파일된 bytecode를 보면 companion object는 `public static final class`가 됩니다. 
 
 ```kotlin
@@ -237,7 +237,7 @@ class MyClass {
 
 kotlin에는 static 키워드가 없으므로 클래스의 정적(static) 특성의 필드를 클래스에 직접 선언할 수 없습니다.
 
-`compnion object`는 어떤 클래스 내부에서 선언되며, outter 클래스의 정적(static) 멤버를 담는 컨테이너 역할의 클래스 입니다.
+`compnion object`는 어떤 클래스 내부에서 선언되며, outer 클래스의 정적(static) 멤버를 담는 컨테이너 역할의 클래스 입니다.
 
 이름 유무에 따라 두 가지 세부 형태로 나뉩니다: 
 
@@ -452,7 +452,7 @@ MyClass.Utils.log("Hello")
 **Companion Object (클래스와 동행)**
 
 클래스의 인스턴스 없이 메서드나 프로퍼티를 호출하고 싶을 때(팩토리 메서드 등) 사용합니다.
-Outter Class에 속한 정적(static) 속성의 함수, 변수를 선언하려고 하는데 사용
+Outer Class에 속한 정적(static) 속성의 함수, 변수를 선언하려고 하는데 사용
 이는 Java에서 Class내 필드 static 함수, 변수를 선언하는 것과 같음
 
 ```kotlin

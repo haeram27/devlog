@@ -40,7 +40,7 @@ public final class LazyHolderSingleton implements Serializable {
     }
 
     // private: 외부에서 접근 불가
-    // static inner class : 지연 초기화,`Holder` Inner class는 outter class가 로드될 때 인스턴스화 되지 않음, 직접 호출되었을 때만 인스턴스화 됨
+    // static inner class : 지연 초기화,`Holder` Inner class는 outer class가 로드될 때 인스턴스화 되지 않음, 직접 호출되었을 때만 인스턴스화 됨
     private static class Holder {
         private static final LazyHolderSingleton INSTANCE = new LazyHolderSingleton();
     }

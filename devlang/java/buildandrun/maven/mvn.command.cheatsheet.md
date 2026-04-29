@@ -5,9 +5,9 @@
 powershell의 경우 각 옵션에 대해서 sigle-quoting을 적용해야 한다.
 
 ```text
-sh$ mvn -e -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install
-cmd> mvn -e install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install
-PS> mvn -e install '-Dcheckstyle.skip' '-Dpmd.skip=true' '-Dcpd.skip=true' '-Dmaven.test.skip=true' clean install
+sh$ mvn -e -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install -T1
+cmd> mvn -e install -Dcheckstyle.skip -Dpmd.skip=true -Dcpd.skip=true -Dmaven.test.skip=true clean install -T1
+PS> mvn -e install '-Dcheckstyle.skip' '-Dpmd.skip=true' '-Dcpd.skip=true' '-Dmaven.test.skip=true' clean install -T1
 ```
 
 ## build 및 local repo에 package 설치(install)

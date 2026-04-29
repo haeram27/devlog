@@ -3,18 +3,23 @@
 ## postgres
 
 ```bash
-docker exec -it postgres-container psql -P pager=off  -p 5432 -d cppoltp
-docker exec -it postgres-container psql -P pager=off  -p 5432 -d cppoltp -f any.sql
-docker exec -it postgres-container psql -P pager=off  -p 5432 -d cppoltp -c '<sql stmt>'
-docker exec -it postgres-container psql -P pager=off  -p 5432 -d cppoltp -c 'SELECT * FROM pg_catalog.pg_tables;'
+docker exec -it postgres-container psql -P pager=off  -p 5432 -d myoltp
+docker exec -it postgres-container psql -P pager=off  -p 5432 -d myoltp -f any.sql
+docker exec -it postgres-container psql -P pager=off  -p 5432 -d myoltp -c '<sql stmt>'
+docker exec -it postgres-container psql -P pager=off  -p 5432 -d myoltp -c 'SELECT * FROM pg_catalog.pg_tables;'
 ```
 
 ## mongodb
 
 ```bash
+# hostip 정보로 접속
 mongosh mongodb://id:pass@1.1.1.1:27017/dbname
 mongosh mongodb://id:pass@1.1.1.1:27017/?authMechanism=DEFAULT&authSource=dbname
+
+# hostname 정보로 접속
 mongosh mongodb+srv://id:pass@hostname/?authMechanism=DEFAULT&authSource=dbname
+
+# authentication
 mongosh mongodb://1.1.1.1:27017 --authenticationDatabase=admin -u adminUser -p adminPass --eval 'sample_airbnb.listingsAndReviews.find().batchSize(-1).limit(10)'
 ```
 
@@ -39,6 +44,7 @@ echo -e "set key1 val1\nget key1\ninfo" | redis-cli
 |kafka-consumer-groups.sh|컨슈머 그룹 상태 확인|
 
 ### 1. 토픽 관리 (kafka-topics.sh)
+
 토픽을 생성, 조회, 수정, 삭제할 때 사용합니다.
 
 - 토픽 리스트 확인:
@@ -54,6 +60,7 @@ bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --topic my-topic 
 ```
 
 ### 2. 메시지 생성 (kafka-console-producer.sh)
+
 특정 토픽으로 메시지를 직접 전송(Produce)할 때 사용합니다.
 
 ```bash

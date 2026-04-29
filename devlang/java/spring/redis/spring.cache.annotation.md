@@ -54,7 +54,6 @@ spring은 외부 캐시 솔루션(redis 등)과 편리하게 연동하기 위해
 ### 추가
 
 - Redis는 `Logical Database`라는 논리적 구분된 공간을 제공한다.
-- 
 
 ### 사용 예제
 

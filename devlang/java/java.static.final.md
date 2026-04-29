@@ -8,6 +8,6 @@
 
 ## static
 
-- inner class : outter 클래스와 독립 클래스 임을 선언, outter 클래스 인스턴스 없이 inner만 인스턴스 생성 가능
+- inner class : outer 클래스와 독립 클래스 임을 선언, outer 클래스 인스턴스 없이 inner만 인스턴스 생성 가능
 - method : 클래스 인스턴스에 독립된 메소드 임을 선언, 클래스 인스턴스 없이 호출 가능, static 메모리 영역에 로딩됨
 - variable : 클래스 인스턴스에 독립된 변수 임을 선언, 클래스 인스턴스 없이 호출 가능, static 메모리 영역에 로딩됨

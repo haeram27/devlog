@@ -93,6 +93,14 @@ Usage: redis-cli [OPTIONS] [cmd [arg [arg ...]]]
 
 ## 명령 사용예
 
+### syntax
+
+```text
+redis-cli [OPTIONS] [cmd [arg [arg ...]]]
+```
+
+### cli 도구 접속
+
 ```bash
 $ redis-cli -h 1.1.1.1 -p 6379 -a passw@rd -n 1
 
@@ -102,3 +110,15 @@ $ redis-cli -h 1.1.1.1 -p 6379 -a passw@rd -n 1
 1.1.1.1:6379> get key:of:my:value
 1.1.1.1:6379> exit
 ```
+
+### docker 컨테이너를 통한 명령 실행
+
+```bash
+docker exec -it redis-container /path/to/redis-cli -h 1.1.1.1 -p 6379 -a "passw@rd" -n 1 keys "key:of:my:value:*"
+```
+
+- `-h <hostname>` : Server hostname (default: 127.0.0.1)
+- `-p <port>` : Server port (default: 6379)
+- `-a <password>` : Alias of `--pass`
+- `--askpass` : Force user to input password with mask from STDIN
+- `-n <db>` : Database number

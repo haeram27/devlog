@@ -159,9 +159,9 @@ List<JsonNode>  JsonNode.findParents(String fieldName)
 
 | method | not existing key | purpose |
 |---|---|---|
-| at(String jsonPtrExpr) | MissingNode | access using JsonPointer(/a/b/c) |
+| **at(String jsonPtrExpr)** | MissingNode | access node using **JsonPointer(/a/b/c)** |
 | findValue(String fieldName) | null | returns first matched child node |
-| findPath(String fieldName) | MissingNode | returns first matched child node |
+| **findPath(String fieldName)** | MissingNode | returns first matched child node |
 | findValues(String fieldName) | empty List | returns all matched child node |
 | findValues(String fieldName, List<JsonNode> foundSoFar) | empty List | returns all child node from subtree except nodes in foundSoFar list |
 | findParent(String fieldName) | null | returns first matched parent node |
