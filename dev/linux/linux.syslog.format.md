@@ -152,8 +152,8 @@ Syslog(Syslog 표준 메시지 포맷 + 프로토콜)과 CEF(Common Event Format
 
 ## 2. 구조 비교
 
-| 항목              | Syslog (RFC3164/5424)                                                               | CEF                                                                                                      |
-|------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| 항목 | Syslog (RFC3164/5424) | CEF |
+|---|---|---|
 | **포맷/구조**      | `<PRI> TIMESTAMP HOST TAG: MESSAGE` 형태 (RFC3164 기준)<br>RFC5424는 구조화된 헤더(Version, AppName 등) 추가 | `CEF:Version|Device Vendor|Device Product|Device Version|Signature ID|Name|Severity|Extension`<br>Extension: Key=Value 쌍을 공백으로 구분 |
 | **용도**          | 일반 시스템·애플리케이션 로그 전송 (OS, 네트워크 장비, 소프트웨어 등에서 폭넓게 사용) | 보안·침입탐지·이벤트 분석을 위한 SIEM 솔루션 연동용 포맷 (ArcSight, Splunk 등) |
 | **프로토콜**      | 일반적으로 UDP/514, TCP/514, 혹은 TLS를 이용해 전송 | 자체적으로 프로토콜을 규정하지 않고, 보통 Syslog(또는 파일)를 통해 전달 |

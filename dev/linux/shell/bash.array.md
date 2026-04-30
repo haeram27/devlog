@@ -101,3 +101,49 @@ done
 # Reverse 1: b
 # Reverse 0: a
 ```
+
+## 배열 인자 전달 및 확인
+
+배열을 함수의 인자로 전달하는 경우 배열의 전체 엘리멘트(`${array[@]}`)를 전달하고 인자를 **전달 받은 함수에서 배열을 positional parameter를 배열로 재구성** 해야 한다.
+
+```bash
+#!/usr/bin/env bash                                                                                             
+set -eo pipefail
+
+units=(a b c d e)
+
+printar() {
+    local array=("$@")
+
+    # 1. check is array (index array 'a' or associate array 'A')
+    if [[ ! ${array@a} =~ [aA] ]]; then
+        echo "Error: $array is NOT array"
+        return 1
+    fi
+
+    # 2. check array is empty
+    # ${#array[@]} returns the number of elements of array
+    if [[ ${#array[@]} -eq 0 ]]; then
+        echo "$array is empty"
+        return 0
+    fi
+
+    echo $array #${array[0]}
+    echo ${array[@]}
+    for p in "${array[@]}"; do echo $p; done
+}
+
+printar ${units[@]}
+
+## --- result ---
+## echo $array
+# a
+## echo ${array[@]}
+# a b c d e
+## for p in "${array[@]}"; do echo $p; done
+# a
+# b
+# c
+# d
+# e
+```
