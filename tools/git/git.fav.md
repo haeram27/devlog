@@ -29,3 +29,13 @@ git branch -D feature01
 # remote branch
 git push origin :feature01
 ```
+
+## remote repository 초기화 하기
+```bash
+git pull
+rm -rf ./.git
+git init -b main
+git add . && git commit -m init
+git remote add origin git@github.com:id/repository.git
+git push -f -u origin main
+```
