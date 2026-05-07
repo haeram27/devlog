@@ -2,11 +2,45 @@
 
 MicroCeph의 접속 포트는 각 서비스(대시보드, RGW 등)를 활성화할 때 옵션을 주거나, 설치 후 Ceph 내부 설정을 변경하는 방식으로 조정할 수 있습니다. [1]
 
+```bash
+```
+
+
+## 주요 서비스 및 기본 포트
+
+- [microceph command enable](https://canonical-microceph.readthedocs-hosted.com/stable/reference/commands/enable/)
+- [microceph network configuration reference](https://docs.ceph.com/en/latest/rados/configuration/network-config-ref/)
+- [ceph dash board](https://docs.ceph.com/en/latest/mgr/dashboard/)
+
+MicroCeph의 활성화 가능한 서비스 및 기본 포트
+
+- RGW (microceph enable rgw)
+  - HTTP: 80
+  - HTTPS: 443
+
+- MON (모니터)
+  - msgr2: 3300
+  - msgr1: 6789
+
+- OSD / MDS / MGR 데몬 통신
+  - 동적 포트 범위: 6800-7568
+  - 고정 1개가 아니라, 데몬이 이 범위에서 사용 가능한 포트를 점유합니다.
+
+- Dashboard (Ceph mgr dashboard 모듈)
+  - 기본 SSL: 8443
+  - SSL 비활성 시: 8080
+
+참고로 “MicroCeph 설치 직 후 전부 활성되는 것은 아니며, 어떤 서비스를 enable 했는지에 따라 실제로 열리는 포트가 달라집니다.
+
+현재 노드에서 실제 열린 포트를 확인하려면 다음 2개가 가장 정확합니다.
+1. `microceph status`
+2. `sudo microceph.ceph mgr services`
+
 ## 1. 주요 서비스 포트 설정 방법
 
-- S3/Object Gateway (RGW): microceph enable rgw --port <포트번호> 명령어로 활성화 시 포트를 지정합니다. 활성화된 RGW의 포트를 변경하려면 disable 후 재활성화합니다.
+- S3/Object Gateway (RGW): `microceph enable rgw --port <포트번호>` 명령어로 활성화 시 포트를 지정합니다. 활성화된 RGW의 포트를 변경하려면 disable 후 재활성화합니다.
 
-- 대시보드 (Dashboard): 기본 8080/8443 포트를 사용하며, microceph.ceph config set 명령어를 통해 mgr/dashboard/server_port (HTTP) 또는 ssl_server_port (HTTPS)를 수정하여 변경할 수 있습니다.
+- 대시보드 (Dashboard): 기본 `8080/8443` 포트를 사용하며, `microceph.ceph config set` 명령어를 통해 `mgr/dashboard/server_port` (HTTP) 또는 `ssl_server_port` (HTTPS)를 수정하여 변경할 수 있습니다.
 
 ## 2. Ceph 기본 통신 포트
 
@@ -20,6 +54,7 @@ microceph.ceph config dump 또는 microceph status 명령어로 현재 적용된
 대시보드에 접속하기 위한 관리자 계정 생성 방법이 필요하신가요? 혹은 외부 IP에서 접속할 수 있도록 바인딩 설정을 추가로 구성하고 싶으신가요?
 
 [3] [https://canonical-microceph.readthedocs-hosted.com](https://canonical-microceph.readthedocs-hosted.com/stable/tutorial/get-started/)
+
 [4] [https://canonical-microceph.readthedocs-hosted.com](https://canonical-microceph.readthedocs-hosted.com/v19.2.0-squid/reference/commands/enable/)
 
 

@@ -3,6 +3,35 @@
 Ceph의 기본 설정(데이터 3중 복제) 때문에 디스크 1개만 추가하면 '경고(HEALTH_WARN)' 상태가 뜨게 됩니다.
 이를 해결하고 디스크(OSD) 1개만으로 HEALTH_OK를 만드는 가장 빠른 방법은 다음과 같습니다.
 
+## 테스트용 microceph 설치 스크립트
+
+- 단일 노드, 단일 loopback 디스크, 단일 pool 구성
+
+```bash
+#/usr/bin/env bash
+
+sudo snap install microceph
+sudo microceph cluster bootstrap
+sudo microceph disk add loop,4G,1
+sudo ceph config set global osd_pool_default_size 1
+sudo ceph config set global osd_pool_default_min_size 1
+sudo ceph osd pool set device_health_metrics size 1
+sudo ceph status
+
+# 풀의 min_size/size 조정 (단일 노드 테스트용, )
+sudo ceph osd pool set rbd min_size 1
+sudo ceph osd pool set rbd size 1
+
+# (선택) 기존 RGW가 이미 떠 있으면 먼저 비활성화
+sudo microceph disable rgw
+
+# RGW for object storage 활성화 (HTTP 포트 지정)
+sudo microceph enable rgw --port 2929
+
+# MDS for CephFS 활성화
+sudo microceph enable mds
+```
+
 ## snap 버전 확인 및 설치
 
 ```bash
