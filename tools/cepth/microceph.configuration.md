@@ -41,11 +41,27 @@ MicroCeph의 활성화 가능한 서비스 및 기본 포트
 - S3/Object Gateway (RGW): `microceph enable rgw --port <포트번호>` 명령어로 활성화 시 포트를 지정합니다. 활성화된 RGW의 포트를 변경하려면 disable 후 재활성화합니다.
 
 - 대시보드 (Dashboard): 기본 `8080/8443` 포트를 사용하며, `microceph.ceph config set` 명령어를 통해 `mgr/dashboard/server_port` (HTTP) 또는 `ssl_server_port` (HTTPS)를 수정하여 변경할 수 있습니다.
+아래처럼 실행하면 됩니다.
+
+```bash
+# (선택) 기존 RGW가 이미 떠 있으면 먼저 비활성화
+sudo microceph disable rgw
+
+# RGW 활성화 (HTTP 포트 지정)
+sudo microceph enable rgw --port 80
+
+# MDS 활성화
+sudo microceph enable mds
+```
+
+참고:
+- `rgw`는 HTTP로 동작하도록 `--port`를 지정할 수 있습니다.
+- `mds`는 CephFS 메타데이터 데몬이라 HTTP 서비스가 아닙니다. 즉, `mds`에 대해 HTTP/HTTPS 포트 개념은 없습니다.
 
 ## 2. Ceph 기본 통신 포트
 
 - MON: 3300(v2), 6789(v1) 포트를 사용합니다.
-- OSD: 6800~7300 대역을 사용하며, 필요 시 ms_bind_port_min/max 설정으로 변경 가능합니다. [8, 9, 10, 11] 
+- OSD: 6800~7300 대역을 사용하며, 필요 시 ms_bind_port_min/max 설정으로 변경 가능합니다. 
 
 ## 3. 설정 확인
 
