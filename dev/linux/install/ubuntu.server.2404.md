@@ -9,9 +9,7 @@ ubuntu 24.04 LTS
 ### sudoers 설정
 
 ```bash
-$ sudo vi /etc/sudoers
-# Allow members of group sudo to execute any command
-%sudo   ALL=(ALL:ALL) ALL
+$ sudo vi /etc/sudoers.d/90-additional-users
 myname  ALL=(ALL) NOPASSWD:ALL
 ```
 
