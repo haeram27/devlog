@@ -40,7 +40,19 @@ mkdir /tmp/lib64; find /usr/lib64/libssl.* -exec ln -sf {} /tmp/lib64 \;
 find /opt/myapp ! -user root -o ! -group root
 find /opt/myapp ! -user 0 -o ! -group 0
 find /opt/myapp \( ! -user 0 -o ! -group 0 \) -a -name '*.sh'
+
+# 특정 디렉토리 제외 (-prune): ./exclude_dir 디렉토리를 제외하고 현재 디렉토리(.)에서 .txt 파일 검색
+find . -path "./exclude_dir" -prune -o -name "*.txt" -print
+
+# 특정 파일/디렉토리 제외 (!): .log 파일을 찾되, ./logs/ 하위 경로는 제외
+find . -name "*.log" ! -path "./logs/*"
+
+# 여러 파일/디렉토리 제외: dir1, dir2를 제외하고 .json 파일 검색
+find . \( -path "./dir1" -o -path "./dir2" \) -prune -o -name "*.json" -print
 ```
+
+- `--prune`은 검색 범위를 줄여 성능을 높일 때 주로 사용하며, `-path` 패턴과 조합해야 효과적
+- 간단한 파일 제외는 `! -name "파일명"` 형식을 사용
 
 ### 일괄 파일 이름 변경
 
@@ -62,6 +74,20 @@ find와 xargs 연동시 `-print0`로 출력하고 `-0`로 받을것
 - xargs 는 공백(space, tab, newline)을 표준 입력의 각 파일 이름 구분자로 사용, `-0` 사용시 입력의 구분자를 NULL(`\0`) 문자로 사용
 - 파일 이름에 공백 또는 따옴표 사용된 경우 오류 없이 전달 가능
 
+## ln - make links between files
+
+```bash
+ln -s TARGET LINKNAME
+
+
+ln [OPTION]... [-T] TARGET LINK_NAME
+ln [OPTION]... TARGET
+ln [OPTION]... TARGET... DIRECTORY
+ln [OPTION]... -t DIRECTORY TARGET...
+```
+
+- TARGET : original file or directory
+- LINK_NAME : linkname to be created
 
 ## tree
 

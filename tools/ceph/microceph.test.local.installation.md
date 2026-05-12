@@ -15,8 +15,8 @@ sudo microceph cluster bootstrap
 sudo microceph disk add loop,4G,1
 sudo ceph config set global osd_pool_default_size 1
 sudo ceph config set global osd_pool_default_min_size 1
-sudo ceph osd pool set device_health_metrics size 1
-sudo ceph status
+sudo ceph osd pool set device_health_metrics size 1 # 초기에는 device_health_metrics가 없을 수 있음
+sudo ceph status # or sudo cepth -s
 
 # 풀의 min_size/size 조정 (단일 노드 테스트용, )
 sudo ceph osd pool set rbd min_size 1
