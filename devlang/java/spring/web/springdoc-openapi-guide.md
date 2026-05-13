@@ -246,6 +246,47 @@ public class S3PresignerController {
 }
 ```
 
+## 6. Parameter에 사용 가능한 값 목록 출력
+
+### 6-1. Request 파라미터의 타입에 enum 타입 직접 사용
+
+- enum 값 목록 자동 노출, 유지보수에 가장 좋음
+
+```java
+public enum Status {
+    READY, RUNNING, DONE
+}
+
+@GetMapping("/jobs")
+public List<JobDto> getJobs(@RequestParam Status status) {
+    ...
+}
+```
+
+### 6-2. enum 클래스를 직접 연결
+
+```java
+@Parameter(schema = @Schema(implementation = Status.class))
+```
+
+
+### 6-3. String 목록 지정
+
+- 파라미터가 String이어야 한다면 annotation으로 명시 가능
+
+```java
+@GetMapping("/jobs")
+public List<JobDto> getJobs(
+    @Parameter(
+        description = "상태",
+        schema = @Schema(allowableValues = {"READY", "RUNNING", "DONE"})
+    )
+    @RequestParam String status
+) {
+    ...
+}
+```
+
 ---
 
 ## 6. 문서 확인 방법
