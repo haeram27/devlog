@@ -1,6 +1,6 @@
 # s3cmd (MicroCeph 공식 가이드 추천)
 
-- microceph client로 s3cmd 사용하는 방법
+- microceph rgw의 client로 s3cmd 사용하는 방법
 
 ## 1. s3cmd 설치 및 설정
 

@@ -1,4 +1,4 @@
-#
+# aws cli (s3/rgw client)
 
 - MicroCeph 자체에는 파일을 직접 업로드하거나 삭제하는 전용 CLI 명령어가 따로 없습니다.
 - 대신 MicroCeph는 S3 호환 인터페이스(RGW)를 제공하므로, s3cmd나 aws-cli와 같은 표준 S3 도구를 사용하여 파일을 관리합니다.

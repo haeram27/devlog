@@ -26,7 +26,7 @@ sudo ceph osd pool set rbd size 1
 sudo microceph disable rgw
 
 # RGW for object storage 활성화 (HTTP 포트 지정)
-sudo microceph enable rgw --port 2929
+sudo microceph enable rgw --port 8555
 
 # MDS for CephFS 활성화
 sudo microceph enable mds
