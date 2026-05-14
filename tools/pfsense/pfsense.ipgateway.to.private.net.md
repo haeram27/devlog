@@ -57,6 +57,13 @@ CMD(명령 프롬프트)를 관리자 권한으로 실행 후 입력:
 
 ```bash
 route -p add 192.168.1.0 mask 255.255.255.0 211.x.x.50
+route show
+```
+
+추후 삭제시
+```bash
+route show
+route delete 192.168.1.0
 ```
 
 - -p 옵션은 컴퓨터를 재부팅해도 라우팅 경로가 영구히 유지되도록 합니다.
@@ -66,6 +73,14 @@ route -p add 192.168.1.0 mask 255.255.255.0 211.x.x.50
 
 ```bash
 sudo ip route add 192.168.1.0/24 via 211.x.x.50
+ip route show
+```
+
+추후 삭제시
+```bash
+ip route show
+sudo ip route del 192.168.1.0/24
+sudo route del -net 192.168.1.0 netmask 255.255.255.0
 ```
 
 ------------------------------
