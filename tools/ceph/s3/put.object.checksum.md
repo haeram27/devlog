@@ -8,16 +8,16 @@ S3가 수신 후 직접 검증한다.
 ### 동작 흐름
 
 ```
-클라이언트                           S3
-  │  SHA-256 계산                     │
-  │  → base64 인코딩                  │
+클라이언트                              S3
+  │  SHA-256 계산                      │
+  │  → base64 인코딩                   │
   │                                   │
   ├─── PUT + x-amz-checksum-sha256 ──►│
   │                                   │ SHA-256 재계산
   │                                   │ 값 비교
-  │◄─── 400 BadChecksum (불일치) ───-─┤
+  │◄─── 400 BadChecksum (불일치) ──────┤
   │  or                               │
-  │◄─── 200 OK (일치) ──────────────-─┤
+  │◄─── 200 OK (일치) ─────────────────┤
 ```
 
 ### 요청 헤더 (SDK 내부 처리)
@@ -92,15 +92,15 @@ Presigned URL 생성 시 `checksumAlgorithm`을 지정하면,
 ```
 서버 (Presigner)                   외부 클라이언트                S3
   │                                   │                            │
-  │ checksumAlgorithm(SHA256) 지정    │                            │
-  │ → Presigned URL 생성              │                            │
-  │──────── URL 전달 ────────────────►│                            │
+  │ checksumAlgorithm(SHA256) 지정     │                            │
+  │ → Presigned URL 생성               │                            │
+  │──────── URL 전달 ─────────────────►│                            │
   │                                   │                            │
-  │                         [외부 클라이언트 처리]                 │
-  │                                   │ SHA-256 계산               │
-  │                                   │ base64 인코딩              │
+  │                         [외부 클라이언트 처리]                     │
+  │                                   │ SHA-256 계산                │
+  │                                   │ base64 인코딩               │
   │                                   │                            │
-  │                                   │ PutObjectRequest 구성      │
+  │                                   │ PutObjectRequest 구성       │
   │                                   │  - URL: presigned URL      │
   │                                   │  - Header:                 │
   │                                   │    x-amz-checksum-sha256   │
