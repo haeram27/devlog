@@ -22,45 +22,45 @@ Escape 대상 특수 문자
 $ <command> | grep -inI <word>
 ```
 
-###  regex 패턴과 매칭된 라인과 그 파일 이름을 출력
+### regex 패턴과 매칭된 라인과 그 파일 이름을 출력
 
 ```bash
 grep -rinI '<regex>'
 ```
 
-###  perl-exp 패턴과 매칭된 라인과 그 파일 이름을 출력
+### perl-exp 패턴과 매칭된 라인과 그 파일 이름을 출력
 
 ```bash
 grep -rinIP '<perl-regex>'
 ```
 
-###  검색 대상에 지정된 파일만 포함
+### 검색 대상에 지정된 파일만 포함
 
 ```bash
 grep -rnI --include=<glob-expr file> '<regex>'
 grep -rnI --include=\*.java --include=\*.sql 'GET_JOB_SCHEDULE'
 ```
 
-###  검색 대상에서 파일 제외
+### 검색 대상에서 파일 제외
 
 ```bash
 grep -rnI --exclude=<glob-expr file> '<regex>'
 ```
 
-###  검색 대상에 지정된 디렉터리만 포함
+### 검색 대상에 지정된 디렉터리만 포함
 
 ```bash
 grep -rnI --include-dir=<glob-expr dir> '<regex>'
 ```
 
-###  검색 대상에서 디렉토리 제외
+### 검색 대상에서 디렉토리 제외
 
 ```bash
 grep -rnI --exclude-dir=<glob-expr dir> '<regex>'
 grep -rnI --exclude=\*.js --exclude-dir=.svn --exclude-dir=target 'INTO tb_hello'
 ```
 
-###  regex 패턴과 매칭된 라인을 갖는 파일 이름만 출력
+### regex 패턴과 매칭된 라인을 갖는 파일 이름만 출력
 
 ```bash
 grep -rilI '<regex>'
@@ -79,7 +79,7 @@ $ echo 'VERSION=3.9.0' | grep -oP '(?<=^VERSION=)[.\d]+(?=\s*$)'
 3.9.0
 ```
 
-###  host ip address만 출력
+### host ip address만 출력
 
 #### ipv4 주소
 

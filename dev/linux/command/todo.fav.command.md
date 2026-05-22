@@ -18,7 +18,7 @@ echo rsync -av --delete /path/from/ /path/to
 syntax: path 생략시 현재 디렉토리(`.`) 의미
 
 ```text
- find [-H] [-L] [-P] [-D debugopts] [-Olevel] [starting-point...] [expression]
+find [-H] [-L] [-P] [-D debugopts] [-Olevel] [starting-point...] [expression]
 ```
 
 ```bash
@@ -70,6 +70,10 @@ find . -type f -name "*.txt" -exec bash -c 'echo mv "$0" "${0/%.txt/.doc}"' {} \
 
 find와 xargs 연동시 `-print0`로 출력하고 `-0`로 받을것
 
+```bash
+find -name '*.java' -print0 | xargs -0rx echo
+```
+
 - find 는 줄바꿈(`\n`)을 결과 표준 출력의 파일 이름 구분자로 사용 , `-print0` 사용시 출력 구분자를 NULL(`\0`) 문자로 사용
 - xargs 는 공백(space, tab, newline)을 표준 입력의 각 파일 이름 구분자로 사용, `-0` 사용시 입력의 구분자를 NULL(`\0`) 문자로 사용
 - 파일 이름에 공백 또는 따옴표 사용된 경우 오류 없이 전달 가능
@@ -78,7 +82,6 @@ find와 xargs 연동시 `-print0`로 출력하고 `-0`로 받을것
 
 ```bash
 ln -s TARGET LINKNAME
-
 
 ln [OPTION]... [-T] TARGET LINK_NAME
 ln [OPTION]... TARGET
@@ -266,9 +269,9 @@ sed -e '<address1>[!] {cmd1; cmd2; ...}' -e '<address2>[!] {cmd1; cmd2; ...}'
 
 ## openssl
 
- openssl을 이용한 text 암호화(복호화)
+openssl을 이용한 text 암호화(복호화)
 
-options
+### options
 
 ```text
 enc : text ciphering(암호화) 명령
@@ -284,13 +287,13 @@ enc : text ciphering(암호화) 명령
 -out : 출력 파일, 암/복호화 결과가 저장될 파일
 ```
 
-syntax
+### syntax
 
 ``` text
 openssl enc -cipher [-help] [-ciphers] [-in filename] [-out filename] [-pass arg] [-e] [-d] [-a/-base64] [-A] [-k password] [-kfile filename] [-K key] [-iv IV] [-S salt] [-salt] [-nosalt] [-z] [-md digest] [-iter count] [-pbkdf2] [-p] [-P] [-bufsize number] [-nopad] [-debug] [-none] [-rand file...] [-writerand file] [-engine id]
 ```
 
-사용예 (openssl 1.1.1 이상)
+### 사용예 (openssl 1.1.1 이상)
 
 ```bash
 # text 암호화 
@@ -303,8 +306,49 @@ openssl enc -e -k secretpassword123 -aes-256-cbc -a -md sha512 -pbkdf2 -iter 112
 openssl enc -d -k secretpassword123 -aes-256-cbc -a -md sha512 -pbkdf2 -iter 1122 -salt -in ./text.enc -out ./text.dec
 ```
 
-## 관리 명령 모음
+## 압축파일 (tar)
 
+### tar 주요 옵션
+
+- -c, --create           Create a new archive
+- -x, --extract, --get   Extract files from an archive
+- -t, --list             list the contents of an archive
+- -f, --file=ARCHIVE     use archive file or device ARCHIVE
+- -v, --verbose            Verbosely  list  files  processed
+  - 주로 `-t` 옵션과 함께 사용, 파일 리스트 출력시 `ls -l`과 같은 추가 정보 출력
+- -C, --directory=DIR    Change to DIR before performing any operations.
+  - 주로 `-x` 옵션과 함께 사용하여 압축 해제 디렉토리 지정
+
+### tar 내부 파일 확인
+
+```bash
+# 파일 전체 리스트 확인
+tar tf nvm-0.40.4.tar.gz
+
+# 디렉토리만 확인
+tar tf nvm-0.40.4.tar.gz | grep '/$'
+```
+
+### tar 해제
+
+```bash
+mkdir ~/.nvm
+tar -xf nvm-0.40.4.tar.gz -C ~/.nvm --strip-components=1
+```
+
+- 압축 방식 옵션: z(gz), j(bz2) J(xz). tar는 압축 해제시 파일 내용을 보고 압축 방식을 자동 체크하므로 별도로 지정 불필요 
+
+- `-C ~/.nvm` (Change directory)
+  - 역할: 압축을 풀 '목적지 디렉터리'를 강제로 지정합니다.
+  - 의미: 이 옵션이 없으면 현재 터미널이 위치한 폴더에 압축이 풀리지만, `-C ~/.nvm`을 주면 홈 디렉터리의 .nvm 폴더 내부로 결과물이 바로 들어갑니다.
+
+- `--strip-components=1`
+  - 역할: 디렉토리 계층 평탄화. 압축 파일 내부에 들어있는 가장 상위의 폴더 1개를 제거(껍질 벗기기)하고 그 알맹이 내용물만 꺼냅니다.
+  - 예: 압축 파일 내부에 `nvm-0.40.4/`라는 폴더가 기본적으로 감싸고 있습니다. 이 옵션이 없으면 파일들이 `~/.nvm/nvm-0.40.4/nvm.sh` 형태로 들어가서 경로가 복잡해집니다.  이 옵션을 사용하면 겉껍질 폴더를 한 단계 생략하여 `~/.nvm/nvm.sh`로 원하는 알맹이 파일들만 바로 평평하게 배치됩니다.
+  - 주의: 값을 2 (level)이상 할당하면 해당 레벨까지 디렉토리가 제거 되고 같은 레벨(2)에 여러 디렉토리가 있다면 각 내부 파일들은 통합되어 목적 디렉토리에 덮어쓰기 방식으로 설치 됩니다. 되도록 최상위 디렉토리에 1개만 있는 경우 사용을 권장합니다.
+
+
+## 관리 명령 모음
 
 ### 리눅스 가상화: 리눅스 작업 환경 구축하기
 

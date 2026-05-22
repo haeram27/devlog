@@ -35,6 +35,7 @@
 ------------------------------
 ## 💡 추천 구현 예시 (Parallel Stream 활용)
 
+```java
 public List<ResultDto> processTasks(List<TaskData> tasks) {
     // 1. 임계값 검증 (1000건 미만은 순차 처리로 오버헤드 방지)
     if (tasks.size() < 1000) {
@@ -48,12 +49,12 @@ public List<ResultDto> processTasks(List<TaskData> tasks) {
                 .map(this::shortCalculation)
                 .collect(Collectors.toList());
 }
+```
 
 현재 개발 중인 서버 환경을 바탕으로 더 정확한 구조를 제안해 드릴 수 있습니다. 아래 추가 정보를 알려주시면 맞춤형 코드를 작성해 드리겠습니다.
 
 - 현재 프로젝트의 Java 버전 (예: Java 11, Java 17, Java 21 등)
 - 하나의 연산 내부에서 외부 DB 조회나 네트워크 I/O가 발생치 않고 순수 수학 계산/데이터 가공만 하는지 여부
-
 
 ```java
 @Service
@@ -95,5 +96,4 @@ public class S3UrlParallelService {
         return "signed-url-placeholder"; 
     }
 }
-
 ```
