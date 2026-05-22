@@ -207,7 +207,7 @@ copilot --autopilot --allow-all
 copilot --autopilot --yolo
 ```
 
-추가로, 질문 없이 더 자율적으로 진행시키려면 다음 옵션도 함께 사용할 수 있다.
+추가로, 질문 없이 더 자율적으로 진행시키려면 다음 옵션도 함께 사용할 수 있다. 이 조합은 매우 강력하지만 굉장히 위험할 수 있으므로(임의 파일 삭제 또는 네트워크로 데이터 전송) 격리 환경에서만 사용하길 추천
 
 ```bash
 copilot --autopilot --yolo --no-ask-user
