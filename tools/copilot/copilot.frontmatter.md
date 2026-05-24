@@ -104,7 +104,7 @@ agent.md 파일의 tools 항목은 에이전트가 단순히 텍스트 답변을
 
 .agent.md 파일 상단의 프론트매터(Frontmatter)에 다음과 같이 정의합니다.
 
-```md
+```plain
 ---
 name: dev-assistant
 description: 개발 및 인프라 관리 지원 에이전트

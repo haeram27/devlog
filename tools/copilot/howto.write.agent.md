@@ -12,12 +12,12 @@ agent.md 파일의 tools 항목은 에이전트가 단순히 텍스트 답변을
 ### 2. 메타정보 헤더 작성 예시 (YAML 형식)
 .agent.md 파일 상단의 프론트매터(Frontmatter)에 다음과 같이 정의합니다.
 
-```md
+```text
 ---
 name: dev-assistant
 description: 개발 및 인프라 관리 지원 에이전트
 tools:
-  - shell_execute          # 터미널 명령어 실행 권한
+  - shell_execute         # 터미널 명령어 실행 권한
   - file_read             # 프로젝트 파일 읽기 권한
   - file_write            # 파일 생성 및 수정 권한
   - google_search         # (지원 시) 외부 정보 검색 권한
