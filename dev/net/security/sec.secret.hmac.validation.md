@@ -9,11 +9,11 @@ HMAC 검증은 웹훅 보안의 기본입니다. 핵심은 아래 2가지를 확
 
 ## 무엇을 검증하나
 
-검증에 필요한 입력값은 아래 3가지입니다.
+수신측에서 검증에 필요한 입력값은 아래 3가지입니다.
 
-1. 공유 비밀값 Secret
-2. 원본 요청 본문 Raw Body
-3. 요청 헤더의 서명값 Signature Header(예: sha256=...)
+1. 공유 비밀값 (Secret Key)
+2. 원본 요청 본문 (Raw Body)
+3. 요청 헤더의 서명값 (Signature Header, 예: sha256=...)
 
 판정 기준은 간단합니다.
 
@@ -93,8 +93,8 @@ flowchart LR
 		B1[Raw Body]
 		I1[K' xor ipad]
 		O1[K' xor opad]
-		H1[inner = SHA256 I1 || Body]
-		H2[mac = SHA256 O1 || inner]
+		H1[Inner hash from i key pad and body]
+		H2[Final mac from o key pad and inner]
 		SIG[Signature Header: sha256=mac]
 		K1 --> I1
 		K1 --> O1
@@ -114,8 +114,8 @@ flowchart LR
 		RSIG[Received Signature]
 		I2[K' xor ipad]
 		O2[K' xor opad]
-		RH1[inner' = SHA256 I2 || Body]
-		EXP[expected = SHA256 O2 || inner']
+		RH1[Inner hash from i key pad and body]
+		EXP[Expected mac from o key pad and inner]
 		CMP{constant-time compare\nReceived Signature vs expected}
 		OK[일치: 통과]
 		NO[불일치: 거부]
