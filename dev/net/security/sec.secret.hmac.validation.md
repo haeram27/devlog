@@ -52,8 +52,8 @@ $$
 - 같은 입력이면 항상 같은 출력이 나오며, 입력이 조금만 바뀌어도 결과가 크게 달라집니다.
 - 다만 SHA-256만으로는 "누가 보냈는지"를 증명할 수 없습니다.
 
-2. HMAC
-- HMAC은 Keyed-Hash Message Authentication Code의 약자입니다.
+2. HMAC (Hash-based Message Authentication Code, 해시 기반 인증 코드)
+- 암호화 해시 함수(SHA-256 등)와 비밀 키를 조합하여 메시지의 무결성과 인증을 보장하는 보안 알고리즘
 - 해시 함수에 비밀키(Secret)를 결합해, 메시지 인증과 무결성 검증을 수행합니다.
 - 즉, "메시지 + 비밀키"를 함께 사용해 서명을 만듭니다.
 - 비밀키를 모르면 올바른 HMAC 값을 만들 수 없습니다.
@@ -77,9 +77,9 @@ $$
 - 공통점: 둘 다 Secret과 body를 입력으로 해시 값을 만듭니다.
 - 차이점: HMAC은 키를 안전하게 다루도록 설계된 표준 구조(내부/외부 해시 2단계)를 사용합니다.
 - 내부/외부 해시 2단계란 아래 흐름을 뜻합니다.
-	1) inner = SHA256((K' xor ipad) || body)
-	2) mac = SHA256((K' xor opad) || inner)
-	여기서 K'는 블록 크기에 맞게 정규화한 키, ipad/opad는 고정 패딩 상수입니다.
+    1) inner = SHA256((K' xor ipad) || body)
+    2) mac = SHA256((K' xor opad) || inner)
+    여기서 K'는 블록 크기에 맞게 정규화한 키, ipad/opad는 고정 패딩 상수입니다.
 - 핵심은 "키를 앞에 한 번 붙이는 방식"이 아니라, 키를 두 번 다른 형태로 섞어 해시한다는 점입니다.
 - 이 구조 덕분에 단순 SHA256(secret + body) 대비 알려진 해시 조합 취약성에 더 강하고, 표준(RFC 2104)으로 오래 검증되었습니다.
 - 실무에서는 이 수식을 직접 구현하기보다 언어 표준 라이브러리의 HMAC 구현을 그대로 사용하는 것이 안전합니다.
@@ -88,51 +88,51 @@ $$
 
 ```mermaid
 flowchart LR
-	subgraph S[송신자]
-		K1[Secret K]
-		B1[Raw Body]
-		I1[K' xor ipad]
-		O1[K' xor opad]
-		H1[Inner hash from i key pad and body]
-		H2[Final mac from o key pad and inner]
-		SIG[Signature Header: sha256=mac]
-		K1 --> I1
-		K1 --> O1
-		I1 --> H1
-		B1 --> H1
-		H1 --> H2
-		O1 --> H2
-		H2 --> SIG
-	end
+    subgraph S[송신자]
+        K1[Secret K]
+        B1[Raw Body]
+        I1[K' xor ipad]
+        O1[K' xor opad]
+        H1[Inner hash from i key pad and body]
+        H2[Final mac from o key pad and inner]
+        SIG[Signature Header: sha256=mac]
+        K1 --> I1
+        K1 --> O1
+        I1 --> H1
+        B1 --> H1
+        H1 --> H2
+        O1 --> H2
+        H2 --> SIG
+    end
 
-	SIG --> REQ[HTTP Request]
-	B1 --> REQ
+    SIG --> REQ[HTTP Request]
+    B1 --> REQ
 
-	subgraph R[수신자]
-		K2[Secret K]
-		B2[Received Raw Body]
-		RSIG[Received Signature]
-		I2[K' xor ipad]
-		O2[K' xor opad]
-		RH1[Inner hash from i key pad and body]
-		EXP[Expected mac from o key pad and inner]
-		CMP{constant-time compare\nReceived Signature vs expected}
-		OK[일치: 통과]
-		NO[불일치: 거부]
-		K2 --> I2
-		K2 --> O2
-		I2 --> RH1
-		B2 --> RH1
-		RH1 --> EXP
-		O2 --> EXP
-		RSIG --> CMP
-		EXP --> CMP
-		CMP -->|true| OK
-		CMP -->|false| NO
-	end
+    subgraph R[수신자]
+        K2[Secret K]
+        B2[Received Raw Body]
+        RSIG[Received Signature]
+        I2[K' xor ipad]
+        O2[K' xor opad]
+        RH1[Inner hash from i key pad and body]
+        EXP[Expected mac from o key pad and inner]
+        CMP{constant-time compare\nReceived Signature vs expected}
+        OK[일치: 통과]
+        NO[불일치: 거부]
+        K2 --> I2
+        K2 --> O2
+        I2 --> RH1
+        B2 --> RH1
+        RH1 --> EXP
+        O2 --> EXP
+        RSIG --> CMP
+        EXP --> CMP
+        CMP -->|true| OK
+        CMP -->|false| NO
+    end
 
-	REQ --> B2
-	REQ --> RSIG
+    REQ --> B2
+    REQ --> RSIG
 ```
 
 5. HMAC이 무엇인가(한 줄 정의)
@@ -150,7 +150,7 @@ HMAC은 단순 해시 값 자체가 아니라, 송신자와 수신자가 같은 
 2. 송신자가 하는 일(서명 생성)
 - 전송할 Raw Body 바이트를 확정합니다.
 - Secret과 Raw Body로 HMAC-SHA256 값을 계산합니다.
-- 계산한 값을 보통 sha256=<hex> 형태로 서명 헤더에 넣습니다.
+- 계산한 값을 보통 `sha256=<hex>` 형태로 서명 헤더에 넣습니다.
 - Raw Body와 서명 헤더를 함께 전송합니다.
 
 3. 수신자가 하는 일(서명 검증)
@@ -206,8 +206,18 @@ HMAC은 단순 해시 값 자체가 아니라, 송신자와 수신자가 같은 
 ## 방어하지 못하는 것
 
 1. 재전송 공격(Replay)
+- 재전송 자체는 과거의 유효한 메시지를 다시 보내는 행위이고, 서버가 이를 새로운 요청으로 오인해 승인되지 않은 중복 효과를 발생시키거나 그 시도가 이루어질 때 재전송 공격으로 간주합니다.
 - 캡처한 정상 요청을 그대로 다시 보내면 서명은 여전히 유효할 수 있습니다.
-- 대응: delivery id 중복 차단, timestamp 윈도우 검사, nonce 저장
+- HMAC 검증은 "변조되지 않았는가"는 확인하지만, "지금 막 생성된 새 요청인가"는 보장하지 않습니다.
+- 따라서 공격자가 과거의 정상 요청 전체(body + signature header)를 그대로 다시 보내면, 서버가 이를 새로운 요청으로 오인하는 순간 공격이 됩니다.
+- 예를 들어 결제 승인, 송금, 포인트 차감, 빌드 트리거 같은 요청은 같은 메시지가 한 번 더 처리되는 것만으로도 실제 피해가 발생할 수 있습니다.
+- 즉 재전송 자체는 단순 복제이지만, 서버가 중복 여부나 신선도(freshness)를 검증하지 않으면 그 복제가 곧 중복 실행 공격으로 전환됩니다.
+- 전형적인 흐름은 아래와 같습니다.
+    1) 정상 사용자가 유효한 요청을 전송함
+    2) 공격자가 그 요청의 Raw Body와 서명 헤더를 캡처함
+    3) 공격자가 같은 요청을 나중에 그대로 다시 전송함
+    4) 서버가 nonce, timestamp, sequence, delivery id 중복 검사를 하지 않으면 새 요청으로 처리함
+- 대응: delivery id 중복 차단, timestamp 윈도우 검사, nonce 저장, sequence number 검증, idempotency key 적용
 
 2. Secret 유출
 - Secret이 탈취되면 공격자도 정상 서명을 만들 수 있습니다.
