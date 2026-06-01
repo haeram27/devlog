@@ -1,10 +1,40 @@
 # springdoc-openapi 사용 가이드
 
-`org.springdoc:springdoc-openapi-starter-webmvc-ui`를 사용하면 Spring Boot 애플리케이션에서 Swagger UI와 OpenAPI 3.x 명세를 자동으로 생성할 수 있습니다.
+`org.springdoc:springdoc-openapi-starter-webmvc-ui`를 사용하면 Spring Boot 애플리케이션에서 `Swagger UI`와 `OpenAPI 3.x` 명세를 자동으로 생성할 수 있습니다.
+
+
+1. [springdoc-openapi 사용 가이드](#springdoc-openapi-사용-가이드)
+   1. [의존성 추가](#의존성-추가)
+      1. [Gradle (`build.gradle`)](#gradle-buildgradle)
+      2. [Maven (`pom.xml`)](#maven-pomxml)
+   2. [제약 사항: 반드시 Web Server 모드로 실행해야 함](#제약-사항-반드시-web-server-모드로-실행해야-함)
+      1. [잘못된 설정 (Web Server 비활성화)](#잘못된-설정-web-server-비활성화)
+      2. [올바른 설정 (Web Server 활성화)](#올바른-설정-web-server-활성화)
+   3. [Controller 필수 어노테이션 목록](#controller-필수-어노테이션-목록)
+   4. [어노테이션 사용 예제](#어노테이션-사용-예제)
+      1. [`@Tag` — Controller 그룹 지정](#tag--controller-그룹-지정)
+      2. [`@Operation` — 엔드포인트 설명](#operation--엔드포인트-설명)
+      3. [`@Parameter` — 쿼리/경로 파라미터 설명](#parameter--쿼리경로-파라미터-설명)
+      4. [`@io.swagger.v3.oas.annotations.parameters.RequestBody` — Request Body 설명](#ioswaggerv3oasannotationsparametersrequestbody--request-body-설명)
+      5. [`@ApiResponse` — 응답 코드 명세](#apiresponse--응답-코드-명세)
+      6. [`@Schema` — DTO 필드 설명](#schema--dto-필드-설명)
+   5. [프로젝트 적용 예시 (S3PresignerController)](#프로젝트-적용-예시-s3presignercontroller)
+   6. [`@Operation`에서 `ExampleObject()` 사용하여 케이스 별 requestBody 예제 삽입하기](#operation에서-exampleobject-사용하여-케이스-별-requestbody-예제-삽입하기)
+   7. [Parameter에 사용 가능한 값 목록 출력](#parameter에-사용-가능한-값-목록-출력)
+      1. [Request 파라미터의 타입에 enum 타입 직접 사용](#request-파라미터의-타입에-enum-타입-직접-사용)
+      2. [enum 클래스를 직접 연결](#enum-클래스를-직접-연결)
+      3. [String 목록 지정](#string-목록-지정)
+   8. [문서 Group 설정](#문서-group-설정)
+   9. [문서 확인 방법](#문서-확인-방법)
+      1. [서버 실행](#서버-실행)
+      2. [브라우저에서 Swagger UI 접속](#브라우저에서-swagger-ui-접속)
+      3. [OpenAPI JSON 명세 확인](#openapi-json-명세-확인)
+      4. [curl로 확인 (CLI)](#curl로-확인-cli)
+   10. [참고 링크](#참고-링크)
 
 ---
 
-## 1. 의존성 추가
+## 의존성 추가
 
 ### Gradle (`build.gradle`)
 
@@ -29,7 +59,7 @@ dependencies {
 
 ---
 
-## 2. 제약 사항: 반드시 Web Server 모드로 실행해야 함
+## 제약 사항: 반드시 Web Server 모드로 실행해야 함
 
 springdoc은 **Servlet 기반 웹 서버**가 실행 중일 때만 동작합니다.  
 `SpringApplication`에서 `WebApplicationType.NONE`으로 설정하면 내장 서버가 시작되지 않아 Swagger UI와 `/v3/api-docs` 엔드포인트 모두 접근 불가합니다.
@@ -68,22 +98,22 @@ server:
 
 ---
 
-## 3. Controller 필수 어노테이션 목록
+## Controller 필수 어노테이션 목록
 
 | 어노테이션 | 위치 | 역할 |
 |---|---|---|
 | `@Tag` | 클래스 | Controller 단위 그룹명과 설명 |
 | `@Operation` | 메서드 | API 엔드포인트 요약/상세 설명 |
 | `@Parameter` | 파라미터 | 개별 파라미터 설명 및 예시 |
-| `@RequestBody` (OAS) | 파라미터 | Request body 설명 (선택) |
+| `@RequestBody` (OAS-openapi specification) | 파라미터 | Request body 설명 (선택) |
 | `@ApiResponse` | 메서드 | HTTP 응답 코드별 설명 (선택) |
 | `@Schema` | DTO 필드 | 모델 필드 설명 및 예시 (선택) |
 
 ---
 
-## 4. 어노테이션 사용 예제
+## 어노테이션 사용 예제
 
-### 4-1. `@Tag` — Controller 그룹 지정
+### `@Tag` — Controller 그룹 지정
 
 ```java
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -98,7 +128,7 @@ public class FileController {
 
 ---
 
-### 4-2. `@Operation` — 엔드포인트 설명
+### `@Operation` — 엔드포인트 설명
 
 ```java
 import io.swagger.v3.oas.annotations.Operation;
@@ -115,7 +145,7 @@ public PresignResult presignGetObject(...) {
 
 ---
 
-### 4-3. `@Parameter` — 쿼리/경로 파라미터 설명
+### `@Parameter` — 쿼리/경로 파라미터 설명
 
 `@RequestParam`, `@PathVariable` 등 개별 파라미터에 붙입니다.
 
@@ -140,7 +170,7 @@ public PresignResult presignGetObject(
 
 ---
 
-### 4-4. `@io.swagger.v3.oas.annotations.parameters.RequestBody` — Request Body 설명
+### `@io.swagger.v3.oas.annotations.parameters.RequestBody` — Request Body 설명
 
 Spring의 `@RequestBody`와 별개로 OAS 전용 어노테이션을 사용합니다.
 
@@ -161,7 +191,7 @@ public PresignResult presignPutObject(
 
 ---
 
-### 4-5. `@ApiResponse` — 응답 코드 명세
+### `@ApiResponse` — 응답 코드 명세
 
 ```java
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -181,7 +211,7 @@ public PresignResult presignGetObject(...) {
 
 ---
 
-### 4-6. `@Schema` — DTO 필드 설명
+### `@Schema` — DTO 필드 설명
 
 ```java
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -205,7 +235,7 @@ public record PutObjectUrlRequest(
 
 ---
 
-## 5. 프로젝트 적용 예시 (S3PresignerController)
+## 프로젝트 적용 예시 (S3PresignerController)
 
 이 프로젝트의 `S3PresignerController.java`는 위 어노테이션을 아래와 같이 조합하여 사용합니다.
 
@@ -246,9 +276,97 @@ public class S3PresignerController {
 }
 ```
 
-## 6. Parameter에 사용 가능한 값 목록 출력
+## `@Operation`에서 `ExampleObject()` 사용하여 케이스 별 requestBody 예제 삽입하기
 
-### 6-1. Request 파라미터의 타입에 enum 타입 직접 사용
+- `requestBody.content.examples`에 `ExampleObject`를 Array로 할당하면 SwaggerUI 화면에서 drop box를 통해서 케이스별 content 내용을 여러 개 중에 선택하여 보여주는 것이 가능하다.
+
+```kotlin
+@Operation(
+    summary = "PUT Presigned URL 일괄 발급",
+    description = "multipart object 업로드를 위한 Presigned PUT URL을 한 번에 발급한다. 응답 순서는 요청 items 순서와 동일하다.",
+    security = [SecurityRequirement(name = "console-auth")],
+    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+        required = true,
+        content = [Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = Schema(implementation = S3PresignPutBulkRequestDto::class),
+            examples = [
+                ExampleObject(
+                    name = "기본 일괄 업로드",
+                    value = """
+                    {
+                        "items": [
+                            {
+                                "bucket": "my-bucket",
+                                "key": "deploy/agent/2026/05/file1.pkg",
+                                "content_type": "application/octet-stream",
+                                "content_length": 5242880,
+                                "expires_in_seconds": 300
+                            },
+                            {
+                                "bucket": "my-bucket",
+                                "key": "deploy/agent/2026/05/file2.pkg",
+                                "content_type": "application/octet-stream",
+                                "content_length": 3145728,
+                                "expires_in_seconds": 300
+                            }
+                        ]
+                    }
+                    """
+                ),
+                ExampleObject(
+                    name = "체크섬 포함 일괄 업로드",
+                    value = """
+                    {
+                        "items": [
+                            {
+                                "bucket": "my-bucket",
+                                "key": "deploy/agent/2026/05/file1.pkg",
+                                "content_type": "application/octet-stream",
+                                "content_length": 5242880,
+                                "expires_in_seconds": 300,
+                                "checksum_sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg="
+                            },
+                            {
+                                "bucket": "my-bucket",
+                                "key": "deploy/agent/2026/05/file2.pkg",
+                                "content_type": "application/octet-stream",
+                                "content_length": 3145728,
+                                "expires_in_seconds": 300,
+                                "checksum_sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg="
+                            }
+                        ]
+                    }
+                    """
+                )
+            ]
+        )]
+    )
+)
+@PostMapping("/files/presign-put-bulk/v1")
+fun presignPutBulk(
+    @RequestHeader(HttpCustomHeaders.TENANT_ID) tenantId: String,
+    @Valid @RequestBody request: S3PresignPutBulkRequestDto,
+): ResponseEntity<ApiResponse<S3PresignPutBulkResponseDto>> {
+    val mockItem1 = S3PresignResultDto(
+        url = "https://ceph.example.com/my-bucket/deploy/agent/2026/05/file1.pkg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=300&X-Amz-Signature=abc111",
+        method = "PUT",
+        headers = mapOf("host" to listOf("ceph.example.com")),
+        expiresAt = "2026-05-26T12:05:00Z"
+    )
+    val mockItem2 = S3PresignResultDto(
+        url = "https://ceph.example.com/my-bucket/deploy/agent/2026/05/file2.pkg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=300&X-Amz-Signature=abc222",
+        method = "PUT",
+        headers = mapOf("host" to listOf("ceph.example.com")),
+        expiresAt = "2026-05-26T12:05:00Z"
+    )
+    return ResponseEntity.ok(ApiResponse.success(S3PresignPutBulkResponseDto(items = listOf(mockItem1, mockItem2))))
+}
+```
+
+## Parameter에 사용 가능한 값 목록 출력
+
+### Request 파라미터의 타입에 enum 타입 직접 사용
 
 - enum 값 목록 자동 노출, 유지보수에 가장 좋음
 
@@ -263,14 +381,14 @@ public List<JobDto> getJobs(@RequestParam Status status) {
 }
 ```
 
-### 6-2. enum 클래스를 직접 연결
+### enum 클래스를 직접 연결
 
 ```java
 @Parameter(schema = @Schema(implementation = Status.class))
 ```
 
 
-### 6-3. String 목록 지정
+### String 목록 지정
 
 - 파라미터가 String이어야 한다면 annotation으로 명시 가능
 
@@ -289,9 +407,52 @@ public List<JobDto> getJobs(
 
 ---
 
-## 6. 문서 확인 방법
+## 문서 Group 설정
 
-### 6-1. 서버 실행
+GroupedOpenApi는 OpenAPI 문서를 그룹별로 분리하는 Grouping 설정용 빈
+
+`org.springdoc.core.models.GroupedOpenApi`는 `springdoc-openapi`에서 `Swagger/OpenAPI` 문서를 그룹 단위로 나눌 때 쓰는 설정 객체입니다. 쉽게 말하면 Swagger UI에 API 목록을 하나로 다 보여주지 않고, 목적별로 묶어서 별도 섹션처럼 보이게 만드는 역할입니다.
+
+다음 예제는 `GroupedOpenApi` 빈을 2개 등록하고 있습니다. 그래서 `Swagger UI`에는 s3 관련 API가 두 그룹으로 나뉘어 표시됩니다.
+
+각 설정 의미는 다음과 같습니다.
+
+- group: 그룹의 내부 식별자입니다. 문서 그룹 이름으로 사용됩니다.
+- displayName: Swagger UI에서 사람이 보기 좋은 표시 이름입니다.
+- pathsToMatch: 어떤 URL 패턴의 API를 이 그룹에 포함할지 지정합니다.
+- build: 설정을 확정해서 GroupedOpenApi 객체를 생성합니다.
+
+```kotlin
+package com.myapiserer.config.s3
+
+import org.springdoc.core.models.GroupedOpenApi
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+
+@Configuration
+class S3SwaggerConfig {
+
+    @Bean
+    fun getDeploymentS3ClientApi(): GroupedOpenApi = GroupedOpenApi.builder()
+        .group("s3client-view")
+        .displayName("S3 Client")
+        .pathsToMatch("/api/s3/client/**")
+        .build()
+
+    @Bean
+    fun getDeploymentS3PresignedApi(): GroupedOpenApi = GroupedOpenApi.builder()
+        .group("s3presigned-view")
+        .displayName("S3 Presigned URL")
+        .pathsToMatch("/api/s3/presigner/**")
+        .build()
+}
+```
+
+---
+
+## 문서 확인 방법
+
+### 서버 실행
 
 ```bash
 # Gradle로 실행
@@ -302,7 +463,7 @@ gradle assemble
 java -jar build/libs/*.jar
 ```
 
-### 6-2. 브라우저에서 Swagger UI 접속
+### 브라우저에서 Swagger UI 접속
 
 서버가 정상 기동되면 브라우저에서 아래 URL로 접속합니다.
 
@@ -312,7 +473,7 @@ http://localhost:18080/swagger-ui/index.html
 
 Swagger UI에서 등록된 모든 API 엔드포인트를 확인하고, **Try it out** 버튼으로 직접 요청을 실행해볼 수 있습니다.
 
-### 6-3. OpenAPI JSON 명세 확인
+### OpenAPI JSON 명세 확인
 
 ```
 http://localhost:18080/v3/api-docs
@@ -320,7 +481,7 @@ http://localhost:18080/v3/api-docs
 
 Raw JSON 형태의 OpenAPI 3.x 명세가 반환됩니다. 이 JSON을 다른 도구(Postman, Insomnia 등)에 임포트하거나 코드 생성에 활용할 수 있습니다.
 
-### 6-4. curl로 확인 (CLI)
+### curl로 확인 (CLI)
 
 ```bash
 # Swagger UI HTML 응답 확인
@@ -333,7 +494,7 @@ curl -sS http://localhost:18080/v3/api-docs | python3 -m json.tool | head -30
 
 ---
 
-## 7. 참고 링크
+## 참고 링크
 
 - [springdoc-openapi 공식 문서](https://springdoc.org/)
 - [Swagger/OAS 어노테이션 레퍼런스](https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X---Annotations)

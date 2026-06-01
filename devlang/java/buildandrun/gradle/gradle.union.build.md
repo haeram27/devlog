@@ -3,11 +3,13 @@
 여러 개의 프로젝트릃 한번에 빌드 구성 하는 방법
 
 1. `include` (멀티프로젝트)
+
 - 하위 모듈: build.gradle(또는 `build.gradle.kts`) 필요
 - 하위 모듈: settings.gradle은 보통 없음
 - 루트 settings.gradle 하나가 전체 모듈 선언 담당
 
-2. `includeBuild` (컴포지트 빌드, 현재 방식)
+1. `includeBuild` (컴포지트 빌드)
+
 - 하위 프로젝트: 독립 Gradle 빌드여야 함
 - 그래서 하위에 settings.gradle + build.gradle이 각각 있는 경우가 일반적
 
@@ -19,45 +21,48 @@
 2. 모듈이 폴더 깊숙이 있으면 projectDir로 실제 경로 매핑
 3. 모듈 간 의존은 includeBuild가 아니라 project(:모듈명)으로 연결
 
-예시
+예시:
 
-1) 루트 settings.gradle
+예1. 루트 settings.gradle
+
 ```gradle
-    rootProject.name = "my-parent"
-    
-    include(":common", ":api", ":batch")
-    
-    project(":common").projectDir = file("modules/common")
-    project(":api").projectDir = file("services/api")
-    project(":batch").projectDir = file("jobs/batch")
+rootProject.name = "my-parent"
+
+include(":common", ":api", ":batch")
+
+project(":common").projectDir = file("modules/common")
+project(":api").projectDir = file("services/api")
+project(":batch").projectDir = file("jobs/batch")
 ```
 
-2) 루트 build.gradle (공통 설정)
+예2. 루트 build.gradle (공통 설정)
+
 ```gradle
-    allprojects {
-        group = "com.example"
-        version = "1.0.0"
-    
-        repositories {
-            mavenCentral()
-        }
+allprojects {
+    group = "com.example"
+    version = "1.0.0"
+
+    repositories {
+        mavenCentral()
     }
-    
-    subprojects {
-        apply plugin: "java"
-    
-        tasks.withType(Test).configureEach {
-            useJUnitPlatform()
-        }
+}
+
+subprojects {
+    apply plugin: "java"
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
     }
+}
 ```
 
-3) 하위 모듈 build.gradle 예시 (api 모듈)
+예3. 하위 모듈 build.gradle 예시 (api 모듈)
+
 ```gradle
-    dependencies {
-        implementation project(":common")
-        testImplementation "org.springframework.boot:spring-boot-starter-test"
-    }
+dependencies {
+    implementation project(":common")
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+}
 ```
 
 중요 포인트
@@ -66,9 +71,9 @@
 2. 하위 프로젝트에 개별 settings.gradle이 있으면 충돌/혼란이 생기므로 보통 제거하거나 무시되게 정리합니다.
 3. Spring Boot 모듈과 라이브러리 모듈을 분리하는 게 좋습니다.
 4. 실행은 루트에서 한 번에:
-   ./gradlew build
+   `./gradlew build`
    또는 모듈별:
-   ./gradlew :api:build
+   `./gradlew :<module-name>:build`
 
 ## 컴포지트 빌드 구성
 
