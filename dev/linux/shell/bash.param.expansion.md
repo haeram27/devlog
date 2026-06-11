@@ -20,10 +20,10 @@
   - `{...}`에 주어진 연산식을 수행하여 그 결과를 값으로 반환($의 의미)해준다.
 - `:-`
   - substitute 치환
-  - 변수 미선언 혹은 NULL인 경우 param의 값을 변경하지 않고(영향을 주지 않음), 지정한 값으로 확장(${})
+  - parameter(매개변수) 미선언 혹은 NULL인 경우 parameter의 값을 변경하지 않고(매개변수는 원본 값 유지), 지정한 값으로 확장(${})
 - `:=`
   - assign 할당
-  - 변수 미선언 혹은 NULL인 경우 param의 값을 지정한 값으로 할당(변경)하고, 지정한 값으로 확장(${})
+  - parameter(매개변수) 미선언 혹은 NULL인 경우 parameter의 값을 지정한 값으로 변경하고(매개변수는 변경 값 유지), 지정한 값으로 확장(${})
 
 ## [parameter manipulation](https://wiki.kldp.org/HOWTO/html/Adv-Bash-Scr-HOWTO/string-manipulation.html)
 
