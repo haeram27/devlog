@@ -1,6 +1,7 @@
 # grpc data types
 
-##
+## 구분
+
 gRPC의 Protocol Buffers(proto3)에서 사용할 수 있는 데이터 타입은 크게 스칼라(Scalar), 복합(Composite), 특수(Special) 타입으로 나뉩니다.
 
 ## 1. 스칼라 기본 타입 (Scalar Value Types)
@@ -37,7 +38,7 @@ enum Corpus {
 
 - Repeated: 배열이나 리스트 형태입니다. (예: repeated string tags = 1;)
 - Map: Key-Value 쌍을 가집니다. (예: map<string, Project> projects = 3;)
-- Key는 string이나 정수 타입만 가능하며, float이나 bytes는 불가합니다. [1] 
+- Key는 string이나 정수 타입만 가능하며, float이나 bytes는 불가합니다.
 
 ## 3. 특수 타입 (Special Types)
 
@@ -60,4 +61,3 @@ Google에서 기본으로 제공하는 유용한 타입들입니다.
 - Timestamp: 날짜와 시간 (google/protobuf/timestamp.proto)
 - Duration: 시간 간격 (google/protobuf/duration.proto)
 - Empty: 인자나 반환값이 없을 때 사용하는 빈 메시지 (google/protobuf/empty.proto)
-

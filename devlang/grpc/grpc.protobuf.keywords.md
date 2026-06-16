@@ -1,8 +1,9 @@
-# grpc keyword
+# grpc protobuf keyword
 
 Protobuf(특히 proto3) 문법에서 사용되는 주요 키워드와 식별자 목록입니다. [Language Specification](https://protobuf.com/docs/language-spec)에 따르면 약 43개의 키워드가 정의되어 있습니다.
 
 ## 1. 주요 예약 키워드 (Top-level & Structural)
+
 구조 정의 및 파일 설정에 필수적인 키워드들입니다.
 
 - syntax: .proto 파일의 버전을 지정합니다 (예: syntax = "proto3";).
@@ -16,6 +17,7 @@ Protobuf(특히 proto3) 문법에서 사용되는 주요 키워드와 식별자 
 - returns: RPC 메서드의 응답 타입을 지정합니다.
 
 ## 2. 필드 규칙 및 제어 키워드
+
 메시지 내부 필드의 특성을 결정합니다.
 
 - repeated: 해당 필드가 0개 이상의 값을 가질 수 있는 배열(List)임을 나타냅니다.
@@ -26,6 +28,7 @@ Protobuf(특히 proto3) 문법에서 사용되는 주요 키워드와 식별자 
 - extensions: (주로 proto2) 메시지 확장 지점을 지정합니다.
 
 ## 3. 데이터 타입 키워드 (Scalar Types)
+
 각 언어의 기본 자료형으로 변환되는 키워드들입니다.
 
 - 정수형: int32, int64, uint32, uint64, sint32, sint64, fixed32, fixed64, sfixed32, sfixed64
