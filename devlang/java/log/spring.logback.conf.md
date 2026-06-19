@@ -58,6 +58,8 @@ public class LogBackEncoder extends LayoutWrappingEncoder<ILoggingEvent> {
 
 ## logback 설정 - LogBackEncoder
 
+일반적으로 별도의 xml 설정 파일을 사용하지 않은 경우에도 default로 console 로그 출력 됨
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -120,4 +122,20 @@ public class LogBackEncoder extends LayoutWrappingEncoder<ILoggingEvent> {
         </root>
     </springProfile>
 </configuration>
+```
+
+## logback console 출력에 ansi color code 적용
+
+- application.yml
+
+```yml
+spring:
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  pattern:
+    # console 패턴에 %clr 또는 %highlight를 적용합니다.
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5p) %clr([%thread]){magenta} %clr(%logger{36}){cyan} : %msg%n"
 ```

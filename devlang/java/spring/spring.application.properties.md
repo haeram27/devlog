@@ -1,4 +1,4 @@
-# spring property 사용하기
+# spring property 사용하기 (application.yml)
 
 ## 프로퍼티 플레이스홀더(Property Placeholder)
 
@@ -23,17 +23,25 @@
 
 2. 빈 필드/생성자 주입  
 - `@Value("${my.user.id}")` 형태로 필드, 생성자 파라미터, 메서드 파라미터에 주입
+- 만약 property 값에 대해 기본값을 설정 하고자 하면 property key의 마지막에 colon(:)을 사용한다.
+```java
+    // ${my.user.id:} 의 :는 “프로퍼티가 없을 때 빈 문자열로 주입” 하겠다는 의미입니다.
+    // 기본값 없이 사용하면, 값이 지정되지 않았을 때 빈값이 아니라 보통 placeholder 해석 실패(애플리케이션 시작 실패) 로 이어집니다
+    @Value("${my.user.id:}")
+    private String userId;
+```
+
 
 3. 어노테이션 속성값  
 - 문자열 속성을 받는 많은 스프링 어노테이션에서 사용 가능  
 - 예: @Scheduled(cron = "${job.cron}")  
 - 예: @KafkaListener(topics = "${kafka.topic.name}")
 
-3. `@ConfigurationProperties` 바인딩 대상 값  
+4. `@ConfigurationProperties` 바인딩 대상 값  
 - 설정 파일 쪽 값에 플레이스홀더가 있으면, 해석된 뒤 바인딩됨  
 - 즉 클래스 내부에 직접 ${...}를 쓰기보다 설정값에서 사용
 
-4. XML 기반 설정(레거시)  
+5. XML 기반 설정(레거시)  
 - XML 빈 정의의 property 값에도 `${...}` 사용 가능
 
 추가로 자주 쓰는 문법:
@@ -89,15 +97,23 @@ SpEL 표현식에서 참조 할 수 있는 컬렉션은 “SpEL 평가 시점에
 
 ## property 설정
 
-우선순위(높은순-낮은번호가 최종적용)는 다음과 같습니다.
+우선순위(높은순-낮은번호가 최종적용)는 다음과 같습니다. 우선순위가 높은 값이 낮은 값을 덮어 씁니다.
 1. java 명령행 인자
 2. JVM 시스템 프로퍼티
 3. OS 환경변수
 4. jar 외부 config 파일 (application.yml/application.properties)
-5. jar 내부 config 파일 (application.yml/application.properties)
+5. 본 프로젝트 jar 내부 config 파일 (application.yml/application.properties)
+6. 라이브러리 jar 내부 config 파일 (application.yml/application.properties)
+
+한줄로 정리하면, 라이브러리의 property가 우선순위가 가장 낮고, 명령행 인자의 property가 우선순위가 가장 높음
+> 라이브러리 config 기본값 property < 본 프로젝트 내부 config property < 외부 config property < 환경변수 < JVM 옵션 < 명령행 인자
 
 즉 같은 키를 여러 곳에 넣으면 `명령행 인자`가 최종값으로 적용됩니다.
 application.yml이 application.properties 보다 우선 순위가 높지만 두 파일을 혼용하지 마십시오.
+
+- 같은 Spring 프로퍼티 키가 라이브러리 쪽과 애플리케이션(본 프로젝트) 쪽에 모두 있을 때는 본 프로젝트의 property가 우선순위가 높음. 그래서 라이브러리의 프로퍼티 값은 대부분 `기본값` 용도로 사용
+  - 1. 본 프로젝트의 src/main/resources/application.yml
+  - 2. 참조 라이브러리 JAR 내부의 application.yml
 
 ### java 명령행 인자(argument) 방식
 ```bash
