@@ -239,3 +239,273 @@ HMAC은 단순 해시 값 자체가 아니라, 송신자와 수신자가 같은 
 5. 실패 사유는 로그에 남기되 Secret/원문 민감정보는 마스킹
 6. 재전송 방지 로직 추가(특히 production)
 7. Secret 주기적 교체
+
+## Secret Key 생성 방법
+
+### 1. 생성 원칙
+
+Secret Key는 다음 조건을 만족해야 합니다:
+
+1. **암호화 안전한 난수 생성기 사용**
+   - 표준 라이브러리의 `SecureRandom`, `crypto.random`, `secrets` 등 사용
+   - 일반 난수 생성기(Math.random, rand 등)는 절대 금지
+   - 이유: 예측 불가능해야 공격자가 Secret을 추측할 수 없음
+
+2. **최소 길이**
+   - HMAC-SHA256의 경우 32바이트(256비트) 이상 권장
+   - 키가 짧을수록 brute-force 공격에 취약
+   - 실제로는 64바이트(512비트) 정도면 충분히 안전
+
+3. **생성 후 처리**
+   - Base64 또는 Hex 인코딩하여 저장/전달
+   - 평문 바이너리로 그대로 다루지 않음
+   - 매번 새로운 Secret을 생성해야 함(절대 재사용 금지)
+
+### 2. 언어별 생성 예제
+
+**Java**
+```java
+import java.security.SecureRandom;
+import java.util.Base64;
+
+// 32바이트(256비트) Secret 생성
+SecureRandom sr = new SecureRandom();
+byte[] secretBytes = new byte[32];
+sr.nextBytes(secretBytes);
+String secret = Base64.getEncoder().encodeToString(secretBytes);
+System.out.println("Secret: " + secret);
+```
+
+**Go**
+```go
+import (
+    "crypto/rand"
+    "encoding/base64"
+    "fmt"
+)
+
+// 32바이트 Secret 생성
+secret := make([]byte, 32)
+if _, err := rand.Read(secret); err != nil {
+    panic(err)
+}
+encoded := base64.StdEncoding.EncodeToString(secret)
+fmt.Println("Secret:", encoded)
+```
+
+### 3. CLI 도구로 생성
+
+명령줄에서도 간단히 생성 가능:
+
+```bash
+# Base64 인코딩된 32바이트 Secret 생성
+openssl rand -base64 32
+
+# 또는 hex 형식으로 생성
+openssl rand -hex 32
+```
+
+## Secret Key 공유 및 저장 방법
+
+### 1. 안전한 공유 절차
+
+**절차 원칙:**
+- Secret을 평문으로 이메일, 메신저, 문서에 올려놓지 않기
+- Out-of-band(채널 분리) 방식 사용
+- 공유 후 로그/기록 삭제
+- 송수신자만 알도록 (제3자 노출 금지)
+
+**권장 공유 방법:**
+
+1. **1회용 비밀 공유 서비스**
+   - Bitwarden Send (자동 삭제 지원)
+   - Privnote, OneTimeSecret 등 단회용 링크
+   - 특징: 일정 시간/조회 후 자동 삭제
+   - 장점: 기록 남지 않음
+
+2. **암호화된 메시지**
+   - PGP/GPG 암호화 메일
+   - Signal, Wire 같은 E2E 암호화 메신저
+   - 특징: 메시지는 암호화되고 발신자/수신자만 열 수 있음
+
+3. **보안 채널(조직 내부)**
+   - 사내 비밀 저장소(Vault, AWS Secrets Manager)
+   - HashiCorp Consul/Nomad의 Secret 엔드포인트
+   - Kubernetes Secret (RBAC와 함께 사용)
+   - 특징: 접근 제어, 감사 로그 남음
+
+4. **직접 만남(초기 설정)**
+   - 신원 확인 후 면대면으로 전달
+   - QR 코드 스캔 또는 USB로 전달
+   - 가장 안전하지만 실무에는 비실용적
+
+### 2. 저장 방법(수신자 시스템)
+
+공유받은 Secret을 어디에 어떻게 저장할지:
+
+**절대 금지:**
+```
+❌ 코드에 하드코딩 (버전 관리 노출)
+❌ 평문 설정 파일 (리포지토리 커밋)
+❌ 파일명에 .txt, .conf 같은 확장자로 저장
+❌ 로그 파일에 출력
+```
+
+**권장 방법:**
+
+1. **환경 변수**
+   ```bash
+   # .env 파일 (로컬 개발용, .gitignore에 등록)
+   export WEBHOOK_SECRET=<base64-encoded-secret>
+   
+   # 실행 시
+   source .env
+   java -jar app.jar
+   ```
+   ```java
+   // Java 코드에서 읽기
+   String secret = System.getenv("WEBHOOK_SECRET");
+   if (secret == null) {
+       throw new IllegalStateException("WEBHOOK_SECRET not set");
+   }
+   ```
+
+2. **설정 관리 도구 (권장)**
+   ```yaml
+   # application.yml (프로덕션)
+   # 이 파일은 배포 시에만 배포 엔진에서 주입됨
+   webhook:
+     secret: ${WEBHOOK_SECRET}  # 환경 변수에서 읽음
+   ```
+   
+   Spring Boot의 경우:
+   ```java
+   @Configuration
+   public class WebhookConfig {
+       @Value("${webhook.secret}")
+       private String secret;
+       
+       @Bean
+       public HmacValidator hmacValidator() {
+           return new HmacValidator(secret);
+       }
+   }
+   ```
+
+3. **시크릿 관리 서비스 (엔터프라이즈)**
+   
+   AWS Secrets Manager:
+   ```java
+   SecretsManagerClient client = SecretsManagerClient.builder()
+       .region(Region.US_EAST_1)
+       .build();
+   
+   GetSecretValueRequest request = GetSecretValueRequest.builder()
+       .secretId("webhook-secret")
+       .build();
+   
+   GetSecretValueResponse response = client.getSecretValue(request);
+   String secret = response.secretString();
+   ```
+   
+   HashiCorp Vault:
+   ```java
+   VaultTemplate vault = new VaultTemplate(
+       new RestTemplateFactory().restTemplate()
+   );
+   VaultResponse response = vault.read("secret/webhook");
+   String secret = (String) response.getData().get("secret");
+   ```
+
+4. **Kubernetes Secret**
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: webhook-secret
+   type: Opaque
+   data:
+     secret: <base64-encoded-value>
+   ```
+   
+   Pod에서 마운트:
+   ```yaml
+   spec:
+     containers:
+     - name: app
+       env:
+       - name: WEBHOOK_SECRET
+         valueFrom:
+           secretKeyRef:
+             name: webhook-secret
+             key: secret
+   ```
+
+### 3. 공유 후 관리
+
+**수신자가 Secret을 받은 후:**
+
+1. 즉시 저장소(환경 변수, 시크릿 관리 도구)에 저장
+2. 임시 메시지/이메일은 삭제
+3. 저장 완료를 송신자에게 알림
+4. 테스트 웹훅으로 검증 (Secret이 정상 작동하는지 확인)
+
+**송신자가 Secret을 전달한 후:**
+
+1. 공유 채널(메시지, 링크)에서 제거
+2. 수신자 확인 후 기록 삭제
+3. 필요시 Secret 저장 현황 확인
+
+### 4. Secret Rotation (주기적 교체)
+
+단일 Secret 수명:
+- 개발/테스트: 변경 불필요 (로컬용)
+- 프로덕션: **90일마다 교체 권장** (업계 표준)
+- 보안 사고 발생 시: 즉시 교체
+
+Rotation 절차:
+
+1. **새 Secret 생성**
+   ```
+   - 이전: secret_old = "..."
+   - 새로: secret_new = "..."
+   ```
+
+2. **양측 모두 새 Secret 저장**
+   - 송신자와 수신자가 동시에 secret_new를 설정
+   - 동시가 아니면 한쪽이 준비될 때까지 대기
+
+3. **이중 검증 기간 운영 (권장)**
+   - 수신자가 new/old 모두 검증하는 기간을 며칠 운영
+   - 이유: 양측 동기화 오류 시 웹훅 손실 방지
+   
+   ```java
+   public boolean validateSignature(String signature, byte[] body) {
+       // 새 Secret으로 먼저 시도
+       if (isValidSignature(signature, body, currentSecret)) {
+           return true;
+       }
+       // 실패하면 이전 Secret으로 시도 (Rotation 기간용)
+       if (isValidSignature(signature, body, previousSecret)) {
+           logger.warn("Using previous secret - please update client");
+           return true;
+       }
+       return false;
+   }
+   ```
+
+4. **이전 Secret 폐기**
+   - 안정화 확인 후 old secret 삭제
+   - 재설정 불가능하도록 보관 금지
+
+## 완전한 공유 체크리스트
+
+- [ ] Secret 생성: 암호화 안전한 난수, 32바이트 이상
+- [ ] Secret 인코딩: Base64 또는 Hex 형식
+- [ ] 송신자 저장: 환경 변수 또는 시크릿 관리 도구
+- [ ] 공유 채널: Out-of-band 방식 (1회용 비밀 공유, 암호화 메시지 등)
+- [ ] 수신자 저장: 환경 변수 또는 시크릿 관리 도구 (코드에 하드코딩 금지)
+- [ ] 테스트: 공유 후 테스트 웹훅으로 검증
+- [ ] 로그 확인: Secret이 로그에 남지 않았는지 확인
+- [ ] Rotation 계획: 90일 주기 교체 방안 수립
+- [ ] 문서화: Secret 저장 위치, 담당자, 교체 일정 기록
