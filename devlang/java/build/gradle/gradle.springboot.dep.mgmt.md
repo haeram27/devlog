@@ -15,7 +15,7 @@ dependencies {
 
 ## `platform()` 사용 - 최신 gradle에서 권장 사용 방법
 
-platform()으로 BOM 파일을 참조하여 지원하는 라이브러의 버전을 입력하지 않고 통합 관리하는 방법
+platform()으로 BOM(.pom) 파일을 참조하여 지원하는 라이브러의 버전을 입력하지 않고 통합 관리하는 방법
 
 BOM 파일에 명시 되지 않은 라이브러리들은 버전을 직접 입력하여야 함
 
@@ -41,7 +41,7 @@ dependencies {
 }
 ```
 
-- `platform(...)`: 의존성 버전 정보만 가져옴 실제 라이브러리 파일은 가져오지 않음). BOM(Bill of Materials) 파일(Maven BOM=POM, `.pom` 파일)을 인식하여, 해당 파일 안에 선언된 라이브러리 버전들을 현재 프로젝트의 dependencyManagement에 추가합니다.
+- `platform(...)`: 의존성 버전 정보만 가져옴 실제 라이브러리 파일은 가져오지 않음. BOM(Bill of Materials) 파일(Maven BOM=POM, `.pom` 파일)을 인식하여, 해당 파일 안에 선언된 라이브러리 버전들을 현재 프로젝트의 dependencyManagement에 추가합니다.
 - `.pom`(POM) 파일은 library `.jar` 파일에 포함되어 있지 않으며 artifact repository(maven)에서 다운로드 합니다.
 - **중요**: `platform(...)` 구문은 모든 빌드 단계(implementation, testImplementation 등)에 통합 적용이 되지 않으므로 각 단계별 별도로 추가 해야 함
 - implementation: 해당 라이브러리를 컴파일 및 런타임에 포함시킵니다.

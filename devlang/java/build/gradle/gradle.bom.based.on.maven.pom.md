@@ -1,4 +1,10 @@
-# gradle에서 spring 의존성 다루기
+# gradle에서 BOM(.pom) 라이브러리 참조 (spring 의존성)
+
+`.pom` 파일을 이용한 dependency 관리는 maven의 방식이며, 사실 gradle의 공식 버전 관리 방식이 아니다. gradle에서 프로젝트에서 공통적으로 사용할 버전 관리 방식을 아직 서포트 하기 이전에 spring 프로젝트에서 임의로 `.pom` 파일을 이용하여 의존성 관리를 하던 방식이 관례로 계속 사용되어 오고 있다.
+
+gradle의 공식 의존성 버전 관리 방식은 versionCatalog 라고 하며, `.toml` 파일을 사용한다.
+
+이 문서는 `.pom` 기반 spring 버전 관리 방식에 대해 기술한다.
 
 ## gradle에서 maven repository의 artifact 참조 방식
 
@@ -17,11 +23,11 @@ dependencies {
 ```
 
 - [`"org.springframework.boot:spring-boot-dependencies:4.0.5"`](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom)는 maven 저장소(repository)의 artifact를 가리키는 URI 이다. `:` 구분자는 maven 저장소의 url에서 `/`로 변환되어 사용된다.
-- `platform()`과 `spring-boot-starter-xxx`는 모두 의존성 파일(BOM == `.pom`)을 가져오는 것을 목적으로 한다.
+- `platform()`과 `spring-boot-starter-xxx`는 모두 의존성 파일(BOM as `.pom`)을 가져오는 것을 목적으로 한다.
 - maven repository 에는 BOM(.pom 파일)을 두가지 artifact 방식으로 배포 하고 있다.
-  - `.jar`없이 `.pom` 파일만 배포 (`platform()`으로 사용 가능)
+  - empty inner `.jar`없이 `.pom` 파일만 배포 (`platform()`으로 참조 가능)
     - 예: [`org.springframework.boot:spring-boot-dependencies:x.x.x` artifact](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.5/spring-boot-dependencies-4.0.5.pom)
-  - 빈(empty) `.jar` 파일과 `.pom` 파일을 함께 배포 (`spring-boot-starter-xxx` 방식)
+  - empty inner `.jar` 파일과 `.pom` 파일을 함께 배포 (`spring-boot-starter-xxx` 방식)
     - 예: [`org.springframework.boot:spring-boot-starter-web` artifact](https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-starter-web/4.0.5/)
 - `platform()`은 maven repository에 직접 배포된 `.pom`파일을 다루기 위한 gradle 함수 이다.
 - `implementation(platform())`은 `platform()`에 정의된 의존성을 graldle 프로젝트의 `implementation` 단계에서 참조하겠다는 의미이다.
@@ -30,19 +36,23 @@ dependencies {
 
 Maven 저장소에서 아티팩트는 두 가지 형태로 배포
 
-| 아티팩트 | `.jar` 존재 | `.pom` 존재 |
+> 과거 maven artifact(`.jar` 파일 - top outter) 파일은 내부에 `.pom` 파일과 또 다른 inner `.jar` 파일을 반드시 포함하는 것을 관례로 했으며, gradle은 `.jar`를 포함하지 않은 artifact를 참조했을 때 오류를 출력했다.
+
+최근에는 BOM(Bill of Materials)을 이용한 의존성 관리 목적으로 artifact에 inner `.jar` 없이 `.pom`(bom in maven) 또는 `.toml`(version catalog = bom in gradle) 파일만을 갖는 artifact(`.jar`) 생성 및 사용하는 방법이 공식적으로 안내되고 있다.
+
+| 아티팩트 | 내부 `.jar` 존재 | `.pom` 존재 |
 |---|---|---|
 | `spring-boot-dependencies` | ❌ 없음 | ✅ 있음 |
 | `spring-boot-starter-web` | ✅ 있음 | ✅ 있음 |
 
 #### `platform()`이 필요한 이유
 
-Gradle은 의존성 함수들은 기본적으로 인자로 전달되는 artifactory로 부터  **`.jar` 파일을 기대** 합니다.
+Gradle의 의존성 함수들(implementation() 등)은 기본적으로 인자로 전달되는 artifactory로 부터 **내부 `.jar` 파일을 기대** 합니다.
 
-- implementation `spring-boot-starter-web` → `.jar` 있음 → 정상 처리
-- impolementation `spring-boot-dependencies` → `.jar` 없음 → 처리 불가
+- implementation `spring-boot-starter-web` → 내부 `.jar` 있음 → 정상 처리
+- implementation `spring-boot-dependencies` → 내부 `.jar` 없음 → 처리 불가
 
-→ `platform()`으로 **"이건 JAR가 없는 버전(의존성) 관리용 POM이야"** 라고 Gradle에게 명시적으로 알려주는 것
+→ `platform()`으로 **"이건 내부 JAR가 없는 버전(의존성) 관리용 POM이야"** 라고 Gradle에게 명시적으로 알려주는 것
 
 ```gradle
 // .jar 없는 아티팩트 → platform() 필요
