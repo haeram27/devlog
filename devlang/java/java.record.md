@@ -40,6 +40,50 @@ public record Person (String name, Integer age) {
 - hashCode()
 - toString()
 
+### Java record의 자동 생성 항목 예제
+
+```java
+public record AwsS3Properties(
+    String endpoint,
+    String region
+) {}
+```
+
+자동 생성되는 것:
+
+| 항목 | 생성 여부 | 형식 |
+|------|----------|------|
+| 생성자 | O | `AwsS3Properties(String endpoint, String region)` |
+| 읽기 메서드 (accessor) | O | `endpoint()`, `region()` (JavaBean 형식 아님) |
+| `equals()` | O | 모든 필드 비교 |
+| `hashCode()` | O | 모든 필드 기반 |
+| `toString()` | O | 모든 필드 포함 |
+| setter | **X** | 생성 안 됨 (불변) |
+
+#### 주의: `getXxx()` 형식이 아님
+
+```java
+record Person(String name) {}
+
+Person p = new Person("John");
+p.name();      // O - record accessor
+p.getName();   // X - 존재하지 않음
+```
+
+#### Lombok과 비교
+
+```java
+// Lombok
+@Getter
+@Setter  // 필요
+class Foo { private String name; }
+// → getName(), setName()
+
+// Record
+record Foo(String name) {}
+// → name() (getter만, setter 없음)
+```
+
 ## 사용자 정의 가능 항목
 
 - public constructor

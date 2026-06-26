@@ -80,6 +80,3 @@ gradle.properties는 민감한 정보(API 키, 비밀번호)를 관리하는 데
 ### build.gradle
 - plugins로 해당 모듈에 실제 적용할 플러그인 지정
 - 의존성(dependencies), 태스크(task), 컴파일 옵션, 테스트 설정(test), packaging(jar) 등 실질 빌드 로직 작성
-
-
-
