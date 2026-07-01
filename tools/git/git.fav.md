@@ -31,6 +31,7 @@ git push origin :feature01
 ```
 
 ## remote repository 초기화 하기
+
 ```bash
 git pull
 rm -rf ./.git

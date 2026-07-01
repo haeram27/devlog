@@ -2,12 +2,13 @@
 
 1. [properties의 객체 바인딩](#properties의-객체-바인딩)
    1. [property 바인딩 객체 생성](#property-바인딩-객체-생성)
-      1. [class 방식 - 기본 생성자 + getter/setter](#class-방식---기본-생성자--gettersetter)
+      1. [application.yml의 key이름 구분자(dash, `-`)](#applicationyml의-key이름-구분자dash--)
+      2. [class 방식 - 기본 생성자 + getter/setter](#class-방식---기본-생성자--gettersetter)
          1. [예시](#예시)
-      2. [권장: record (불변 객체) 방식 - 생성자 바인딩](#권장-record-불변-객체-방식---생성자-바인딩)
+      3. [권장: record (불변 객체) 방식 - 생성자 바인딩](#권장-record-불변-객체-방식---생성자-바인딩)
          1. [예시 (record)](#예시-record)
          2. [주의사항](#주의사항)
-      3. [정리](#정리)
+      4. [정리](#정리)
    2. [EnableConfigurationProperties 사용](#enableconfigurationproperties-사용)
       1. [EnableConfigurationProperties 사용 예](#enableconfigurationproperties-사용-예)
    3. [ConfigurationPropertiesScan 사용](#configurationpropertiesscan-사용)
@@ -33,6 +34,37 @@ ceph:
       secret-key: admin
       path-style-access-enabled: true
 ```
+
+### application.yml의 key이름 구분자(dash, `-`)
+
+Spring Boot의 ConfigurationProperties 바인더는 Relaxed Binding을 사용하기 때문에 entity-packages를 entityPackages로 정상 매핑합니다.
+
+왜 `-` 를 써도 camelCase로 매핑되는가
+1. Spring이 프로퍼티 이름을 느슨하게 해석합니다.
+2. 같은 의미로 취급되는 표기들이 있습니다.
+3. 예를 들어 아래는 모두 entityPackages와 매핑 가능합니다.
+- entity-packages
+- entity_packages
+- entityPackages
+- ENTITY_PACKAGES (환경변수)
+
+따라서 application-local.yml의 entity-packages는 record의 entityPackages와 잘 매핑됩니다.
+
+`_` 와 `-` 차이가 없는가
+1. 바인딩 결과 관점에서는 거의 차이가 없습니다.
+2. 하지만 가독성과 표준 관점에서는 차이가 있습니다.
+3. Spring 공식 권장 스타일은 외부 설정 키에 kebab-case, 즉 - 사용입니다.
+
+무엇을 쓰는 것이 좋은가
+1. YAML/properties 파일: - 권장
+2. Java/Kotlin 필드명: camelCase 유지
+3. 환경변수: 관례상 _ 사용
+
+실무 권장안
+1. 설정 파일은 전부 - 로 통일
+2. 코드 필드는 camelCase 유지
+3. 팀 규칙 문서화로 혼용 방지
+
 
 ### class 방식 - 기본 생성자 + getter/setter
 
