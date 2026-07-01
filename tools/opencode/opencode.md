@@ -9,10 +9,36 @@
 
 ## install
 
+- 공식 스크립트 사용
+
 ```bash
 ## install
 curl -fsSL https://opencode.ai/install | bash
 
 ## uninstall
 opencode uninstall
+```
+
+- Node.js (npm) 사용
+
+```bash
+npm install -g opencode-ai@latest
+```
+
+## omo(oh-my-opencode) install
+
+설치:
+
+```bash
+npx oh-my-opencode install
+```
+
+환경 설정: ~/.zshrc
+
+```bash
+#####################
+## OH MY OPENCODE
+#####################
+# disable send telemery
+export OMO_SEND_ANONYMOUS_TELEMETRY=0
 ```

@@ -202,6 +202,7 @@ System.out.println(config);  // Config(host=localhost, port=8080)
 #### @Data 사용 시 주의점
 
 1. **모든 필드에 대해 생성됨**: 민감한 필드(password, secret 등)도 toString()과 equals()에 포함되므로 주의
+
    ```java
    @Data
    public class User {

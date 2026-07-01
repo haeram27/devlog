@@ -1,31 +1,31 @@
 # Class CronExpression
 
-- [Class CronExpression](#class-cronexpression)
-  - [refs](#refs)
-  - [Syntax](#syntax)
-  - [Allowed Special Characters](#allowed-special-characters)
-    - [Asterisk ( \* )](#asterisk---)
-    - [Questionmark ( ? ) - dow, dom](#questionmark------dow-dom)
-    - [Comma (\<unit1\> ,\<unit2\>,... )](#comma-unit1-unit2-)
-    - [Hyphen ( - )](#hyphen----)
-    - [Slash ( \<start\>/\<interval\> )](#slash--startinterval-)
-    - ['L' - `dom, dow`](#l---dom-dow)
-    - ['L-nth'  - `dom`](#l-nth----dom)
-    - ['\<DDD\>L' - `dow`](#dddl---dow)
-    - ['\<nth\>W' - `dom`](#nthw---dom)
-    - ['LW' - `dom`](#lw---dom)
-    - [sharp( \<dow\>#\<nth\> ) - `dom`](#sharp-downth----dom)
-  - [Example expressions](#example-expressions)
+1. [Class CronExpression](#class-cronexpression)
+   1. [refs](#refs)
+   2. [Syntax](#syntax)
+   3. [Allowed Special Characters](#allowed-special-characters)
+      1. [Asterisk ( \* )](#asterisk---)
+      2. [Questionmark ( ? ) - dow, dom](#questionmark------dow-dom)
+      3. [Comma (\<unit1\> ,\<unit2\>,... )](#comma-unit1-unit2-)
+      4. [Hyphen ( - )](#hyphen----)
+      5. [Slash ( \<start\>/\<interval\> )](#slash--startinterval-)
+      6. ['L' - `dom, dow`](#l---dom-dow)
+      7. ['L-nth'  - `dom`](#l-nth----dom)
+      8. ['\<DDD\>L' - `dow`](#dddl---dow)
+      9. ['\<nth\>W' - `dom`](#nthw---dom)
+      10. ['LW' - `dom`](#lw---dom)
+      11. [sharp( \<dow\>#\<nth\> ) - `dom`](#sharp-downth----dom)
+   4. [Example expressions](#example-expressions)
 
 ---
 
 ## refs
 
-<https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronExpression.html>
-<https://www.manpagez.com/man/5/crontab/>
-<http://crontab.org/>
-<https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html>
-<https://en.wikipedia.org/wiki/Cron#CRON_expression>
+- <https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronExpression.html>
+- <https://www.manpagez.com/man/5/crontab/>
+- <http://crontab.org/>
+- <https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html>
+- <https://en.wikipedia.org/wiki/Cron#CRON_expression>
 
 ## Syntax
 
