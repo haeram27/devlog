@@ -3,6 +3,7 @@
 ## property 설정
 
 우선순위(높은순-낮은번호가 최종적용)는 다음과 같습니다. 우선순위가 높은 값이 낮은 값을 덮어 씁니다.
+
 1. java 명령행 인자
 2. JVM 시스템 프로퍼티
 3. OS 환경변수
@@ -21,33 +22,49 @@ application.yml이 application.properties 보다 우선 순위가 높지만 두 
   - 2. 참조 라이브러리 JAR 내부의 application.yml
 
 ### java 명령행 인자(argument) 방식
+
 ```bash
 java -jar build/libs/spring-ceph-client-0.0.1-SNAPSHOT.jar \
-  --ceph.aws.s3.endpoint=http://127.0.0.1:8555 \
-  --ceph.aws.s3.region=us-east-1 \
-  --ceph.aws.s3.access-key=YOUR_ACCESS_KEY \
-  --ceph.aws.s3.secret-key=YOUR_SECRET_KEY \
-  --ceph.aws.s3.path-style-access-enabled=true
+  --ceph.rgw.endpoint=http://127.0.0.1:8555 \
+  --ceph.rgw.region=us-east-1 \
+  --ceph.rgw.access-key=YOUR_ACCESS_KEY \
+  --ceph.rgw.secret-key=YOUR_SECRET_KEY \
+  --ceph.rgw.path-style-access-enabled=true
 ```
 
+**GRADLE 사용시**
+
+```bash
+gradle bootRun --args="--server.grpc-port=50051 --spring.profiles.active=dev"
+```
+
+
 ### JVM 시스템 프로퍼티(JVM 환경변수, java -D) 방식
+
 ```bash
 java \
-  -Dceph.aws.s3.endpoint=http://127.0.0.1:8555 \
-  -Dceph.aws.s3.region=us-east-1 \
-  -Dceph.aws.s3.access-key=YOUR_ACCESS_KEY \
-  -Dceph.aws.s3.secret-key=YOUR_SECRET_KEY \
-  -Dceph.aws.s3.path-style-access-enabled=true \
+  -Dceph.rgw.endpoint=http://127.0.0.1:8555 \
+  -Dceph.rgw.region=us-east-1 \
+  -Dceph.rgw.access-key=YOUR_ACCESS_KEY \
+  -Dceph.rgw.secret-key=YOUR_SECRET_KEY \
+  -Dceph.rgw.path-style-access-enabled=true \
   -jar build/libs/spring-ceph-client-0.0.1-SNAPSHOT.jar
 ```
 
-### OS 환경변수 방식
+**GRALDE 사용시**
+
 ```bash
-export CEPH_AWS_S3_ENDPOINT=http://127.0.0.1:8555
-export CEPH_AWS_S3_REGION=us-east-1
-export CEPH_AWS_S3_ACCESS_KEY=YOUR_ACCESS_KEY
-export CEPH_AWS_S3_SECRET_KEY=YOUR_SECRET_KEY
-export CEPH_AWS_S3_PATH_STYLE_ACCESS_ENABLED=true
+gradle bootRun -Dserver.grpc-port=50051 -Dspring.profiles.active=dev
+```
+
+### OS 환경변수 방식
+
+```bash
+export CEPH_RGW_ENDPOINT=http://127.0.0.1:8555
+export CEPH_RGW_REGION=us-east-1
+export CEPH_RGW_ACCESS_KEY=YOUR_ACCESS_KEY
+export CEPH_RGW_SECRET_KEY=YOUR_SECRET_KEY
+export CEPH_RGW_PATH_STYLE_ACCESS_ENABLED=true
 
 java -jar build/libs/spring-ceph-client-0.0.1-SNAPSHOT.jar
 ```
@@ -56,7 +73,7 @@ OS 환경 변수의 경우 spring 내부 에서 참조(소스 또는 applicaton.
 
 OS 환경 변수의 경우 대문자와 `_` 구분자로 이름을 지정하는데 spring 내부에서 참조할 때는 spring이 자동으로 소문자와 `.`으로 바인딩 해줍니다. 실제 OS 환경변수 이름이 바뀌는 것은 아니고 조회/바인딩 시점에만 이렇게 해석된다는 점입니다.
 
-- `CEPH_AWS_S3_ENDPOINT`를 `${ceph.aws.s3.endpoint}`으로 참조
+- `CEPH_RGW_ENDPOINT`를 `${ceph.rgw.endpoint}`으로 참조
 - `SPRING_PROFILES_ACTIVE`를 `${spring.profiles.active}`으로 참조
 
 
@@ -87,12 +104,14 @@ Spring Boot 기본 동작 기준(2.4+), 외부 application.yml 탐색 위치는 
 - `./config/*/`
 
 예시로 실제 파일명은 보통 아래 형태를 둡니다.
+
 1. ./application.yml
 2. ./config/application.yml
 3. ./config/dev/application.yml
 4. ./config/prod/application.yml
 
 프로필 파일도 같은 위치 규칙을 따릅니다.
+
 1. application-prod.yml
 2. application-dev.yml
 
@@ -261,11 +280,11 @@ redis:
 
 대표적으로는 아래입니다.
 
-1. 설정 파일 내부 값 참조  
+1. 설정 파일 내부 값 참조
 - application.yml / application.properties 안에서 다른 프로퍼티를 참조할 때  
 - 예: app.name: ${spring.application.name:my-app}
 
-2. 빈 필드/생성자 주입  
+2. 빈 필드/생성자 주입
 - `@Value("${my.user.id}")` 형태로 필드, 생성자 파라미터, 메서드 파라미터에 주입
 - 만약 property 값에 대해 기본값을 설정 하고자 하면 property key의 마지막에 colon(:)을 사용한다.
 ```java
@@ -275,13 +294,13 @@ redis:
     private String userId;
 ```
 
-3. 어노테이션 속성값  
-- 문자열 속성을 받는 많은 스프링 어노테이션에서 사용 가능  
+3. 어노테이션 속성값
+- 문자열 속성을 받는 많은 스프링 어노테이션에서 사용 가능
 - 예: @Scheduled(cron = "${job.cron}")  
 - 예: @KafkaListener(topics = "${kafka.topic.name}")
 
-4. `@ConfigurationProperties` 바인딩 대상 값  
-- 설정 파일 쪽 값에 플레이스홀더가 있으면, 해석된 뒤 바인딩됨  
+4. `@ConfigurationProperties` 바인딩 대상 값
+- 설정 파일 쪽 값에 플레이스홀더가 있으면, 해석된 뒤 바인딩됨
 - 즉 클래스 내부에 직접 ${...}를 쓰기보다 설정값에서 사용
 
 5. XML 기반 설정(레거시)  

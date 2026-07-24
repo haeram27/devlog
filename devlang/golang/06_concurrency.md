@@ -1483,142 +1483,100 @@ return &instance
 
 ---
 
-# [go][sync] Pool
+## [go][sync] Pool
 
 sync package
 
-1. [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
-: 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
+- [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
+  - 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
 
-2.
-[RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
-: 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
+- [RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
+  - 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
 
-3.
-[Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03) :
-조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에
-깨울수도 있다.
+- [Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03)
+  - 조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에 깨울수도 있다.
 
-4.
-[Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04) :
-특정 함수를 딱 한번만 실행할때
+- [Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04)
+  - 특정 함수를 딱 한번만 실행할때
 
-5.
-[Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05) :
-멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀.
+- [Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05)
+  - 멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀.
+  - 자주 사용하는 객체를 풀에 보과냈다가 다시 사용
 
-자주 사용하는 객체를 풀에 보과냈다가 다시 사용
+- [WaitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
+  - 고루틴이 모두 끝날 때까지 기다리는 기능
 
-6.
-[W
-aitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
-: 고루틴이 모두 끝날 때까지 기다리는 기능
-
-7.
-[Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
-: 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산.
+- [Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
+  - 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산
 
 멀티 스레드, 멀티코어 환경에서 안전하게 값을 연산하는 기능
 
-- 풀은 객체를 사용한 후 보관했다가 다시 사용.
-
-- 객체를 반복해서 할당하면메모리 사용량도 늘어나고, 메모리를 해제하는
-가비지 컬렉토도 부담
-
+- 풀은 객체를 사용한 후 보관했다가 다시 사용
+- 객체를 반복해서 할당하면메모리 사용량도 늘어나고, 메모리를 해제하는 가비지 컬렉토도 부담
 - 메모리 할당과 해제 횟수를 줄여 설능을 높이고자 할때 사용
-
 - 풀은 여러 고루틴에서 동시에 사용이 가능
 
 ​
 
 - sync.Pool
-
 - func (p *Pool) Get() interface{}: 풀에 보관된 객체를 가져옴
-
 - func (p *Pool) Pub( x interface{}) : 풀에 객체를 보관
 
 ​
 
 ```go
 type Data struct{
-
-tag string
-
-buffer []int
-
+    tag string
+    buffer []int
 }
 
 func pool(){
+    p := sync.Pool{ // 풀을 할당
+        New: func() interface{}{             // GET 함수사용으로 호출될 함수를 정의
+            data := new(Data)                // 새 메모리 할당
+            data.tag = "new"                 // 태그 설정
+            data.buffer = make([]int, 10)    // 슬라이스 공간 할당
+            return data                      // 할당한 메모리(객체) 리턴
+        },
+    }
 
-p := sync.Pool{ // 풀을 할당
+    // 고루틴을 10개 생성함
+    for i:=0; i<10; i++ {
+        go func(){
+            // 풀에서 Data 타입으로 데이터 가져옴
+            data := p.Get().(Data)
+            for index := range data.buffer {
+                data.buffer[index] = rand.Intn(100) // 슬라이스에 랜덤값 저장
+            }
 
-New: func() interface{}{ // GET 함수사용으로 호출될 함수를 정의
+            fmt.Println(data)
 
-data := new(Data)                 // 새 메모리 할당
+            // 사용된 객체라는 증거로 값을 넣음
+            data.tag = "used"
 
-data.tag = "new"                 // 태그 설정
+            // 풀에 객체를 보관
+            p.Put(data) 
+        }()
+    }
 
-data.buffer = make([]int, 10)         // 슬라이스 공간 할당
+    for i:=0; i<10; i++ {
+        go func(){
+            data := p.Get().(*Data)
+            n := 0
+            for index := range data.buffer {
+                data.buffer[index] = n
+                n += 2
+            }
 
-return data // 할당한 메모리(객체) 리턴ㄴ
+            fmt.Println(data)
 
-},
+            data.tag = "used"
 
-}
+            p.Put(data)
+        }()
+    }
 
-// 고루틴을 10개 생성함
-
-for i:=0; i<10; i++ {
-
-go func(){
-
-data := p.Get().(Data) // 풀에서 Data 타입으로 데이터
-가져옴
-
-for index := range data.buffer {
-
-data.buffer[index] = rand.Intn(100) // 슬라이스에 랜덤값 저장
-
-}
-
-fmt.Println(data)
-
-data.tag = "used" // 사용된 객체라는 증거로 값을 넣음
-
-p.Put(data) // 풀에 객체를 보관
-
-}()
-
-}
-
-for i:=0; i<10; i++ {
-
-go func(){
-
-data := p.Get().(*Data)
-
-n := 0
-
-for index := range data.buffer {
-
-data.buffer[index] = n
-
-n += 2
-
-}
-
-fmt.Println(data)
-
-data.tag = "used"
-
-p.Put(data)
-
-}()
-
-}
-
-fmt.Scanln()
-
+    fmt.Scanln()
 }
 ```
 
@@ -1628,6 +1586,7 @@ fmt.Scanln()
 
 나머지는 할당된 데이터를 꺼내서 사용을 한것을 알수 있습니다.
 
+```plain
 &{new [81 87 47 59 81 18 25 40 56 0]}
 
 &{used [94 11 62 89 28 74 11 45 37 6]}
@@ -1655,169 +1614,113 @@ fmt.Scanln()
 &{new [0 2 4 6 8 10 12 14 16 18]}
 
 &{used [0 2 4 6 8 10 12 14 16 18]}
+```
 
 ---
 
-# [go][sync] WaitGroup
+## [go][sync] WaitGroup
 
 sync package
 
-1. [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
-: 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
+- [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
+  - 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
 
-2.
-[RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
-: 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
+- [RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
+  - 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
 
-3.
-[Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03) :
-조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에
-깨울수도 있다.
+- [Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03)
+  - 조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에 깨울수도 있다.
 
-4.
-[Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04) :
-특정 함수를 딱 한번만 실행할때
+- [Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04)
+  - 특정 함수를 딱 한번만 실행할때
 
-5.
-[Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05) :
-멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀.
+- [Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05)
+  - 멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀
+  - 자주 사용하는 객체를 풀에 보과냈다가 다시 사용
 
-자주 사용하는 객체를 풀에 보과냈다가 다시 사용
+- [WaitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
+  - 고루틴이 모두 끝날 때까지 기다리는 기능
 
-6.
-[W
-aitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
-: 고루틴이 모두 끝날 때까지 기다리는 기능
-
-7.
-[Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
-: 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산.
+- [Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
+  - 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산
 
 멀티 스레드, 멀티코어 환경에서 안전하게 값을 연산하는 기능
 
-- 대기그룹은 고루틴이 모두 끝날때까지 기다릴때 사용
-
+- `WaitGroup`은 고루틴이 모두 끝날때까지 기다릴때 사용
 - sync.WaitGroup
+  - `func (wg *WaitGroup) Add(delta int)` - 대기그룹에 고루틴 개수 추가
+  - `func (wg *WaitGroup) Wait()` - 모든 고루틴이 끝날 때 까지 기다림
+  - `func (wg *WaitGroup) Done()` - 고루틴이 끝났다는 것을 알려줄 때 사용
 
-- func ( wg *WaitGroup) **Add**(delta int) - 대기그룹에 고루틴 개수
-추가
+> **Add, Wait, Done 암기하자**
 
-- func ( wg *WaitGroup) **Wait**() - 모든 고루틴이 끝날 때 까지 기다림
-
-- func ( wg *WaitGroup) **Done**() - 고루틴이 끝났다는 것을 알려줄 때
-사용
-
-**Add, Wait, Done 암기하자**
+**WaitGroup 사용 예:**
 
 ```go
-wg := new(sync.WaitGroup) // 대기그룹 생성
-
+wg := new(sync.WaitGroup) // WaitGroup 생성
 for i:=0 ; i<10 ; i++{
-
-wg.Add(1) // 반복할때 마다 wg.Add 함수로 1씩 추가
-
-// 고루틴 10개 생성
-
-go func(n int){
-
-fmt.Println(n)
-
-wg.Done() // 고루틴이 끝났다는 것을 알려줌
-
-}(i)
-
+    wg.Add(1) // 반복할때 마다 wg.Add 함수로 1씩 추가
+    // 고루틴 10개 생성
+    go func(n int){
+        fmt.Println(n)
+        wg.Done() // 고루틴이 끝났다는 것을 알려줌
+    }(i)
 }
 
-wg.Wait() // 모든 고루틴이 끝날때 까지 기다림
+// 모든 고루틴이 끝날때 까지 실행흐름 대기, wg에 add된 카운트 만큼 Done()이 호출되어야 대기 해제
+wg.Wait()
 
 fmt.Println("the end")
 ```
 
 - 고루틴을 생성시 Add함수로 고루틴 개수를 추가
-
 - 고루틴 안에서 Done함수를 사용하여 고루틴이 끝났다는 것을 알려줌
-
 - Wait 함수를 사용하여 모든 고루틴이 끝날때까지 기다린다.
-
-* Add함수에 설정한 값과 Done함수가 호출되는 횟수는 같아야 함.
+- Add함수에 설정한 값과 Done함수가 호출되는 횟수는 같아야 함.
 
 ---
 
-# [go][sync] Atomic action
+## [go][sync] Atomic action
 
-sync package
-
-1. [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
-: 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
-
-2.
-[RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
-: 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
-
-3.
-[Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03) :
-조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에
-깨울수도 있다.
-
-4.
-[Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04) :
-특정 함수를 딱 한번만 실행할때
-
-5.
-[Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05) :
-멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀.
-
-자주 사용하는 객체를 풀에 보과냈다가 다시 사용
-
-6.
-[W
-aitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
-: 고루틴이 모두 끝날 때까지 기다리는 기능
-
-7.
-[Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
-: 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산.
-
-멀티 스레드, 멀티코어 환경에서 안전하게 값을 연산하는 기능
-
-- 고루틴, CPU, 코어에서 같은 메모리를 수정할때 서로 영향을 받지 않고
-안전하게 연산
-
+- 멀티 스레드, 멀티코어 환경에서 안전하게 값을 연산하는 기능
+- 고루틴, CPU, 코어에서 같은 메모리를 수정할때 서로 영향을 받지 않고 안전하게 연산
 - CPU명령어를 직접 사용하여 구현
 
-​
+- sync package
+  - [Mutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35)
+    - 상호배제/ 여러 스레드에서 공유되는 데이터를 보호할때 사용
+  - [RWMutex](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/02)
+    - 읽기/쓰기 동작을 나누어서 Lock 을 걸수 있음
+  - [Cond](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/03) :
+    - 조건 변수. 대기하고 있는 하나의 객체를 깨울 수도 있고 여러개를 동시에 깨울수도 있다.
+  - [Once](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/04)
+    - 특정 함수를 딱 한번만 실행할 때
+  - [Pool](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/05)
+    - 멀티 스레트(고루틴)에서 사용할 수 있는 객체의 풀
+    - 자주 사용하는 객체를 풀에 보과냈다가 다시 사용
+  - [WaitGroup](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/06)
+    - 고루틴이 모두 끝날 때까지 기다리는 기능
+  - [Atomic](https://pyrasis.com/book/GoForTheReallyImpatient/Unit35/07)
+    - 원자적 연산이라고도 하며 더이상 쪼갤수 없는 연산
 
 ```go
 var data int32 = 0
-
 wg := new(sync.WaitGroup)
 
 for i:=0 ; i < 2000 ; i++{
-
-wg.Add(1)
-
-go func(){
-
-data += 1
-
-wg.Done()
-
-}()
-
+    wg.Add(1)
+    go func(){
+        data += 1
+        wg.Done()
+    }()
 }
 
 for i:=0 ; i < 1000 ; i++{
-
-wg.Add(1)
-
-go func(){
-
-data -= 1
-
-wg.Done()
-
-}()
-
+    wg.Add(1)
+    go func(){
+        data -= 1
+        wg.Done()
+    }()
 }
 
 wg.Wait()
@@ -1835,35 +1738,21 @@ fmt.Println(data)
 
 ```go
 var data int32 = 0
-
 wg := new(sync.WaitGroup)
-
 for i:=0 ; i < 2000 ; i++{
-
-wg.Add(1)
-
-go func(){
-
-atomic.AddInt32( &data, 1)
-
-wg.Done()
-
-}()
-
+    wg.Add(1)
+    go func(){
+        atomic.AddInt32(&data, 1)
+        wg.Done()
+    }()
 }
 
 for i:=0 ; i < 1000 ; i++{
-
-wg.Add(1)
-
-go func(){
-
-atomic.AddInt32( &data, -1)
-
-wg.Done()
-
-}()
-
+    wg.Add(1)
+    go func(){
+        atomic.AddInt32(&data, -1)
+        wg.Done()
+    }()
 }
 
 wg.Wait()
@@ -1877,15 +1766,8 @@ fmt.Println(data)
 
 sync/atomic 패키지에서 제공하는 원자적 연산으로 처리가 됨
 
-​
-
 - Add 계열: 변수에 값을 더하고 결과를 리턴
-
-- CompareAndSwap 계역: 변수 AB를 비교하여 같으면 C를 대입, 같으면 true,
-다르면 false를 리턴
-
-- Load 계열: 변수에서 값을 가져옵니다.
-
+- CompareAndSwap 계역: 변수 AB를 비교하여 같으면 C를 대입, 같으면 true, 다르면 false를 리턴
+- Load 계열: 변수에서 값을 가져옵니다
 - Store 계열: 변수에 값을 저장
-
-- Swap 계열: 변수에 새 값을 대입하고 이전 값을 리턴
+- Swap 계열: 변수에 새 값을 대입하고 이전 값을 반환

@@ -16,19 +16,14 @@ nil은 인스턴스의 주소가 없는 상태이다.
 
 ## 모듈 멤버의 첫문자의 대소문자에 따른 package간 access scope 제한
 
-.go 파일에 정의되는 global variable과 함수에 대해서
+`.go` 파일에 정의되는 global variable과 함수에 대해서
+- 그 이름의 첫문자가 대문자이면 다른 외부 package에서 접근 가능
+- 그 이름의 첫문자가 소문자이면 다른 외부 package에서 접근 불가능
 
-그 이름의 첫문자가 대문자이면 다른 외부 package에서 접근 가능
-
-그 이름의 첫문자가 소문자이면 다른 외부 package에서 접근 불가능
-
-`var PackageExternalGlobalVariable int`
-
-`var packageInternalGlobalVariable int`
-
-`func PackageExternalFunction(){}`
-
-`func packageInternalFunction(){}`
+- `var PackageExternalGlobalVariable int`
+- `var packageInternalGlobalVariable int`
+- `func PackageExternalFunction(){}`
+- `func packageInternalFunction(){}`
 
 ## var
 
@@ -128,7 +123,6 @@ func main() {
 
 ⚠️ Go의 관례: 하나의 타입에 정의된 메서드들 중 단 하나라도 포인터 리시버를 사용한다면, 일관성을 위해 모든 메서드를 포인터 리시버로 통일하는 것이 좋습니다.
 
-
 ## go 함수의 closure 표현에서 outter 변수 사용은 모두 call by reference 이다.
 
 ### Rule 1, Go 언어에는 함수는 일급 함수로써 하나의 객체로 다루어진다.
@@ -186,6 +180,7 @@ func TestClosureCaptureReDecl(t *testing.T) {
 ```
 
 ## 변수 선언시과 default 값
+
 golang 에서 모든 변수는 따로 초기값을 부여 코드를 작성하지 않는다면
 default 값(0, nil, false)으로 초기화 된다.
 
