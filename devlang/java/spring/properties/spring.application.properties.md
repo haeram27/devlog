@@ -21,7 +21,10 @@ application.yml이 application.properties 보다 우선 순위가 높지만 두 
   - 1. 본 프로젝트의 src/main/resources/application.yml
   - 2. 참조 라이브러리 JAR 내부의 application.yml
 
-### java 명령행 인자(argument) 방식
+### java 어플리케이션 명령행 인자(argument) 방식
+
+- java 어플리케이션에서는 애플리케이션 인자(`args[]`)로 전달됨
+- spring 어플리케이션에서는 property로써 참조 가능
 
 ```bash
 java -jar build/libs/spring-ceph-client-0.0.1-SNAPSHOT.jar \
@@ -38,8 +41,11 @@ java -jar build/libs/spring-ceph-client-0.0.1-SNAPSHOT.jar \
 gradle bootRun --args="--server.grpc-port=50051 --spring.profiles.active=dev"
 ```
 
-
 ### JVM 시스템 프로퍼티(JVM 환경변수, java -D) 방식
+
+- `-D` 옵션으로 전달되는 값은 JVM이 System Properties(시스템 속성) 공간에 저장
+- java 어플리케이션에서는 `System.getProperties()`로 직접 참조 가능
+- spring 어플리케이션에서는 property로써 참조 가능
 
 ```bash
 java \
@@ -59,6 +65,10 @@ gradle bootRun -Dserver.grpc-port=50051 -Dspring.profiles.active=dev
 
 ### OS 환경변수 방식
 
+- 환경 변수로 전달되느 값은 JVM이 환경변수 전용 공간에 저장
+- java 어플리케이션에서는 `System.getenv()`로 직접 참조 가능
+- spring 어플리케이션에서는 property로써 참조 가능
+
 ```bash
 export CEPH_RGW_ENDPOINT=http://127.0.0.1:8555
 export CEPH_RGW_REGION=us-east-1
@@ -76,8 +86,8 @@ OS 환경 변수의 경우 대문자와 `_` 구분자로 이름을 지정하는�
 - `CEPH_RGW_ENDPOINT`를 `${ceph.rgw.endpoint}`으로 참조
 - `SPRING_PROFILES_ACTIVE`를 `${spring.profiles.active}`으로 참조
 
-
 ### application.yml 방식
+
 ```yml
 ceph:
   aws:
