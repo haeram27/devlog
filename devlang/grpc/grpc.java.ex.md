@@ -6,7 +6,7 @@ Java에서 gRPC를 구현하려면 .proto 정의, 코드 생성(Stubs), 서버 �
 
 1. protobuf 구현
 1. protobuf 빌드 하여 클라이언트(Stub)과 서버(ImplBase) Java class 생성
-1. 서버 로직 구현 ()
+1. 서버 로직 구현
 1. 클라이언트 로직 구현
 
 ## 서버 구현
@@ -257,4 +257,59 @@ import org.springframework.context.annotation.Bean;
         };
     }
 }
+```
+
+### gRPC-Java Client Stub 종류 및 선택
+
+gRPC-Java는 `.proto`에 정의된 서비스마다 코드 생성을 통해 여러 종류의 클라이언트 Stub 클래스를
+자동으로 만들어준다. 모두 동일한 RPC를 호출하지만 **호출 방식(동기/비동기)과 결과를 받는 방법**이
+다르다. 예: `console.report.v1.ConsoleReportService`의 경우 다음 4가지 Stub이 생성된다.
+
+- `Stub`
+- `BlockingStub`
+- `BlockingV2Stub`
+- `FutureStub`
+
+#### 비교 테이블
+
+| 스텁 | 호출 방식 | 반환/결과 처리 | 특징 |
+|---|---|---|---|
+| **`Stub`** (async stub) | 비동기 | `StreamObserver<Response>` 콜백으로 결과 수신 | 서버/클라이언트/양방향 스트리밍 RPC까지 모두 지원하는 가장 범용적인 스텁. non-blocking, 콜백 기반 |
+| **`BlockingStub`** | 동기(블로킹) | 메서드가 `Response`를 바로 리턴 (unary/서버 스트리밍만) | 가장 많이 쓰는 스텁. 호출 스레드가 응답 올 때까지 대기. 구버전 API |
+| **`BlockingV2Stub`** | 동기(블로킹) | 동일하게 `Response` 바로 리턴 | grpc-java 최근 버전에서 도입된 신형 blocking stub. 내부적으로 `ClientCalls`의 최신(V2) 구현을 사용해 취소·데드라인 처리 등이 개선됨. 기존 `BlockingStub`을 대체할 목적으로 추가된 버전 (점진적으로 V2가 표준이 되는 추세) |
+| **`FutureStub`** | 비동기 | `ListenableFuture<Response>` 리턴 (unary RPC 전용) | 콜백 대신 Future 조합(`Futures.addCallback`, `transform` 등)으로 비동기 처리하고 싶을 때 사용 |
+
+#### 선택 기준
+
+- 단순 unary 호출이고 블로킹이 괜찮다면 → `BlockingStub` / `BlockingV2Stub` (신규 코드는 V2 권장)
+- 논블로킹 + 콜백 기반 처리가 필요하다면 → `Stub` (async)
+- `ListenableFuture` 기반으로 비동기 결과를 조합/체이닝하고 싶다면 → `FutureStub`
+- 서버 스트리밍, 클라이언트 스트리밍, 양방향 스트리밍 RPC를 사용해야 한다면 → `Stub` (async)만 지원
+
+#### 예시
+
+```java
+// BlockingStub: 동기 호출, 응답이 바로 리턴됨
+ConsoleReportServiceGrpc.ConsoleReportServiceBlockingStub blockingStub =
+    ConsoleReportServiceGrpc.newBlockingStub(channel);
+HelloResponse response = blockingStub.hello(request);
+
+// Stub: 비동기 호출, StreamObserver 콜백으로 결과 수신
+ConsoleReportServiceGrpc.ConsoleReportServiceStub asyncStub =
+    ConsoleReportServiceGrpc.newStub(channel);
+asyncStub.hello(request, new StreamObserver<HelloResponse>() {
+    @Override
+    public void onNext(HelloResponse value) { /* ... */ }
+
+    @Override
+    public void onError(Throwable t) { /* ... */ }
+
+    @Override
+    public void onCompleted() { /* ... */ }
+});
+
+// FutureStub: 비동기 호출, ListenableFuture로 결과 수신
+ConsoleReportServiceGrpc.ConsoleReportServiceFutureStub futureStub =
+    ConsoleReportServiceGrpc.newFutureStub(channel);
+ListenableFuture<HelloResponse> future = futureStub.hello(request);
 ```
