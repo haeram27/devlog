@@ -33,9 +33,11 @@ public record GreetingProperties(
 @EnableConfigurationProperties(GreetingConfig.GreetingProperties.class)
 public class GreetingConfig {
 
+    // record to bind at `example.greeting` property
     @ConfigurationProperties(prefix = "example.greeting")
     public record GreetingProperties(String prefix, String target) {}
 
+    // register bean using GreetingProperties
     @Bean
     public GreetingService greetingService(GreetingProperties properties) {
         return new GreetingService(properties.prefix(), properties.target());
