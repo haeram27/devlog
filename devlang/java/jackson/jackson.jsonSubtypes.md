@@ -1,5 +1,17 @@
 # `@JsonTypeInfo`를 이용한 json 다형성(Polymorphic) 직렬화/역직렬화
 
+`JsonTypeInfo`는 Json의 특정 필드 값 또는 클래스 이름을 기준으로 맵핑될 실제 클래스를 `JsonSubTypes`로 명시해 주는 기법이다.
+
+## 핵심 요약
+
+- `@JsonTypeInfo`와 `@JsonSubTypes`는 역할이 나뉩니다.
+  - `@JsonTypeInfo`: 부모(추상) 타입에 선언해 "타입 식별자를 어떤 방식(`use`)으로, 어디에(`include`) 기록할지" 규칙을 정의합니다.
+  - `@JsonSubTypes`: 그 규칙에서 사용할 **논리적 이름(name) ↔ 실제 하위 클래스(value)** 매핑 테이블을 정의합니다.
+- 동작 흐름:
+  - **역직렬화 시**: JSON에서 `@JsonTypeInfo(property = "type")`로 지정된 필드 값(예: `"DOG"`)을 읽음 → `@JsonSubTypes` 매핑 테이블에서 일치하는 클래스(`Dog::class`)를 찾음 → 해당 클래스의 인스턴스로 변환.
+  - **직렬화 시**: 반대로 실제 런타임 클래스(`Dog`)를 보고 매핑 테이블에서 대응하는 `name`(`"DOG"`)을 찾아 JSON 필드 값으로 기록.
+- `@JsonTypeInfo`만으로는 "타입 정보를 어떻게 표현할지"만 정해질 뿐 실제 값-클래스 대응은 알 수 없고, `@JsonSubTypes`가 매핑 테이블 역할을 해야 실제 클래스 변환이 가능합니다. (`Id.NAME` 방식일 때 필수 조합이며, `Id.CLASS`/`Id.MINIMAL_CLASS`는 클래스명 자체를 식별자로 쓰므로 `@JsonSubTypes` 없이도 동작 가능합니다.)
+
 ## 어노테이션 설명
 
 **`@JsonTypeInfo`**
