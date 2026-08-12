@@ -45,7 +45,7 @@
   - **직렬화 시**: 객체의 실제 런타임 클래스를 보고, 매핑 테이블에서 일치하는 `name`을 찾아 JSON의 타입 필드 값으로 씁니다.
   - **역직렬화 시**: JSON의 타입 필드 값을 읽고, 매핑 테이블에서 일치하는 `value`(클래스)를 찾아 해당 타입의 인스턴스로 생성합니다.
 
-## 다형성(Polymorphic) JSON 직렬화/역직렬화 예제
+## 다형성(Polymorphic) JSON 직렬화/역직렬화 예제 (kotlin)
 
 ### 1. Base/Sub클래스 정의
 
@@ -296,3 +296,614 @@ data class PeriodicDayParamsDto(
 )
 ```
 
+## 다형성(Polymorphic) JSON 직렬화/역직렬화 예제 (java)
+
+### 구현 내용
+
+schedule_type 별 파라미터
+
+| scheduler type   | 파라미터 필드           | 파라미터 객체 필드                            | 설명                                  |
+|------------------|-------------------------|-----------------------------------------------|---------------------------------------|
+| IMMEDIATE        | -                       | -                                             | 즉시 1회 실행. 추가 파라미터 없음     |
+| SPECIFIC_TIME    | specific_time_params    | date_time: string (ISO-8601 OffsetDateTime)   | 지정 일시에 1회 실행                  |
+| EVERY_MINUTE     | every_minute_params     | second: integer (0~59)                        | 매분 지정 초에 실행                   |
+| EVERY_HOUR       | every_hour_params       | minute: integer (0~59)                        | 매시간 지정 분:초에 실행              |
+|                  |                         | second: integer (0~59)                        |                                       |
+| EVERY_DAY        | every_day_params        | hour: integer (0~23)                          | 매일 지정 시:분:초에 실행             |
+|                  |                         | minute: integer (0~59)                        |                                       |
+|                  |                         | second: integer (0~59)                        |                                       |
+| EVERY_WEEK       | every_week_params       | days_of_week: list (요일 목록, MONDAY~SUNDAY) | 매주 지정 요일 시:분:초에 실행        |
+|                  |                         | hour: integer (0~23)                          |                                       |
+|                  |                         | minute: integer (0~59)                        |                                       |
+|                  |                         | second: integer (0~59)                        |                                       |
+| EVERY_MONTH_DAY  | every_month_day_params  | days_of_month: list (1~31 일 목록)            | 매월 지정 일 시:분:초에 실행          |
+|                  |                         | hour: integer (0~23)                          |                                       |
+|                  |                         | minute: integer (0~59)                        |                                       |
+|                  |                         | second: integer (0~59)                        |                                       |
+| EVERY_MONTH_WEEK | every_month_week_params | day_of_week: string (MONDAY~SUNDAY)           | 매월 N째 주 지정 요일 시:분:초에 실행 |
+|                  |                         | week_order: integer (1~5, 몇째 주)            |                                       |
+|                  |                         | hour: integer (0~23)                          |                                       |
+|                  |                         | minute: integer (0~59)                        |                                       |
+|                  |                         | second: integer (0~59)                        |                                       |
+| EVERY_YEAR       | every_year_params       | months: list (1~12 월 목록)                   | 매년 지정 월/일 시:분:초에 실행       |
+|                  |                         | day_of_month: integer (1~31)                  |                                       |
+|                  |                         | hour: integer (0~23)                          |                                       |
+|                  |                         | minute: integer (0~59)                        |                                       |
+|                  |                         | second: integer (0~59)                        |                                       |
+| PERIODIC         | periodic_params         | interval_seconds: long (반복 간격 초)         | 지정 간격(초)마다 반복 실행           |
+| PERIODIC_DAY     | periodic_day_params     | period_days: integer (반복 일 수)             | N일마다 지정 시각에 실행              |
+|                  |                         | time_of_day: string (HH:mm:ss, LocalTime)     |                                       |
+
+
+### 1. Base/Sub클래스 정의
+
+```java
+package com.example.dto.scheduler;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.time.DayOfWeek;
+import java.util.List;
+
+/**
+ * Jackson의 Json 다형성 맵핑을 위한 Schedule Dto 구현
+ *
+ * <p>판별자({@code schedule_type})가 params와 같은 객체 안에 함께 존재하므로
+ * {@code EXISTING_PROPERTY}를 사용한다 — 판별자가 형제 필드로 분리되어 있는 경우(예:
+ * {@code AgentMasterSearchRequestDtoV1}의 {@code EXTERNAL_PROPERTY})와는 다른 케이스다.
+ * record 기반 생성자 바인딩에서 판별자 프로퍼티 값이 그대로 채워지도록 {@code visible = true}가
+ * 필요하다.
+ *
+ * <p>모든 직접 서브타입과 각 서브타입의 params 클래스({@code SpecificTimeParamsDtoV1} 등)가
+ * 이 파일 안에 nested record로 선언되어 있으므로 컴파일러가 {@code permits} 목록을 자동으로
+ * 추론한다 — 명시적으로 적지 않아도 된다. 다른 패키지에서 params 클래스를 참조할 때는
+ * {@code ReportScheduleDtoV1.SpecificTimeParamsDtoV1}처럼 정규화하거나 nested type을
+ * import해서 사용한다.
+ */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "schedule_type",
+    visible = true
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.Immediate.class, name = "IMMEDIATE"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.SpecificTime.class, name = "SPECIFIC_TIME"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryMinute.class, name = "EVERY_MINUTE"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryHour.class, name = "EVERY_HOUR"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryDay.class, name = "EVERY_DAY"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryWeek.class, name = "EVERY_WEEK"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryMonthDay.class, name = "EVERY_MONTH_DAY"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryMonthWeek.class, name = "EVERY_MONTH_WEEK"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.EveryYear.class, name = "EVERY_YEAR"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.Periodic.class, name = "PERIODIC"),
+    @JsonSubTypes.Type(value = ReportScheduleDtoV1.PeriodicDay.class, name = "PERIODIC_DAY"),
+})
+public sealed interface ReportScheduleDtoV1 {
+
+    ReportScheduleTypeDtoV1 scheduleType();
+
+    String timezone();
+
+    /**
+     * 스케줄 실행 방식 판별자.
+     *
+     * <p>{@code report_plan.proto}의 {@code ScheduleTypeV1}과 동일한 상수 구성을 갖는다
+     * ({@code SCHEDULE_TYPE_UNSPECIFIED}는 JSON 계약에는 없으므로 제외).
+     */
+    enum ReportScheduleTypeDtoV1 {
+        IMMEDIATE,
+        SPECIFIC_TIME,
+        EVERY_MINUTE,
+        EVERY_HOUR,
+        EVERY_DAY,
+        EVERY_WEEK,
+        EVERY_MONTH_DAY,
+        EVERY_MONTH_WEEK,
+        EVERY_YEAR,
+        PERIODIC,
+        PERIODIC_DAY
+    }
+
+    /**
+     * 즉시 1회 실행. 추가 파라미터 없음.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "IMMEDIATE",
+     *   "timezone": "UTC"
+     * }
+     * }</pre>
+     */
+    record Immediate(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /**
+     * 지정 일시에 1회 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "SPECIFIC_TIME",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "date_time": "2026-08-12T00:00:00+09:00"
+     *   }
+     * }
+     * }</pre>
+     */
+    record SpecificTime(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") SpecificTimeParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 지정 일시에 1회 실행. {@code report_plan.proto}의 {@code SpecificTimeParamsV1}. */
+    record SpecificTimeParamsDtoV1(
+        @JsonProperty("date_time") String dateTime
+    ) {
+
+    }
+
+    /**
+     * 매분 지정 초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_MINUTE",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryMinute(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryMinuteParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매분 지정 초에 실행. {@code report_plan.proto}의 {@code EveryMinuteParamsV1}. */
+    record EveryMinuteParamsDtoV1(
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매시간 지정 분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_HOUR",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryHour(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryHourParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매시간 지정 분:초에 실행. {@code report_plan.proto}의 {@code EveryHourParamsV1}. */
+    record EveryHourParamsDtoV1(
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매일 지정 시:분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_DAY",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "hour": 9,
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryDay(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryDayParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매일 지정 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryDayParamsV1}. */
+    record EveryDayParamsDtoV1(
+        @JsonProperty("hour") Integer hour,
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매주 지정 요일 시:분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_WEEK",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "days_of_week": ["MONDAY", "FRIDAY"],
+     *     "hour": 9,
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryWeek(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryWeekParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매주 지정 요일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryWeekParamsV1}. */
+    record EveryWeekParamsDtoV1(
+        @JsonProperty("days_of_week") List<DayOfWeek> daysOfWeek,
+        @JsonProperty("hour") Integer hour,
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매월 지정 일 시:분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_MONTH_DAY",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "days_of_month": [1, 15],
+     *     "hour": 9,
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryMonthDay(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryMonthDayParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매월 지정 일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryMonthDayParamsV1}. */
+    record EveryMonthDayParamsDtoV1(
+        @JsonProperty("days_of_month") List<Integer> daysOfMonth,
+        @JsonProperty("hour") Integer hour,
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매월 N째 주 지정 요일 시:분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_MONTH_WEEK",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "day_of_week": "MONDAY",
+     *     "week_order": 2,
+     *     "hour": 9,
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryMonthWeek(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryMonthWeekParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /**
+     * 매월 N째 주 지정 요일 시:분:초에 실행. {@code report_plan.proto}의
+     * {@code EveryMonthWeekParamsV1}.
+     */
+    record EveryMonthWeekParamsDtoV1(
+        @JsonProperty("day_of_week") DayOfWeek dayOfWeek,
+        @JsonProperty("week_order") Integer weekOrder,
+        @JsonProperty("hour") Integer hour,
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 매년 지정 월/일 시:분:초에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "EVERY_YEAR",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "months": [1, 6],
+     *     "day_of_month": 15,
+     *     "hour": 9,
+     *     "minute": 15,
+     *     "second": 30
+     *   }
+     * }
+     * }</pre>
+     */
+    record EveryYear(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") EveryYearParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 매년 지정 월/일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryYearParamsV1}. */
+    record EveryYearParamsDtoV1(
+        @JsonProperty("months") List<Integer> months,
+        @JsonProperty("day_of_month") Integer dayOfMonth,
+        @JsonProperty("hour") Integer hour,
+        @JsonProperty("minute") Integer minute,
+        @JsonProperty("second") Integer second
+    ) {
+
+    }
+
+    /**
+     * 지정 간격(초)마다 반복 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "PERIODIC",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "interval_seconds": 3600
+     *   }
+     * }
+     * }</pre>
+     */
+    record Periodic(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") PeriodicParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /** 지정 간격(초)마다 반복 실행. {@code report_plan.proto}의 {@code PeriodicParamsV1}. */
+    record PeriodicParamsDtoV1(
+        @JsonProperty("interval_seconds") Long intervalSeconds
+    ) {
+
+    }
+
+    /**
+     * N일마다 지정 시각에 실행.
+     *
+     * <pre>{@code
+     * {
+     *   "schedule_type": "PERIODIC_DAY",
+     *   "timezone": "UTC",
+     *   "params": {
+     *     "period_days": 2,
+     *     "time_of_day": "09:00:00"
+     *   }
+     * }
+     * }</pre>
+     */
+    record PeriodicDay(
+        @JsonProperty("schedule_type") ReportScheduleTypeDtoV1 scheduleType,
+        @JsonProperty("timezone") String timezone,
+        @JsonProperty("params") PeriodicDayParamsDtoV1 params
+    ) implements ReportScheduleDtoV1 {
+
+    }
+
+    /**
+     * N일마다 지정 시각에 실행. {@code report_plan.proto}의 {@code PeriodicDayParamsV1}.
+     *
+     * <p>{@code time_of_day}는 {@code HH:mm:ss} 형식 문자열이다.
+     */
+    record PeriodicDayParamsDtoV1(
+        @JsonProperty("period_days") Integer periodDays,
+        @JsonProperty("time_of_day") String timeOfDay
+    ) {
+
+    }
+}
+```
+
+### 2. UnitTest
+
+```java
+package com.example.dto.scheduler;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryDayParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryHourParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryMinuteParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryMonthDayParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryMonthWeekParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryWeekParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.EveryYearParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.Immediate;
+import com.example.dto.scheduler.ReportScheduleDtoV1.PeriodicDayParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.PeriodicParamsDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.ReportScheduleTypeDtoV1;
+import com.example.dto.scheduler.ReportScheduleDtoV1.SpecificTimeParamsDtoV1;
+import java.time.DayOfWeek;
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import tools.jackson.databind.json.JsonMapper;
+
+/**
+ * {@link ReportScheduleDtoV1}의 {@code schedule_type} 별 다형성 JSON 바인딩
+ * (직렬화/역직렬화/round-trip) 검증.
+ */
+class ReportScheduleDtoV1JsonTest {
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
+
+    private static Stream<Arguments> scheduleDtos() {
+        return Stream.of(
+            new Arguments2(
+                new Immediate(ReportScheduleTypeDtoV1.IMMEDIATE, "UTC"),
+                "{\"schedule_type\":\"IMMEDIATE\",\"timezone\":\"UTC\"}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.SpecificTime(
+                    ReportScheduleTypeDtoV1.SPECIFIC_TIME, "UTC",
+                    new SpecificTimeParamsDtoV1("2026-08-12T00:00:00+09:00")
+                ),
+                "{\"schedule_type\":\"SPECIFIC_TIME\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"date_time\":\"2026-08-12T00:00:00+09:00\"}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryMinute(
+                    ReportScheduleTypeDtoV1.EVERY_MINUTE, "UTC", new EveryMinuteParamsDtoV1(30)
+                ),
+                "{\"schedule_type\":\"EVERY_MINUTE\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryHour(
+                    ReportScheduleTypeDtoV1.EVERY_HOUR, "UTC", new EveryHourParamsDtoV1(15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_HOUR\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryDay(
+                    ReportScheduleTypeDtoV1.EVERY_DAY, "UTC", new EveryDayParamsDtoV1(9, 15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_DAY\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"hour\":9,\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryWeek(
+                    ReportScheduleTypeDtoV1.EVERY_WEEK, "UTC",
+                    new EveryWeekParamsDtoV1(List.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY), 9, 15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_WEEK\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"days_of_week\":[\"MONDAY\",\"FRIDAY\"],"
+                    + "\"hour\":9,\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryMonthDay(
+                    ReportScheduleTypeDtoV1.EVERY_MONTH_DAY, "UTC",
+                    new EveryMonthDayParamsDtoV1(List.of(1, 15), 9, 15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_MONTH_DAY\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"days_of_month\":[1,15],"
+                    + "\"hour\":9,\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryMonthWeek(
+                    ReportScheduleTypeDtoV1.EVERY_MONTH_WEEK, "UTC",
+                    new EveryMonthWeekParamsDtoV1(DayOfWeek.MONDAY, 2, 9, 15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_MONTH_WEEK\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"day_of_week\":\"MONDAY\",\"week_order\":2,"
+                    + "\"hour\":9,\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.EveryYear(
+                    ReportScheduleTypeDtoV1.EVERY_YEAR, "UTC",
+                    new EveryYearParamsDtoV1(List.of(1, 6), 15, 9, 15, 30)
+                ),
+                "{\"schedule_type\":\"EVERY_YEAR\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"months\":[1,6],\"day_of_month\":15,"
+                    + "\"hour\":9,\"minute\":15,\"second\":30}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.Periodic(
+                    ReportScheduleTypeDtoV1.PERIODIC, "UTC", new PeriodicParamsDtoV1(3600L)
+                ),
+                "{\"schedule_type\":\"PERIODIC\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"interval_seconds\":3600}}"
+            ),
+            new Arguments2(
+                new ReportScheduleDtoV1.PeriodicDay(
+                    ReportScheduleTypeDtoV1.PERIODIC_DAY, "UTC",
+                    new PeriodicDayParamsDtoV1(2, "09:00:00")
+                ),
+                "{\"schedule_type\":\"PERIODIC_DAY\",\"timezone\":\"UTC\","
+                    + "\"params\":{\"period_days\":2,\"time_of_day\":\"09:00:00\"}}"
+            )
+        ).map(a -> arguments(a.dto, a.expectedJson));
+    }
+
+    @ParameterizedTest
+    @MethodSource("scheduleDtos")
+    void serializesToExpectedSnakeCaseJson(ReportScheduleDtoV1 dto, String expectedJson) {
+        String actualJson = JSON_MAPPER.writeValueAsString(dto);
+
+        assertThat(actualJson).isEqualTo(expectedJson);
+    }
+
+    @ParameterizedTest
+    @MethodSource("scheduleDtos")
+    void deserializesToConcreteSubtypeByScheduleType(ReportScheduleDtoV1 dto, String expectedJson) {
+        ReportScheduleDtoV1 deserialized = JSON_MAPPER.readValue(expectedJson, ReportScheduleDtoV1.class);
+
+        assertThat(deserialized)
+            .isInstanceOf(dto.getClass())
+            .isEqualTo(dto);
+    }
+
+    @ParameterizedTest
+    @MethodSource("scheduleDtos")
+    void roundTripsThroughJson(ReportScheduleDtoV1 dto, String expectedJson) {
+        String json = JSON_MAPPER.writeValueAsString(dto);
+        ReportScheduleDtoV1 roundTripped = JSON_MAPPER.readValue(json, ReportScheduleDtoV1.class);
+
+        assertThat(roundTripped).isEqualTo(dto);
+    }
+
+    private record Arguments2(ReportScheduleDtoV1 dto, String expectedJson) {
+
+    }
+}
+```
