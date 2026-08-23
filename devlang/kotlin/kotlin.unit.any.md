@@ -59,7 +59,8 @@ interface Callback<T> {
     fun onSuccess(result: T)
 }
 
-// 결과를 받을 필요가 없는 경우 Unit 지정val simpleCallback = object : Callback<Unit> {
+// 결과를 받을 필요가 없는 경우 Unit 지정
+val simpleCallback = object : Callback<Unit> {
     override fun onSuccess(result: Unit) {
         println("작업 완료!") // result를 다룰 필요가 없음
     }
@@ -98,17 +99,17 @@ Java에서는 제네릭에 원시 타입 void를 쓸 수 없어 Void 클래스�
 
 제네릭에서 상한(Upper Bound)을 지정하지 않고 `<T>`라고만 쓰면, 암묵적으로 `<T : Any?>`가 됩니다.
 
-* 의미: "어떤 타입이든 올 수 있고, null도 허용한다."
-* Unit 사용 시: `<Unit>`으로 타입을 명시하여 쓸 수 있습니다.
-* Any 사용 시: `<Any>` 또는 `<Any?>` 모두 가능합니다.
+- 의미: "어떤 타입이든 올 수 있고, null도 허용한다."
+- Unit 사용 시: `<Unit>`으로 타입을 명시하여 쓸 수 있습니다.
+- Any 사용 시: `<Any>` 또는 `<Any?>` 모두 가능합니다.
 
 ### 2. T : Any라고 명시했을 때
 
 이것은 "상한 제한(Upper Bound Constraint)"이라고 부릅니다.
 
-* 의미: "반드시 null이 될 수 없는(Non-null) 타입만 올 수 있다."
-* Unit 사용 시: Unit은 그 자체로 null이 아니므로 당연히 사용 가능합니다.
-* 차이점: 만약 누가 이 제네릭에 String?이나 Int?처럼 null이 가능한 타입을 넣으려고 하면 컴파일 에러를 내뱉습니다.
+- 의미: "반드시 null이 될 수 없는(Non-null) 타입만 올 수 있다."
+- Unit 사용 시: Unit은 그 자체로 null이 아니므로 당연히 사용 가능합니다.
+- 차이점: 만약 누가 이 제네릭에 String?이나 Int?처럼 null이 가능한 타입을 넣으려고 하면 컴파일 에러를 내뱉습니다.
 
 ### 왜 T : Any라고 명시하나요?
 

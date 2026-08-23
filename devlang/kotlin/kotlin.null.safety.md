@@ -1,16 +1,17 @@
 # [NUll Safety](https://kotlinlang.org/docs/null-safety.html)
 
-1. [NUll Safety](#null-safety)
-   1. [? (nullable)](#-nullable)
-   2. [?. (safe call)](#-safe-call)
-   3. [?: (elvis operator)](#-elvis-operator)
-   4. [!! (not NULL assertion Operator)](#-not-null-assertion-operator)
+- [NUll Safety](#null-safety)
+  - [? (nullable)](#-nullable)
+  - [?. (safe call)](#-safe-call)
+  - [?: (elvis operator)](#-elvis-operator)
+  - [!! (not NULL assertion Operator)](#-not-null-assertion-operator)
 
 ---
 
 - kotlin의 변수는 기본 적으로 Non-null 속성 가짐
 - `?` 는 Nullable 타입으로 변수 선언(연산자는 타입에 사용)
 - `?.`, `?:`, `!!`은 Nullable 타입의 변수 참조시 null 핸들링 방법 지정(연산자는 변수에 사용), `?` 타입으로 생성된 변수에만 사용하는 연산자
+- 사실 Kotlin 언어 자체는 기본적으로 null을 허용하지 않으므로, Kotlin으로만 이루어진 코드에서는 nullable 값을 직접 다루는 경우에만 주로 사용된다. Java 코드와 연동할 때(Java로부터 메서드 등의 결과를 읽을 때) 자주 쓰이지만, Kotlin 코드에서도 nullable 반환값이나 조회 결과를 처리할 때 사용된다.
 
 ## ? ([nullable](https://kotlinlang.org/docs/null-safety.html#nullable-types-and-non-nullable-types))
 
