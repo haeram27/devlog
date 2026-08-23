@@ -65,8 +65,55 @@ export RIPGREP_CONFIG_PATH=$HOME/.ripgreprc
        rg [OPTIONS] --version
 ```
 
-- PATTERN은 검색 word에 대한 pattern을 의미하며, regex pattern 사용
+- PATTERN은 검색 word에 대한 pattern을 의미하며, ***regex pattern*** 사용
 - ripgrep은 기본적으로 지정된 PATH 하위로 recursive로 동작한다.
+
+## 검색 예제
+- 별도의 type을 지정하지 않으면 현재 디렉토리 하위의 숨김 파일과 ignore 대상 파일을 제외하고 검색
+
+```bash
+# 현재 디렉토리 하위의 모든 검색 대상 파일에서 검색
+rg "검색어"
+
+# 지정한 디렉토리 하위에서 검색
+rg "검색어" ./src
+```
+
+- `-o, --only-matching`과 `-r, --replace`를 함께 사용하면 매칭된 문자열에서 원하는 값만 추출 가능
+
+```bash
+# my_version= 뒤의 버전 값만 추출
+printf '%s\n' 'my_version=1.2.3.4' | rg -o --replace '$1' 'my_version=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)'
+# 1.2.3.4
+```
+
+- `$1`은 정규식의 첫 번째 캡처 그룹(`(...)`)으로 추출한 값이며, `--replace`는 매칭 결과를 `$1`의 값으로 대체함
+
+- `-t, --type`으로 검색 대상 type을 지정하면 해당 type에 속한 파일만 검색
+
+```bash
+# 기본 정의된 rust type에 해당하는 파일만 검색
+rg "fn main" -t rust
+
+# 여러 type을 지정하면 지정한 type에 해당하는 파일을 검색
+rg "TODO" -t md -t text
+```
+
+- `-T, --type-not`으로 특정 type을 예외 처리하면 해당 type에 속한 파일은 검색 대상에서 제외
+
+```bash
+# 모든 검색 대상에서 markdown 파일을 제외하고 검색
+rg "검색어" -T md
+
+# python 파일을 포함하되 test type은 제외
+rg "fixture" -t py -T test
+```
+
+- `-t`와 `-T`를 함께 지정하면 `-t`로 포함한 type 중 `-T`로 제외한 type을 제외하고 검색
+
+```bash
+rg "import" -t py -T test
+```
 
 ## type 관리
 
@@ -81,7 +128,7 @@ type:glob ex. html:*.html
 ### 현재 정의된 type 리스트 확인 (`--type-list`)
 
 ```bash
-rg --type-add 'web:*.{html,css,js}' --type-list | grep web
+rg --type-list | grep web
 ```
 
 ### command-line 에서 type 추가 하기
@@ -94,7 +141,7 @@ rg --type-add 'web:*.{html,css,js}' -tweb title
 rg --type-add='web:*.{html,css,js}' -tweb title
 ```
 
-### type 추가 여부 확인
+### type 추가 후 정상 여부 확인
 
 ```bash
 rg --type-add 'web:*.{html,css,js}' --type-list | grep web
