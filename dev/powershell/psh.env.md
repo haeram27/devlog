@@ -15,7 +15,7 @@ pwsh -v
 # 관리자 계정으로 powershell을 열고
 winget install --id Microsoft.PowerShell --source winget
 # upgrade
-winget upgrade --id Microsoft.PowerShell
+winget upgrade --id Microsoft.PowerShell --source winget
 ```
 
 ## git windows 설치
@@ -195,7 +195,8 @@ Set-Alias gvi gvim
 . $PROFILE
 ```
 
-## 최종 profile
+## 최종 profile 예
+
 ```ps1
 # Path: ~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 # Edit: vi $PROFILE
@@ -215,22 +216,53 @@ Set-Alias gvi gvim
 ########################################
 # list of key bindings: Get-PSReadLineKeyHandler
 # list of unbound keys: Get-PSReadLineKeyHandler -Unbound
-# list of unbound keys: Get-PSReadLineKeyHandler -Unbound | findstr Line
 Set-PSReadLineKeyHandler -Chord Ctrl+j -Function AcceptSuggestion
 Set-PSReadLineKeyHandler -Chord Alt+f -Function AcceptNextSuggestionWord
 Set-PSReadLineKeyHandler -Chord Ctrl+u -Function DeleteLine
 Set-PSReadLineKeyHandler -Chord Ctrl+k -Function KillLine
-Set-PSReadLineKeyHandler -Chord Ctrl+b -Function BeginningOfLine
+#Set-PSReadLineKeyHandler -Chord Ctrl+a -Function BeginningOfLine
 
 # Set-PSReadLineOption -EditMode Vi ## vi edit mode - ESC enables command mode, i enables insert mode
 Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle InlineView
 
 ########################################
+# functions
+########################################
+# bat
+function bats {
+    bat -p --paging=never @args
+}
+
+# copilot
+function Copilot-Auto {
+    copilot --autopilot --yolo
+}
+
+# eza
+function l  { eza --icons }
+function ll { eza -l --git --icons }
+function la { eza -la --git --icons }
+function lt { eza --tree --level=2 --icons }
+
+
+########################################
 # alias
 ########################################
+Set-Alias ls eza
 Set-Alias vi vim
+Set-Alias ff fzf
 Set-Alias gvi gvim
+Set-Alias cop.auto Copilot-Auto
+
+########################################
+# utils - init
+########################################
+# zoxide
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
 
 ########################################
 # oh-my-posh
