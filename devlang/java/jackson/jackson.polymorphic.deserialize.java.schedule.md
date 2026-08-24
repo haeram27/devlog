@@ -1,6 +1,6 @@
 # Jackson에서 json 다형성(Polymorphic) 직렬화/역직렬화
 
-다형성(polymorphic) 타입이란 하나의 공통 타입으로 취급되지만 실제로는 여러 구체 타입(하위 타입) 중 하나로 나타나는 타입이다. 이런 타입을 JSON으로 표현할 때는 모든 하위 타입에 공통인 고정부(타입 식별자 등)와, 하위 타입마다 다른 변동부로 구조가 나뉘는 경우가 많다. `@JsonTypeInfo`와 `@JsonSubTypes`는 이런 JSON을 올바른 하위 타입으로 매핑하기 위한 어노테이션이다.
+다형성(polymorphic) 타입이란 하나의 공통 타입으로 취급되지만 실제로는 여러 구체 타입(하위 타입)을 나뉘는 타입이다. 이런 타입을 JSON으로 표현할 때는 모든 하위 타입에 공통인 고정부(타입 식별자 등)와, 하위 타입마다 다른 변동부로 구조가 나뉘는 경우가 많다. `@JsonTypeInfo`와 `@JsonSubTypes`는 Jackson에서 이런 다형성 JSON을 올바른 하위 타입으로 매핑하기 위한 어노테이션이다.
 
 ## 핵심 요약
 
@@ -57,37 +57,37 @@
 
 schedule_type 별 파라미터
 
-| scheduler_type   | 파라미터 필드 | 파라미터 객체 필드 | 설명                                  |
+| scheduler_type   | 파라미터 필드 | 파라미터 객체 필드 | 설명 |
 |---|---|---|---|
-| IMMEDIATE        | -                       | -                                             | 즉시 1회 실행. 추가 파라미터 없음     |
-| SPECIFIC_TIME    | specific_time_params    | date_time: string (ISO-8601 OffsetDateTime)   | 지정 일시에 1회 실행                  |
-| EVERY_MINUTE     | every_minute_params     | second: integer (0~59)                        | 매분 지정 초에 실행                   |
-| EVERY_HOUR       | every_hour_params       | minute: integer (0~59)                        | 매시간 지정 분:초에 실행              |
-|                  |                         | second: integer (0~59)                        |                                       |
-| EVERY_DAY        | every_day_params        | hour: integer (0~23)                          | 매일 지정 시:분:초에 실행             |
-|                  |                         | minute: integer (0~59)                        |                                       |
-|                  |                         | second: integer (0~59)                        |                                       |
-| EVERY_WEEK       | every_week_params       | days_of_week: list (요일 목록, MONDAY~SUNDAY) | 매주 지정 요일 시:분:초에 실행        |
-|                  |                         | hour: integer (0~23)                          |                                       |
-|                  |                         | minute: integer (0~59)                        |                                       |
-|                  |                         | second: integer (0~59)                        |                                       |
-| EVERY_MONTH_DAY  | every_month_day_params  | days_of_month: list (1~31 일 목록)            | 매월 지정 일 시:분:초에 실행          |
-|                  |                         | hour: integer (0~23)                          |                                       |
-|                  |                         | minute: integer (0~59)                        |                                       |
-|                  |                         | second: integer (0~59)                        |                                       |
-| EVERY_MONTH_WEEK | every_month_week_params | day_of_week: string (MONDAY~SUNDAY)           | 매월 N째 주 지정 요일 시:분:초에 실행 |
-|                  |                         | week_order: integer (1~5, 몇째 주)            |                                       |
-|                  |                         | hour: integer (0~23)                          |                                       |
-|                  |                         | minute: integer (0~59)                        |                                       |
-|                  |                         | second: integer (0~59)                        |                                       |
-| EVERY_YEAR       | every_year_params       | months: list (1~12 월 목록)                   | 매년 지정 월/일 시:분:초에 실행       |
-|                  |                         | day_of_month: integer (1~31)                  |                                       |
-|                  |                         | hour: integer (0~23)                          |                                       |
-|                  |                         | minute: integer (0~59)                        |                                       |
-|                  |                         | second: integer (0~59)                        |                                       |
-| PERIODIC         | periodic_params         | interval_seconds: long (반복 간격 초)         | 지정 간격(초)마다 반복 실행           |
-| PERIODIC_DAY     | periodic_day_params     | period_days: integer (반복 일 수)             | N일마다 지정 시각에 실행              |
-|                  |                         | time_of_day: string (HH:mm:ss, LocalTime)     |                                       |
+| IMMEDIATE        | -                       | -                      | 즉시 1회 실행. 추가 파라미터 없음 |
+| SPECIFIC_TIME    | specific_time_params    | date_time: string (ISO-8601 OffsetDateTime)   | 지정 일시에 1회 실행 |
+| EVERY_MINUTE     | every_minute_params     | second: integer (0~59) | 매분 지정 초에 실행 |
+| EVERY_HOUR       | every_hour_params       | minute: integer (0~59) | 매시간 지정 분:초에 실행 |
+|                  |                         | second: integer (0~59) |    |
+| EVERY_DAY        | every_day_params        | hour: integer (0~23)   | 매일 지정 시:분:초에 실행 |
+|                  |                         | minute: integer (0~59) |    |
+|                  |                         | second: integer (0~59) |    |
+| EVERY_WEEK       | every_week_params       | days_of_week: list (요일 목록, MONDAY~SUNDAY) | 매주 지정 요일 시:분:초에 실행 |
+|                  |                         | hour: integer (0~23)   |    |
+|                  |                         | minute: integer (0~59) |    |
+|                  |                         | second: integer (0~59) |    |
+| EVERY_MONTH_DAY  | every_month_day_params  | days_of_month: list (1~31 일 목록) | 매월 지정 일 시:분:초에 실행 |
+|                  |                         | hour: integer (0~23)   |    |
+|                  |                         | minute: integer (0~59) |    |
+|                  |                         | second: integer (0~59) |    |
+| EVERY_MONTH_WEEK | every_month_week_params | day_of_week: string (MONDAY~SUNDAY) | 매월 N째 주 지정 요일 시:분:초에 실행 |
+|                  |                         | week_order: integer (1~5, 몇째 주) |    |
+|                  |                         | hour: integer (0~23)   |    |
+|                  |                         | minute: integer (0~59) |    |
+|                  |                         | second: integer (0~59) |    |
+| EVERY_YEAR       | every_year_params       | months: list (1~12 월 목록) | 매년 지정 월/일 시:분:초에 실행       |
+|                  |                         | day_of_month: integer (1~31) |    |
+|                  |                         | hour: integer (0~23)   |    |
+|                  |                         | minute: integer (0~59) |    |
+|                  |                         | second: integer (0~59) |    |
+| PERIODIC         | periodic_params         | interval_seconds: long (반복 간격 초) | 지정 간격(초)마다 반복 실행 |
+| PERIODIC_DAY     | periodic_day_params     | period_days: integer (반복 일 수)     | N일마다 지정 시각에 실행 |
+|                  |                         | time_of_day: string (HH:mm:ss, LocalTime)     |    |
 
 ### java 예제
 

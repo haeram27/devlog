@@ -1,4 +1,4 @@
-# `@JsonTypeInfo`를 이용한 json 다형성(Polymorphic) 직렬화/역직렬화
+# Java: json 다형성(Polymorphic) 직렬화/역직렬화
 
 `JsonTypeInfo`는 Json의 특정 필드 값 또는 클래스 이름을 기준으로 맵핑될 실제 클래스를 `JsonSubTypes`로 명시해 주는 기법이다.
 
