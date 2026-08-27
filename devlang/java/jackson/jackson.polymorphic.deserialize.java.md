@@ -8,7 +8,7 @@
   - `@JsonTypeInfo`: 부모(추상) 타입에 선언해 "타입 식별자를 어떤 방식(`use`)으로, 어디에(`include`) 기록할지" 규칙을 정의합니다.
   - `@JsonSubTypes`: 그 규칙에서 사용할 **논리적 이름(name) ↔ 실제 하위 클래스(value)** 매핑 테이블을 정의합니다.
 - 동작 흐름:
-  - **역직렬화 시**: JSON에서 `@JsonTypeInfo(property = "type")`로 지정된 필드 값(예: `"DOG"`)을 읽음 → `@JsonSubTypes` 매핑 테이블에서 일치하는 클래스(`Dog::class`)를 찾음 → 해당 클래스의 인스턴스로 변환.
+  - **역직렬화 시**: JSON에서 `@JsonTypeInfo(property = "type")`로 지정된 필드 값(예: `"DOG"`)을 읽음 → `@JsonSubTypes` 매핑 테이블에서 일치하는 클래스(`Dog.class`)를 찾음 → 해당 클래스의 인스턴스로 변환.
   - **직렬화 시**: 반대로 실제 런타임 클래스(`Dog`)를 보고 매핑 테이블에서 대응하는 `name`(`"DOG"`)을 찾아 JSON 필드 값으로 기록.
 - `@JsonTypeInfo`만으로는 "타입 정보를 어떻게 표현할지"만 정해질 뿐 실제 값-클래스 대응은 알 수 없고, `@JsonSubTypes`가 매핑 테이블 역할을 해야 실제 클래스 변환이 가능합니다. (`Id.NAME` 방식일 때 필수 조합이며, `Id.CLASS`/`Id.MINIMAL_CLASS`는 클래스명 자체를 식별자로 쓰므로 `@JsonSubTypes` 없이도 동작 가능합니다.)
 
@@ -38,7 +38,7 @@
 - `@JsonTypeInfo(use = Id.NAME, ...)`와 함께 사용되며, 논리적 타입 이름(name)과 실제 하위 클래스(Java/Kotlin class) 간의 매핑 테이블을 정의하는 어노테이션입니다.
 - 부모 클래스에 선언하며, 내부에 여러 개의 `@JsonSubTypes.Type` 항목을 배열로 나열합니다.
 - `@JsonSubTypes.Type`의 주요 파라미터:
-  - `value`: 매핑 대상이 되는 하위 클래스(`::class` 또는 `.class`)를 지정합니다.
+  - `value`: 매핑 대상이 되는 하위 클래스(`.class`)를 지정합니다.
   - `name`: 해당 하위 클래스에 대응하는 논리적 이름(문자열)을 지정합니다. `@JsonTypeInfo`의 `property`에 지정된 필드 값과 매칭됩니다.
   - `names`: 하나의 클래스에 여러 개의 별칭(이름)을 매핑하고 싶을 때 사용하는 문자열 배열입니다. (Jackson 2.12+)
 - 동작 방식:
@@ -49,63 +49,75 @@
 
 ### 1. 클래스 정의
 
-```kotlin
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+sealed interface + record 조합 사용. 타입 판별자(`type`)가 각 서브타입의 필드와 함께 존재하므로 `EXISTING_PROPERTY`를 사용하고, record 생성자 바인딩에 값이 채워지도록 `visible = true`를 지정한다.
+
+```java
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 // 부모 타입: 다형성의 "창구" 역할
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
-@JsonSubTypes(
-  JsonSubTypes.Type(value = Dog::class, name = AnimalType.Names.DOG),
-  JsonSubTypes.Type(value = Cat::class, name = AnimalType.Names.CAT),
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "type",
+    visible = true
 )
-sealed class Animal(open val type: AnimalType)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Animal.Dog.class, name = "DOG"),
+    @JsonSubTypes.Type(value = Animal.Cat.class, name = "CAT"),
+})
+public sealed interface Animal {
 
-// 하위 타입 1: 강아지
-data class Dog(
-  @JsonProperty("breed")
-  val breed: String,
-  override val type: AnimalType = AnimalType.DOG,
-) : Animal(type)
+    AnimalType type();
 
-// 하위 타입 2: 고양이
-data class Cat(
-  @JsonProperty("is_indoor")
-  val isIndoor: Boolean,
-  override val type: AnimalType = AnimalType.CAT,
-) : Animal(type)
+    // 하위 타입 1: 강아지
+    record Dog(
+        @JsonProperty("breed") String breed,
+        AnimalType type
+    ) implements Animal {
+        public Dog(String breed) {
+            this(breed, AnimalType.DOG);
+        }
+    }
 
-enum class AnimalType {
-  DOG, CAT;
+    // 하위 타입 2: 고양이
+    record Cat(
+        @JsonProperty("is_indoor") boolean isIndoor,
+        AnimalType type
+    ) implements Animal {
+        public Cat(boolean isIndoor) {
+            this(isIndoor, AnimalType.CAT);
+        }
+    }
 
-  object Names {
-    const val DOG = "DOG"
-    const val CAT = "CAT"
-  }
+    enum AnimalType {
+        DOG, CAT
+    }
 }
 ```
 
 ### 2. 사용하는 쪽 (다형성 필드를 가진 클래스)
 
-```kotlin
-data class Zoo(
-  val animals: List<Animal>,
-)
+```java
+import java.util.List;
+
+public record Zoo(
+    List<Animal> animals
+) {
+}
 ```
 
 ### 3. 직렬화 (객체 → JSON)
 
-```kotlin
-val zoo = Zoo(
-  animals = listOf(
-    Dog(breed = "진돗개"),
-    Cat(isIndoor = true),
-  )
-)
+```java
+Zoo zoo = new Zoo(List.of(
+    new Animal.Dog("진돗개"),
+    new Animal.Cat(true)
+));
 
-val json = objectMapper.writeValueAsString(zoo)
-println(json)
+String json = objectMapper.writeValueAsString(zoo);
+System.out.println(json);
 ```
 
 **결과 JSON:**
@@ -122,29 +134,27 @@ println(json)
 
 ### 4. 역직렬화 (JSON → 객체)
 
-```kotlin
-val json = """
+```java
+String json = """
 {
   "animals": [
     { "type": "DOG", "breed": "진돗개" },
     { "type": "CAT", "is_indoor": true }
   ]
 }
-"""
+""";
 
-val zoo: Zoo = objectMapper.readValue(json, Zoo::class.java)
+Zoo zoo = objectMapper.readValue(json, Zoo.class);
 ```
 
 **결과:**
-```kotlin
-Zoo(
-  animals = listOf(
-    Dog(breed = "진돗개", type = AnimalType.DOG),
-    Cat(isIndoor = true, type = AnimalType.CAT),
-  )
-)
+```java
+new Zoo(List.of(
+    new Animal.Dog("진돗개", Animal.AnimalType.DOG),
+    new Animal.Cat(true, Animal.AnimalType.CAT)
+))
 ```
 
 - Jackson은 `animals` 리스트의 각 원소가 선언상 `Animal` 타입(추상)이라 그 자체로는 어떤 구체 클래스를 만들어야 할지 모릅니다.
-- 이때 JSON에 있는 `"type": "DOG"` 값을 읽고, `@JsonSubTypes` 매핑 테이블에서 `"DOG"` → `Dog::class`를 찾아 **`Dog` 인스턴스로 역직렬화**합니다.
-- `"type": "CAT"`이면 `Cat::class`로 매핑되어 `Cat` 인스턴스가 생성됩니다.
+- 이때 JSON에 있는 `"type": "DOG"` 값을 읽고, `@JsonSubTypes` 매핑 테이블에서 `"DOG"` → `Dog.class`를 찾아 **`Dog` 인스턴스로 역직렬화**합니다.
+- `"type": "CAT"`이면 `Cat.class`로 매핑되어 `Cat` 인스턴스가 생성됩니다.

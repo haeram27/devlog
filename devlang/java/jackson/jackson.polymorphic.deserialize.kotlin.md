@@ -57,8 +57,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 // 부모 타입: 다형성의 "창구" 역할
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
-  JsonSubTypes.Type(value = Dog::class, name = AnimalType.Names.DOG),
-  JsonSubTypes.Type(value = Cat::class, name = AnimalType.Names.CAT),
+  JsonSubTypes.Type(value = Dog::class, name = "DOG"),
+  JsonSubTypes.Type(value = Cat::class, name = "CAT"),
 )
 sealed class Animal(open val type: AnimalType)
 
@@ -77,12 +77,7 @@ data class Cat(
 ) : Animal(type)
 
 enum class AnimalType {
-  DOG, CAT;
-
-  object Names {
-    const val DOG = "DOG"
-    const val CAT = "CAT"
-  }
+  DOG, CAT
 }
 ```
 

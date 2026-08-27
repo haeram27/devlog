@@ -26,17 +26,32 @@
 ## JSON 예시
 
 ### 단일 조건
+
+각 단일 조건의 값은 OR로 연산된다.
+
+```sql
+WHERE task_type IN ('a', 'b', 'c')
+```
+
 ```json
 { "type": "TASK_STATUS", "task_status": ["SUCCESS", "FAIL", "ING"] }
 ```
 
 ### 중첩 AND (복합 필터)
+
+복합 필터의 경우 각 단일 필터를 AND로 조합한다.
+
+```sql
+WHERE task_type IN ('a', 'b', 'c')
+  AND task_status IN ('sucess', 'fail', 'ing')
+```
+
 ```json
 {
   "type": "AND",
   "targets": [
-    { "type": "TASK_STATUS", "task_status": ["SUCCESS", "FAIL"] },
-    { "type": "TASK_TYPE", "task_type": ["COLLECT_AHNREPORT_FILE"] }
+    { "type": "TASK_STATUS", "task_status": ["SUCCESS", "FAIL", "ING"] },
+    { "type": "TASK_TYPE", "task_type": ["A", "B", "C"] }
   ]
 }
 ```
