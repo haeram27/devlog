@@ -98,14 +98,15 @@ sealed interface + record 조합 사용
 ```java
 package com.example.dto.scheduler;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import java.time.DayOfWeek;
 import java.util.List;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 /**
- * Jackson의 Json 다형성 맵핑을 위한 Schedule Dto 구현
+ * {@code report_plan.proto}의 {@code TypedScheduleParamsV1}(oneof 기반) 메시지를 그대로
+ * 반영한 다형성 스케줄 Dto 계층의 기반 타입.
  *
  * <p>판별자({@code type})가 params와 같은 객체 안에 함께 존재하므로
  * {@code EXISTING_PROPERTY}를 사용한다 — 판별자가 형제 필드로 분리되어 있는 경우(예:
@@ -140,13 +141,12 @@ import java.util.List;
 })
 public sealed interface ReportScheduleDtoV1 {
 
-    // 구현 record가 반드시 이 시그니처(이름+반환타입)를 만족하는 accessor를 갖도록 강제하는 추상 메서드
     ReportScheduleTypeDtoV1 type();
 
     String timezone();
 
     /**
-     * 스케줄 실행 방식 판별자.
+     * 스케줄 실행 방식 판별자 11종.
      *
      * <p>{@code report_plan.proto}의 {@code ScheduleTypeV1}과 동일한 상수 구성을 갖는다
      * ({@code SCHEDULE_TYPE_UNSPECIFIED}는 JSON 계약에는 없으므로 제외).
@@ -175,9 +175,10 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record Immediate(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone
+        ReportScheduleTypeDtoV1 type,
+        String timezone
     ) implements ReportScheduleDtoV1 {
 
     }
@@ -195,17 +196,19 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record SpecificTime(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") SpecificTimeParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        SpecificTimeParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 지정 일시에 1회 실행. {@code report_plan.proto}의 {@code SpecificTimeParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record SpecificTimeParamsDtoV1(
-        @JsonProperty("date_time") String dateTime
+        String dateTime
     ) {
 
     }
@@ -223,17 +226,19 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMinute(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryMinuteParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryMinuteParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매분 지정 초에 실행. {@code report_plan.proto}의 {@code EveryMinuteParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMinuteParamsDtoV1(
-        @JsonProperty("second") Integer second
+        Integer second
     ) {
 
     }
@@ -252,18 +257,20 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryHour(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryHourParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryHourParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매시간 지정 분:초에 실행. {@code report_plan.proto}의 {@code EveryHourParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryHourParamsDtoV1(
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -283,19 +290,21 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryDay(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryDayParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryDayParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매일 지정 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryDayParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryDayParamsDtoV1(
-        @JsonProperty("hour") Integer hour,
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        Integer hour,
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -308,7 +317,7 @@ public sealed interface ReportScheduleDtoV1 {
      *   "type": "EVERY_WEEK",
      *   "timezone": "UTC",
      *   "params": {
-     *     "days_of_week": ["MONDAY", "FRIDAY"],
+     *     "days_of_week": [1,3,5],
      *     "hour": 9,
      *     "minute": 15,
      *     "second": 30
@@ -316,20 +325,23 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryWeek(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryWeekParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryWeekParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매주 지정 요일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryWeekParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryWeekParamsDtoV1(
-        @JsonProperty("days_of_week") List<DayOfWeek> daysOfWeek,
-        @JsonProperty("hour") Integer hour,
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        // ISO 요일. 1=MONDAY ~ 7=SUNDAY
+        List<Integer> daysOfWeek,
+        Integer hour,
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -350,20 +362,22 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMonthDay(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryMonthDayParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryMonthDayParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매월 지정 일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryMonthDayParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMonthDayParamsDtoV1(
-        @JsonProperty("days_of_month") List<Integer> daysOfMonth,
-        @JsonProperty("hour") Integer hour,
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        List<Integer> daysOfMonth,
+        Integer hour,
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -376,7 +390,7 @@ public sealed interface ReportScheduleDtoV1 {
      *   "type": "EVERY_MONTH_WEEK",
      *   "timezone": "UTC",
      *   "params": {
-     *     "day_of_week": "MONDAY",
+     *     "day_of_week": 1,
      *     "week_order": 2,
      *     "hour": 9,
      *     "minute": 15,
@@ -385,10 +399,11 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMonthWeek(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryMonthWeekParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryMonthWeekParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
@@ -397,12 +412,14 @@ public sealed interface ReportScheduleDtoV1 {
      * 매월 N째 주 지정 요일 시:분:초에 실행. {@code report_plan.proto}의
      * {@code EveryMonthWeekParamsV1}.
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryMonthWeekParamsDtoV1(
-        @JsonProperty("day_of_week") DayOfWeek dayOfWeek,
-        @JsonProperty("week_order") Integer weekOrder,
-        @JsonProperty("hour") Integer hour,
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        // ISO 요일. 1=MONDAY ~ 7=SUNDAY
+        Integer dayOfWeek,
+        Integer weekOrder,
+        Integer hour,
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -424,21 +441,23 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryYear(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") EveryYearParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        EveryYearParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 매년 지정 월/일 시:분:초에 실행. {@code report_plan.proto}의 {@code EveryYearParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record EveryYearParamsDtoV1(
-        @JsonProperty("months") List<Integer> months,
-        @JsonProperty("day_of_month") Integer dayOfMonth,
-        @JsonProperty("hour") Integer hour,
-        @JsonProperty("minute") Integer minute,
-        @JsonProperty("second") Integer second
+        List<Integer> months,
+        Integer dayOfMonth,
+        Integer hour,
+        Integer minute,
+        Integer second
     ) {
 
     }
@@ -456,17 +475,19 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record Periodic(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") PeriodicParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        PeriodicParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
 
     /** 지정 간격(초)마다 반복 실행. {@code report_plan.proto}의 {@code PeriodicParamsV1}. */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record PeriodicParamsDtoV1(
-        @JsonProperty("interval_seconds") Long intervalSeconds
+        Long intervalSeconds
     ) {
 
     }
@@ -485,10 +506,11 @@ public sealed interface ReportScheduleDtoV1 {
      * }
      * }</pre>
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record PeriodicDay(
-        @JsonProperty("type") ReportScheduleTypeDtoV1 type,
-        @JsonProperty("timezone") String timezone,
-        @JsonProperty("params") PeriodicDayParamsDtoV1 params
+        ReportScheduleTypeDtoV1 type,
+        String timezone,
+        PeriodicDayParamsDtoV1 params
     ) implements ReportScheduleDtoV1 {
 
     }
@@ -498,9 +520,10 @@ public sealed interface ReportScheduleDtoV1 {
      *
      * <p>{@code time_of_day}는 {@code HH:mm:ss} 형식 문자열이다.
      */
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     record PeriodicDayParamsDtoV1(
-        @JsonProperty("period_days") Integer periodDays,
-        @JsonProperty("time_of_day") String timeOfDay
+        Integer periodDays,
+        String timeOfDay
     ) {
 
     }
@@ -744,6 +767,7 @@ enum class ReportScheduleType {
     PERIODIC,
     PERIODIC_DAY,
 }
+
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes(
