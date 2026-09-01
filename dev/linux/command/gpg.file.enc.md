@@ -6,6 +6,18 @@
 - 암호화 된 내용(바이너리)를 base64 인코딩된 텍스트로 출력할 수 있다. 이렇게 base64 인코딩 텍스트로 생성된 결과는 ascii armored out 이라고 한다.
 - armored 출력 파일은 .asc (ascii?) 확장자를 가진다.
 
+## 예제
+
+`gpg` syntax상 옵션 항목이 대상 파일 앞에 나와야 하므로 항상 명령문의 마지막에 대상 파일 이름을 명시하는 순서
+
+```bash
+# file을 file.hint.gpg로 암호화 (암호입력)
+gpg -c -o file.hint.gpg file
+
+# file.hint.gpg를 file.dec로 복호화
+gpg -d -o file.dec file.hint.gpg
+```
+
 ## gpg 로 대칭키 암호화 (-c, --symmetric)
 
 대칭키 암호화를 하는 경우 편리하게 비밀번호(대칭키)를 사용하는 암호화 방식이 된다.
