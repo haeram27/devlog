@@ -264,42 +264,47 @@ REST 쪽의 Bean Validation(`@NotNull`)이 하던 역할을, gRPC 쪽에서는 �
 `sealed interface` + `switch` 패턴 매칭(Java 21+)을 쓰면, 새 필터 타입이 추가됐을 때 매핑 함수를 안 고치면 **컴파일 에러**가 나서 누락을 원천 차단한다.
 
 toFilterProto (kotlin)
-```java
-private fun toFilterProto(filter: Filter): FilterNode {
-    val builder = FilterNode.newBuilder()
-    when (filter) {
-        is AndFilter -> builder.setAnd(
-            AndFilter.newBuilder()
+
+> `when`을 **식(expression, 값 표현, 반환 값이 있는 when)**으로 써야 한다 — 그래야 Kotlin 컴파일러가 sealed interface에 대해 exhaustiveness(누락 없음)를 강제해준다.
+
+```kotlin
+private fun toFilterProto(filter: Filter): FilterNode = when (filter) {
+    is AndFilter -> FilterNode.newBuilder()
+        .setAnd(
+            AndFilterProto.newBuilder()
                 .addAllTargets(filter.targets.map { toFilterProto(it) })
-                .build()
         )
+        .build()
 
-        is SearchStringFilter -> builder.setSearchString(
-            SearchStringFilter.newBuilder()
+    is SearchStringFilter -> FilterNode.newBuilder()
+        .setSearchString(
+            SearchStringFilterProto.newBuilder()
                 .setValue(filter.value)
-                .build()
         )
+        .build()
 
-        is StatusFilter -> builder.setStatus(
-            StatusFilter.newBuilder()
+    is StatusFilter -> FilterNode.newBuilder()
+        .setStatus(
+            StatusFilterProto.newBuilder()
                 .addAllValues(filter.value.map { it.name })
-                .build()
         )
+        .build()
 
-        is ReportCategoryFilter -> builder.setReportCategory(
-            ReportCategoryFilter.newBuilder()
+    is ReportCategoryFilter -> FilterNode.newBuilder()
+        .setReportCategory(
+            ReportCategoryFilterProto.newBuilder()
                 .addAllValues(filter.value.map { it.name })
-                .build()
         )
+        .build()
 
-        is ScheduleFrequencyFilter -> builder.setScheduleFrequency(
-            ScheduleFrequencyFilter.newBuilder()
+    is ScheduleFrequencyFilter -> FilterNode.newBuilder()
+        .setScheduleFrequency(
+            ScheduleFrequencyFilterProto.newBuilder()
                 .addAllValues(filter.value.map { it.name })
-                .build()
         )
-    }
-    return builder.build()
+        .build()
 }
+// sealed interface + when-식이라 else 분기 없이도 exhaustive — 새 서브타입 추가 시 컴파일 에러로 강제됨
 ```
 
 toFilterProto (java)
