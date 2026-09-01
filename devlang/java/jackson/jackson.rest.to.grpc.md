@@ -263,10 +263,50 @@ REST 쪽의 Bean Validation(`@NotNull`)이 하던 역할을, gRPC 쪽에서는 �
 
 `sealed interface` + `switch` 패턴 매칭(Java 21+)을 쓰면, 새 필터 타입이 추가됐을 때 매핑 함수를 안 고치면 **컴파일 에러**가 나서 누락을 원천 차단한다.
 
+toFilterProto (kotlin)
+```java
+private fun toFilterProto(filter: Filter): FilterNode {
+    val builder = FilterNode.newBuilder()
+    when (filter) {
+        is AndFilter -> builder.setAnd(
+            AndFilter.newBuilder()
+                .addAllTargets(filter.targets.map { toFilterProto(it) })
+                .build()
+        )
+
+        is SearchStringFilter -> builder.setSearchString(
+            SearchStringFilter.newBuilder()
+                .setValue(filter.value)
+                .build()
+        )
+
+        is StatusFilter -> builder.setStatus(
+            StatusFilter.newBuilder()
+                .addAllValues(filter.value.map { it.name })
+                .build()
+        )
+
+        is ReportCategoryFilter -> builder.setReportCategory(
+            ReportCategoryFilter.newBuilder()
+                .addAllValues(filter.value.map { it.name })
+                .build()
+        )
+
+        is ScheduleFrequencyFilter -> builder.setScheduleFrequency(
+            ScheduleFrequencyFilter.newBuilder()
+                .addAllValues(filter.value.map { it.name })
+                .build()
+        )
+    }
+    return builder.build()
+}
+```
+
+toFilterProto (java)
 ```java
 public final class FilterMapper {
 
-    public static FilterNode toProto(Filter filter) {
+    public static FilterNode toFilterProto(Filter filter) {
         return switch (filter) {
             case AndFilter f -> FilterNode.newBuilder()
                 .setAnd(AndFilterProto.newBuilder()
@@ -299,7 +339,7 @@ public final class FilterMapper {
 }
 ```
 
-`AndFilter`의 재귀는 `targets`를 순회하며 `toProto`를 재귀 호출하는 것으로 자연스럽게 처리된다 — 트리 구조가 양쪽(DTO/proto)에서 동형(isomorphic)이기 때문에 매핑 코드도 트리를 그대로 따라간다.
+`AndFilter`의 재귀는 `targets`를 순회하며 `toFilterProto`를 재귀 호출하는 것으로 자연스럽게 처리된다 — 트리 구조가 양쪽(DTO/proto)에서 동형(isomorphic)이기 때문에 매핑 코드도 트리를 그대로 따라간다.
 
 ---
 
