@@ -4,10 +4,12 @@
 
 `FE > REST API > API Gateway(BE) > Grpc > MSA Service(BE)`
 
-FE 용 REST API 구현시, 화면의 시나리오가 Table에 대해서
-Search, Filter(컴럼 값, SQL에서 IN 해당), Pagenation, Sorting 조건을
+FE 용 REST API 구현시, 목록(리스트)뷰 화면에서
+Search(단어 기반 filter), Filter(컴럼 값, SQL에서 IN 해당), Pagenation, Sorting 조건을
 다형성 Json을 이용해 수신하는 Dto 구조와
 이를 다시 Grpc로 전달하는 grpc protobuf정의를 설명한다.
+
+리스트 뷰 화면에서 Search, Filter, Pagination, Sorting을 구현하려면 4개의 Java 객체 구현이 필요하다.
 
 ## 1. 문제 정의
 
@@ -18,10 +20,22 @@ Search, Filter(컴럼 값, SQL에서 IN 해당), Pagenation, Sorting 조건을
     "filter": {
         "type": "AND",
         "targets": [
-            { "type": "SEARCH_STRING", "value": "foo" },
-            { "type": "STATUS", "value": ["PENDING", "CREATING", "CREATED", "FAILED", "DELETED"] },
-            { "type": "REPORT_CATEGORY", "value": ["BASIC", "UNIFIED", "QUERY"] },
-            { "type": "SCHEDULE_FREQUENCY", "value": ["IMMEDIATE", "SPECIFIC_TIME", "EVERY_DAY", "EVERY_WEEK", "EVERY_MONTH_DAY", "EVERY_YEAR"] }
+            {
+              "type": "SEARCH_STRING",
+              "value": "foo"
+            },
+            {
+              "type": "STATUS",
+              "value": ["PENDING", "CREATING", "CREATED", "FAILED", "DELETED"]
+            },
+            {
+              "type": "CATEGORY",
+              "value": ["BASIC", "UNIFIED", "QUERY"]
+            },
+            { 
+              "type": "FREQUENCY",
+              "value": ["IMMEDIATE", "SPECIFIC_TIME", "EVERY_DAY", "EVERY_WEEK", "EVERY_MONTH_DAY", "EVERY_YEAR"]
+            }
         ]
     },
     "pagination": { "page_size": 20, "page_number": 1 },
@@ -31,7 +45,7 @@ Search, Filter(컴럼 값, SQL에서 IN 해당), Pagenation, Sorting 조건을
 
 - `filter`는 `type` 필드로 실제 하위 타입이 결정되는 다형성 노드다.
 - `AND` 타입은 자기 자신과 같은 타입(`Filter`)의 리스트를 자식으로 가진다 → **재귀 구조**.
-- 나머지 리프 타입(`SEARCH_STRING`, `STATUS`, `REPORT_CATEGORY`, `SCHEDULE_FREQUENCY`)은 각자 다른 모양의 `value`를 가진다.
+- 나머지 리프 타입(`SEARCH_STRING`, `STATUS`, `CATEGORY`, `FREQUENCY`)은 각자 다른 모양의 `value`를 가진다.
 
 이런 구조를 REST 계층(Java DTO)과 gRPC 계층(proto message) 양쪽에서 "제일 자연스러운 방식으로" 표현하는 것이 핵심 설계 문제다. 아래는 특정 리포지토리의 기존 구현과 무관하게, 일반적으로 권장되는 설계다.
 
@@ -43,95 +57,197 @@ Search, Filter(컴럼 값, SQL에서 IN 해당), Pagenation, Sorting 조건을
 
 Java 17+에서는 이런 "닫힌 다형성 집합"을 표현하는 가장 안전한 방법이 `sealed interface`다. 컴파일러가 허용된 하위 타입을 강제하고, 이후 `switch` 패턴 매칭에서 **exhaustiveness(누락 없음)**를 컴파일 타임에 검증해준다 — Kotlin의 `sealed class` + `when`과 동일한 이점이다.
 
-```java
-// ── 판별 타입 마커 ──────────────────────────────────────────
-public enum FilterType {
-    AND, SEARCH_STRING, STATUS, REPORT_CATEGORY, SCHEDULE_FREQUENCY
-}
+### MyFilter.java
 
-// ── 폴리모픽 루트 ───────────────────────────────────────────
+```java
+package com.example.sample.dto;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
     property = "type"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = AndFilter.class, name = "AND"),
-    @JsonSubTypes.Type(value = SearchStringFilter.class, name = "SEARCH_STRING"),
-    @JsonSubTypes.Type(value = StatusFilter.class, name = "STATUS"),
-    @JsonSubTypes.Type(value = ReportCategoryFilter.class, name = "REPORT_CATEGORY"),
-    @JsonSubTypes.Type(value = ScheduleFrequencyFilter.class, name = "SCHEDULE_FREQUENCY"),
+    @JsonSubTypes.Type(value = MyFilter.AndFilter.class, name = "AND"),
+    @JsonSubTypes.Type(value = MyFilter.SearchStringFilter.class, name = "SEARCH_STRING"),
+    @JsonSubTypes.Type(value = MyFilter.StatusFilter.class, name = "STATUS"),
+    @JsonSubTypes.Type(value = MyFilter.CategoryFilter.class, name = "CATEGORY"),
+    @JsonSubTypes.Type(value = MyFilter.FrequencyFilter.class, name = "FREQUENCY"),
 })
-public sealed interface Filter
-    permits AndFilter, SearchStringFilter, StatusFilter, ReportCategoryFilter, ScheduleFrequencyFilter {
+public sealed interface MyFilter
+    permits MyFilter.AndFilter,
+    MyFilter.SearchStringFilter,
+    MyFilter.StatusFilter,
+    MyFilter.CategoryFilter,
+    MyFilter.FrequencyFilter {
     FilterType type();
+
+    // ── 판별 타입 마커 ──────────────────────────────────────────
+    enum FilterType {
+        AND, SEARCH_STRING, STATUS, CATEGORY, FREQUENCY
+    }
+
+    enum Status {
+        PENDING, CREATING, CREATED, FAILED, DELETED
+    }
+
+    enum Category {
+        BASIC, UNIFIED, QUERY
+    }
+
+    enum Frequency {
+        CUSTOM_DAILY, CUSTOM_WEEKLY, CUSTOM_MONTHLY, DAILY, WEEKLY, MONTHLY
+    }
+    
+    // ── 리프/재귀 노드 (record = 불변 값 객체) ──────────────────
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record AndFilter(
+        // @Valid: targets 리스트 각 요소(MyFilter)까지 재귀적으로 Bean Validation 수행
+        // @NotEmpty: null/빈 리스트를 허용하지 않음(최소 1개 요소 필요)
+        @NotEmpty List<@Valid MyFilter> targets,
+        FilterType type
+    ) implements MyFilter {
+        public AndFilter { type = FilterType.AND; } // 판별자 고정
+    }
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record SearchStringFilter(
+        // @NotBlank: null/빈 문자열/공백-only 문자열을 허용하지 않음
+        @NotBlank String value,
+        FilterType type
+    ) implements MyFilter {
+        public SearchStringFilter { type = FilterType.SEARCH_STRING; }
+    }
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record StatusFilter(
+        // @NotEmpty: 최소 1개 상태값이 있어야 함
+        @NotEmpty List<Status> value,
+        FilterType type
+    ) implements MyFilter {
+        public StatusFilter { type = FilterType.STATUS; }
+    }
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record CategoryFilter(
+        // @NotEmpty: 최소 1개 카테고리 값이 있어야 함
+        @NotEmpty List<Category> value,
+        FilterType type
+    ) implements MyFilter {
+        public CategoryFilter { type = FilterType.CATEGORY; }
+    }
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record FrequencyFilter(
+        // @NotEmpty: 최소 1개 주기 값이 있어야 함
+        @NotEmpty List<String> value,
+        FilterType type
+    ) implements MyFilter {
+        public FrequencyFilter { type = FilterType.FREQUENCY; }
+    }
 }
 
-// ── 리프/재귀 노드 (record = 불변 값 객체) ──────────────────
-public record AndFilter(
-    @NotEmpty List<@Valid Filter> targets,
-    FilterType type
-) implements Filter {
-    public AndFilter { type = FilterType.AND; }         // 판별자 고정
-}
-
-public record SearchStringFilter(
-    @NotBlank String value,
-    FilterType type
-) implements Filter {
-    public SearchStringFilter { type = FilterType.SEARCH_STRING; }
-}
-
-public record StatusFilter(
-    @NotEmpty List<ReportStatus> value,          // 문자열이 아니라 enum 리스트로!
-    FilterType type
-) implements Filter {
-    public StatusFilter { type = FilterType.STATUS; }
-}
-
-public record ReportCategoryFilter(
-    @NotEmpty List<ReportCategory> value,
-    FilterType type
-) implements Filter {
-    public ReportCategoryFilter { type = FilterType.REPORT_CATEGORY; }
-}
-
-public record ScheduleFrequencyFilter(
-    @NotEmpty List<ScheduleFrequency> value,
-    FilterType type
-) implements Filter {
-    public ScheduleFrequencyFilter { type = FilterType.SCHEDULE_FREQUENCY; }
-}
 ```
 
+#### Pagination.java
+
 ```java
-// ── 나머지 요청 본문 (평범한 flat DTO) ──────────────────────
+package com.example.sample.dto;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record Pagination(
     @NotNull @Positive Integer pageSize,
+    // valid minimum pageNumber is 1
     @NotNull @PositiveOrZero Integer pageNumber
 ) {}
+```
 
+#### Sort.java
+
+```java
+package com.example.sample.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record Sort(
     @NotBlank String sortKey,
     @NotBlank String sortOrder     // 또는 enum SortOrder { ASC, DESC }
 ) {}
+```
 
-public record ReportPlanListRequest(
-    @NotNull @Valid Filter filter,
+#### ListRequest.java
+
+```java
+package com.example.sample.dto;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record ListRequest(
+    @NotNull @Valid MyFilter filter,
     @NotNull @Valid Pagination pagination,
     @Valid Sort sort               // null 허용 → "정렬 안 함/기본 정렬"
 ) {}
 ```
 
-`snake_case` ↔ `camelCase` 변환은 필드마다 `@JsonProperty`를 반복하지 말고, `ObjectMapper` 전역 설정으로 한 번에 처리한다:
+`snake_case` ↔ `camelCase` 변환은 필드마다 `@JsonProperty`를 반복하지 말고, 네이밍 전략으로 한 번에 처리한다. 방법은 두 가지이며 **둘 중 하나만 적용하면 된다**.
+
+**(A) 클래스 단위 — 위 예제들이 쓰는 방식**
+
+DTO에 `@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)`를 붙이면 그 클래스에 한해 전략이 적용되며, 전역 설정은 필요 없다. 애플리케이션의 다른 JSON(외부 API 응답 등)은 기본 `camelCase`를 유지하고 싶을 때 적합하다.
+
+**(B) 전역 단위 — 애너테이션 없이 처리**
+
+모든 JSON을 `snake_case`로 통일한다면 DTO의 `@JsonNaming`을 모두 지우고 전역 설정만 둔다.
+
+Spring Boot에서는 프로퍼티로 설정하는 것이 가장 간단하다:
+
+```yaml
+spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+```
+
+`ObjectMapper`를 직접 만든다면 Jackson 3(`tools.jackson`)에서는 `ObjectMapper`가 불변이므로 빌더로 지정한다:
 
 ```java
-objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+ObjectMapper mapper = JsonMapper.builder()
+    .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+    .build();
 ```
+
+Jackson 2(`com.fasterxml.jackson`)라면 `objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)`를 쓴다.
+
+> 우선순위: 클래스의 `@JsonNaming`이 전역 설정보다 우선한다. 둘 다 `SNAKE_CASE`라면 결과는 같지만 중복이므로 한쪽으로 정리하는 편이 좋다.
 
 ### 왜 `value`를 `String`이 아니라 enum으로 받는가
 
-`STATUS`/`REPORT_CATEGORY`/`SCHEDULE_FREQUENCY`의 `value`를 `List<String>`이 아니라 `List<ReportStatus>` 같은 실제 enum으로 받으면:
+`STATUS`/`CATEGORY`/`FREQUENCY`의 `value`를 `List<String>`이 아니라 `List<Status>` 같은 실제 enum으로 받으면:
 
 - 잘못된 값(`"FOO"`)이 오면 **Jackson 역직렬화 단계에서 자동으로 400**이 나고, 컨트롤러/서비스 로직에서 유효성 검사를 따로 안 해도 된다.
 - 이후 gRPC 매핑 코드에서 `switch`로 안전하게 변환할 수 있다(문자열 오타로 인한 런타임 버그를 컴파일 타임 문제로 옮김).
@@ -165,8 +281,8 @@ message FilterNode {
     AndFilter and = 1;
     SearchStringFilter search_string = 2;
     StatusFilter status = 3;
-    ReportCategoryFilter report_category = 4;
-    ScheduleFrequencyFilter schedule_frequency = 5;
+    CategoryFilter category = 4;
+    ScheduleFrequencyFilter frequency = 5;
   }
 }
 
@@ -179,19 +295,19 @@ message SearchStringFilter {
 }
 
 message StatusFilter {
-  repeated ReportStatus values = 1;        // enum 또는 repeated string 가능
+  repeated Status values = 1;        // enum 또는 repeated string 가능
 }
 
-message ReportCategoryFilter {
-  repeated ReportCategory values = 1;      // enum 또는 repeated string 가능
+message CategoryFilter {
+  repeated Category values = 1;      // enum 또는 repeated string 가능
 }
 
 message ScheduleFrequencyFilter {
-  repeated ScheduleFrequency values = 1;   // enum 또는 repeated string 가능
+  repeated Frequency values = 1;   // enum 또는 repeated string 가능
 }
 
-enum ReportStatus {
-  REPORT_STATUS_UNSPECIFIED = 0;   // proto3 enum은 0번 값이 필수 (unset 시 기본값)
+enum Status {
+  STATUS_UNSPECIFIED = 0;   // proto3 enum은 0번 값이 필수 (unset 시 기본값)
   PENDING = 1;
   CREATING = 2;
   CREATED = 3;
@@ -199,15 +315,15 @@ enum ReportStatus {
   DELETED = 5;
 }
 
-enum ReportCategory {
-  REPORT_CATEGORY_UNSPECIFIED = 0;
+enum Category {
+  CATEGORY_UNSPECIFIED = 0;
   BASIC = 1;
   UNIFIED = 2;
   QUERY = 3;
 }
 
-enum ScheduleFrequency {
-  SCHEDULE_FREQUENCY_UNSPECIFIED = 0;
+enum Frequency {
+  FREQUENCY_UNSPECIFIED = 0;
   IMMEDIATE = 1;
   SPECIFIC_TIME = 2;
   EVERY_DAY = 3;
@@ -290,16 +406,16 @@ private fun toFilterProto(filter: Filter): FilterNode = when (filter) {
         )
         .build()
 
-    is ReportCategoryFilter -> FilterNode.newBuilder()
+    is CategoryFilter -> FilterNode.newBuilder()
         .setReportCategory(
-            ReportCategoryFilterProto.newBuilder()
+            CategoryFilterProto.newBuilder()
                 .addAllValues(filter.value.map { it.name })
         )
         .build()
 
     is ScheduleFrequencyFilter -> FilterNode.newBuilder()
         .setScheduleFrequency(
-            ScheduleFrequencyFilterProto.newBuilder()
+            FrequencyFilterProto.newBuilder()
                 .addAllValues(filter.value.map { it.name })
         )
         .build()
@@ -327,26 +443,304 @@ public final class FilterMapper {
                     .addAllValues(f.value().stream().map(FilterMapper::toProto).toList()))
                 .build();
 
-            case ReportCategoryFilter f -> FilterNode.newBuilder()
-                .setReportCategory(ReportCategoryFilterProto.newBuilder()
+            case CategoryFilter f -> FilterNode.newBuilder()
+                .setReportCategory(CategoryFilterProto.newBuilder()
                     .addAllValues(f.value().stream().map(FilterMapper::toProto).toList()))
                 .build();
 
             case ScheduleFrequencyFilter f -> FilterNode.newBuilder()
-                .setScheduleFrequency(ScheduleFrequencyFilterProto.newBuilder()
+                .setScheduleFrequency(FrequencyFilterProto.newBuilder()
                     .addAllValues(f.value().stream().map(FilterMapper::toProto).toList()))
                 .build();
         };
         // sealed interface라 default 분기 없이도 exhaustive — 새 서브타입 추가 시 컴파일 에러로 강제됨
     }
 
-    private static ReportStatusProto toProto(ReportStatus s) { /* enum → enum 매핑 */ }
+    private static ReportStatusProto toProto(Status s) { /* enum → enum 매핑 */ }
 }
 ```
 
 `AndFilter`의 재귀는 `targets`를 순회하며 `toFilterProto`를 재귀 호출하는 것으로 자연스럽게 처리된다 — 트리 구조가 양쪽(DTO/proto)에서 동형(isomorphic)이기 때문에 매핑 코드도 트리를 그대로 따라간다.
 
 ---
+
+## 4. JPA query
+
+### Specification
+
+- sort specification
+```java
+package com.example.sample.repository.specification;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.example.sample.repository.entity.MyListEntity;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
+
+/**
+ * {@code MyListListRequestV1.sort}(sort_key/sort_order)를 {@code tb_report_plan} 조회 정렬로
+ * 변환한다.
+ *
+ * <p>정렬 대상 6종({@code name}/{@code description}/{@code viewer_admin_ids}(첫 항목)/
+ * {@code admin_id}/{@code details}(JSON 0번째 요소의 {@code base_report_id})/
+ * {@code last_run_at}) 중 일부는 단순 컬럼이 아니라 배열/JSON 경로 추출식이라
+ * {@code Sort.by("property")}로 표현할 수 없다. 그래서 {@link Specification}에서
+ * {@code CriteriaQuery.orderBy(...)}를 직접 설정하고 조건 자체는 {@code cb.conjunction()}(no-op)을
+ * 반환해, 필터 {@link Specification}과 {@code .and()}로 결합해 하나의 쿼리로 실행한다.
+ *
+ * <p>{@code sort_key}/{@code sort_order} 화이트리스트 검증은 {@link #orderBy}에서 즉시(eager) 수행한다 —
+ * {@link Specification}의 {@code toPredicate}(DB 접근 시점)까지 미루지 않아, 잘못된 요청을 쿼리 실행 전에
+ * {@link IllegalArgumentException}으로 빠르게 실패시킨다.
+ */
+public final class MyListSortSpecifications {
+
+    private MyListSortSpecifications() {
+    }
+
+    /** 허용된 {@code sort_key} 화이트리스트. 그 외 값은 {@link #orderBy}에서 즉시 거부된다. */
+    private enum SortKey {
+        NAME("name"),
+        DESCRIPTION("description"),
+        VIEWER_ADMIN_IDS("viewer_admin_ids"),
+        BASIC_REPORT_DETAILS("details"),
+        ADMIN_ID("admin_id"),
+        ADMIN_IP("admin_ip"),
+        LAST_RUN_AT("last_run_at"),
+        MODIFIED_AT("modified_at"),
+        CREATED_AT("created_at");
+
+        private final String wireValue;
+
+        SortKey(String wireValue) {
+            this.wireValue = wireValue;
+        }
+
+        static SortKey fromWireValue(String value) {
+            for (SortKey key : values()) {
+                if (key.wireValue.equals(value)) {
+                    return key;
+                }
+            }
+            throw new IllegalArgumentException("Unknown sort_key value: " + value);
+        }
+    }
+
+    public static Specification<MyListEntity> orderBy(String sortKey, String sortOrder) {
+        if (sortKey == null || sortKey.isBlank()) {
+            return Specification.unrestricted();
+        }
+        SortKey key = SortKey.fromWireValue(sortKey);
+        boolean ascending = toAscending(sortOrder);
+        return (root, query, cb) -> {
+            Expression<?> sortExpression = toSortExpression(key, root, cb);
+            query.orderBy(ascending ? cb.asc(sortExpression) : cb.desc(sortExpression));
+            return cb.conjunction();
+        };
+    }
+
+    private static Expression<?> toSortExpression(SortKey key, Root<MyListEntity> root, CriteriaBuilder cb) {
+        return switch (key) {
+            case NAME -> root.get("name");
+            case DESCRIPTION -> root.get("description");
+            case ADMIN_ID -> root.get("adminId");
+            case ADMIN_IP -> root.get("adminIp");
+            case LAST_RUN_AT -> root.get("lastRunAt");
+            case MODIFIED_AT -> root.get("modifiedAt");
+            case CREATED_AT -> root.get("createdAt");
+            // Postgres text[]는 1-based 인덱스. Hibernate 6의 array_get(array, index) 함수를 사용한다.
+            case VIEWER_ADMIN_IDS -> cb.function(
+                "array_get", String.class, root.get("viewerAdminIds"), cb.literal(1));
+            // details(jsonb 배열) 0번째 요소의 base_report_id.
+            // 숫자 인덱스를 경로 요소로 넘기면 jsonb 배열 인덱싱으로 동작한다.
+            case BASIC_REPORT_DETAILS -> cb.function(
+                "jsonb_extract_path_text", String.class, root.get("basicReportDetails"),
+                cb.literal("0"), cb.literal("base_report_id"));
+        };
+    }
+
+    private static boolean toAscending(String sortOrder) {
+        if (sortOrder == null || sortOrder.isBlank()) {
+            return true;
+        }
+        if ("ASC".equalsIgnoreCase(sortOrder)) {
+            return true;
+        }
+        if ("DESC".equalsIgnoreCase(sortOrder)) {
+            return false;
+        }
+        throw new IllegalArgumentException("Unknown sort_order value: " + sortOrder);
+    }
+}
+```
+
+- 
+
+```java
+package com.example.sample.repository.specification;
+
+import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.example.sample.dto.filter.MyListFilterDto;
+import com.example.sample.dto.scheduler.MyListScheduleDtoV1.MyListScheduleTypeDtoV1;
+import com.example.sample.repository.entity.MyListEntity;
+import com.example.sample.repository.enums.MyListCategory;
+import com.example.sample.repository.enums.MyListStatus;
+
+import jakarta.persistence.criteria.Expression;
+
+/**
+ * {@link MyListFilterDto}(재귀 {@code oneof} 필터 트리)를 {@code tb_my_list} 조회용
+ * {@link Specification}으로 변환한다.
+ *
+ * <p>각 조건의 {@code values}/{@code targets}가 비어 있으면 "조건 없음"으로 간주해 전체를
+ * 통과시킨다({@code Specification.where(null)}). enum으로 변환할 수 없는 값(잘못된
+ * status/MyList_category/schedule_frequency 문자열)은 {@link IllegalArgumentException}으로
+ * 즉시 실패시킨다(기존 {@code toMyListCategory} 등과 동일한 컨벤션).
+ */
+public final class MyListSpecifications {
+
+    private MyListSpecifications() {
+    }
+
+    public static Specification<MyListEntity> fromFilter(MyListFilterDto filter) {
+        if (filter == null) {
+            return Specification.unrestricted();
+        }
+        return switch (filter) {
+            case MyListFilterDto.AndDto and -> fromAnd(and);
+            case MyListFilterDto.SearchStringDto searchString -> fromSearchString(searchString);
+            case MyListFilterDto.StatusDto status -> fromStatus(status);
+            case MyListFilterDto.MyListCategoryDto MyListCategory -> fromMyListCategory(MyListCategory);
+            case MyListFilterDto.ScheduleFrequencyDto scheduleFrequency -> fromScheduleFrequency(scheduleFrequency);
+        };
+    }
+
+    private static Specification<MyListEntity> fromAnd(MyListFilterDto.AndDto and) {
+        List<MyListFilterDto> targets = and.targets();
+        if (targets == null || targets.isEmpty()) {
+            return Specification.unrestricted();
+        }
+        return Specification.allOf(targets.stream().map(MyListSpecifications::fromFilter).toList());
+    }
+
+    /** {@code name}/{@code description}/{@code admin_id} 중 하나라도 대소문자 구분 없이 포함하면 매칭한다. */
+    private static Specification<MyListEntity> fromSearchString(MyListFilterDto.SearchStringDto searchString) {
+        String value = searchString.value();
+        if (value == null || value.isBlank()) {
+            return Specification.unrestricted();
+        }
+        String pattern = "%" + value.toLowerCase() + "%";
+        return (root, query, cb) -> cb.or(
+            cb.like(cb.lower(root.get("name")), pattern),
+            cb.like(cb.lower(root.get("description")), pattern),
+            cb.like(cb.lower(root.get("adminId")), pattern),
+            cb.like(cb.lower(root.get("adminIp")), pattern));
+    }
+
+    private static Specification<MyListEntity> fromStatus(MyListFilterDto.StatusDto status) {
+        List<String> values = status.values();
+        if (values == null || values.isEmpty()) {
+            return Specification.unrestricted();
+        }
+        List<MyListStatus> statuses = values.stream().map(MyListSpecifications::toMyListStatus).toList();
+        return (root, query, cb) -> root.get("status").in(statuses);
+    }
+
+    private static Specification<MyListEntity> fromMyListCategory(MyListFilterDto.MyListCategoryDto MyListCategory) {
+        List<String> values = MyListCategory.values();
+        if (values == null || values.isEmpty()) {
+            return Specification.unrestricted();
+        }
+        List<MyListCategory> categories = values.stream().map(MyListSpecifications::toMyListCategory).toList();
+        return (root, query, cb) -> root.get("MyListCategory").in(categories);
+    }
+
+    /**
+     * {@code schedule}(jsonb) 컬럼에 {@code {"type": "EVERY_WEEK", ...}} 형태로 저장된 스케줄 종류를
+     * {@code jsonb_extract_path_text}로 추출해 비교한다.
+     */
+    private static Specification<MyListEntity> fromScheduleFrequency(
+        MyListFilterDto.ScheduleFrequencyDto scheduleFrequency) {
+        List<String> values = scheduleFrequency.values();
+        if (values == null || values.isEmpty()) {
+            return Specification.unrestricted();
+        }
+        List<String> scheduleTypes = values.stream()
+            .map(MyListSpecifications::toScheduleTypeName)
+            .toList();
+        return (root, query, cb) -> {
+            Expression<String> scheduleType = cb.function(
+                "jsonb_extract_path_text", String.class, root.get("schedule"), cb.literal("type"));
+            return scheduleType.in(scheduleTypes);
+        };
+    }
+
+    private static MyListStatus toMyListStatus(String value) {
+        try {
+            return MyListStatus.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown status value: " + value, e);
+        }
+    }
+
+    private static MyListCategory toMyListCategory(String value) {
+        try {
+            return MyListCategory.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown MyList_category value: " + value, e);
+        }
+    }
+
+    private static String toScheduleTypeName(String value) {
+        try {
+            return MyListScheduleTypeDtoV1.valueOf(value).name();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown schedule_frequency value: " + value, e);
+        }
+    }
+}
+```
+
+```java
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class MyListService {
+
+    private final MyListRepository myListRepository;
+
+    /**
+     * {@code getMyListV1()} 요청으로 {@code tb_report_plan}에서 단건 조회한 엔티티를 반환한다.
+     */
+    public MyListEntity getMyList(long reportPlanId) {
+        return myListRepository.findById(reportPlanId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "MyList not found for report_plan_id: " + reportPlanId));
+    }
+
+    /**
+     * {@code getMyListListV1()} 요청의 {@code filter}/{@code sort}/{@code pagination}을 적용해
+     * {@code tb_report_plan}을 조회한다. {@code pagination}이 없으면 기존과 동일하게 전체 조회한다
+     * (하위 호환).
+     */
+    public Page<MyListEntity> getMyListList(MyListListRequestV1 request) {
+        MyListFilterDto filterDto = request.hasFilter() ? toFilterDto(request.getFilter()) : null;
+        Specification<MyListEntity> spec = MyListSpecifications.fromFilter(filterDto);
+        if (request.hasSort()) {
+            spec = spec.and(MyListSortSpecifications.orderBy(
+                request.getSort().getSortKey(), request.getSort().getSortOrder()));
+        }
+        Pageable pageable = toPageable(request);
+        Specification<MyListEntity> finalSpec = spec;
+        return myListRepository.findAll(finalSpec, pageable);
+    }
+}
+```
 
 ## 5. 설계 요약
 

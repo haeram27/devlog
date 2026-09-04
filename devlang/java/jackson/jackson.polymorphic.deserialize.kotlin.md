@@ -112,6 +112,7 @@ println(json)
   ]
 }
 ```
+
 - 각 객체의 실제 런타임 타입(`Dog`, `Cat`)에 따라 `type` 필드 값(`"DOG"`, `"CAT"`)이 자동으로 채워집니다.
 - `@JsonSubTypes` 매핑 덕분에 Jackson이 "Dog 클래스는 DOG라는 이름으로 표시해야 한다"는 것을 알고 있습니다.
 

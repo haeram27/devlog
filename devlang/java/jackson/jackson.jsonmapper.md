@@ -9,7 +9,7 @@
 
 ## JsonMapper 생성
 
-- 주의: `JsonMapper`와 `YAMLMapper`를 모두 Bean으로 등록하면 둘 모두 `ObjectMapper`로 간주되어 Bean 충돌 발생이 발생하므로 둘 중 하나에 `@Primary` 어노테이션을 추가해야 한다. (`JsonMapper`를 추천) 
+- 주의: `JsonMapper`와 `YAMLMapper`를 모두 Bean으로 등록하면 둘 모두 `ObjectMapper`로 간주되어 Bean 충돌 발생이 발생하므로 둘 중 하나에 `@Primary` 어노테이션을 추가해야 한다. (`JsonMapper`를 추천)
 
 ```java
 import org.springframework.context.annotation.Bean;

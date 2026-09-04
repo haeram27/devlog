@@ -1,4 +1,4 @@
-# ReportPlanFilterV1로 수신 가능한 JSON 형태 예제
+# Grpc Proto oneof와 json mapping
 
 기준 proto:
 

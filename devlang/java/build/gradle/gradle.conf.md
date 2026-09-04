@@ -7,7 +7,7 @@
 
 gradle의 주 설정 파일은 크게 `.properties` 파일과 `.gradle` 파일로 나뉜다.
 
-- `.properties`은 빌드 실행 환경 변수 선언, `.gradle`은 빌드용 스크립트 파일이다. 
+- `.properties`은 빌드 실행 환경 변수 선언, `.gradle`은 빌드용 스크립트 파일이다.
 - `.properties` 파일은 gradle 실행시 빌드용 jvm과 스크립트(settings/build.gradle) 파일에 참조할 수 있는 system.propoery 변수를 선언한다.
 - `.gradle` 파일은 DSL 스크립트 파일이며, gradle 빌드 수행시 자동 참조 되는 빌드 스크립트 파일이다.
 

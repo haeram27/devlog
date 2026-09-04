@@ -64,31 +64,130 @@ dependencies {
 }
 ```
 
-## `libs.versions.toml` 예제
+## gradle groovy version catalog 사용 예제
+
+### gradle/libs.version.toml
+
+```toml
+[versions]
+apacheCompress = "1.26.2"
+apacheTika = "2.9.2"
+jackson = "3.1.2"
+java = "25"
+junit = "5.10.2"
+jakartaValidation = "3.1.1"
+lombok = "1.18.44"
+log4j2 = "2.23.1"
+querydsl = "7.6"
+slf4j = "2.0.13"
+
+[libraries]
+apache-commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "apacheCompress" }
+apache-tika-core = { module = "org.apache.tika:tika-core", version.ref = "apacheTika" }
+jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakartaValidation" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "jackson" }
+jackson-core = { module = "tools.jackson.core:jackson-core" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind" }
+jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j2" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j2" }
+log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j2" }
+querydsl-apt = { module = "io.github.openfeign.querydsl:querydsl-apt", version.ref = "querydsl" }
+querydsl-jpa = { module = "io.github.openfeign.querydsl:querydsl-jpa", version.ref = "querydsl" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+```
+
+### build.gradle
+
+```groovy
+plugins {
+    id 'java'
+    id 'application' //for gradle tasks
+}
+
+// set java source compatibility for java compile task
+java {
+    // This is a local variable used only inside the java block, so `def` is used.
+    def javaVersion = libs.versions.java.get()
+
+    // minimum java version to compile source code
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    // minimum java version to run the compiled bytecode, same or bigger than sourceCompatibility
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
+
+    // foojay-resolver: Apply a specific Java toolchain to ease working on different environments.
+    // foojay downloads specified JDK version if not found in .gradle/toolchains/ so gradlew can automatically setup the JDK toolchain.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(Integer.parseInt(javaVersion))
+    }
+}
+
+dependencies {
+    implementation libs.slf4j.api
+    implementation libs.log4j.api
+    implementation libs.log4j.core
+    implementation libs.log4j.slf4j2.impl
+
+    implementation libs.apache.commons.compress
+    implementation libs.apache.tika.core
+    implementation libs.jakarta.validation.api
+
+    // platform adds BOM as dependency so that group of library related in BOM is used in same version
+    implementation platform(libs.jackson.bom)
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.jackson.dataformat.yaml
+
+    // querydsl
+    implementation libs.querydsl.jpa
+    implementation libs.querydsl.apt
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly libs.junit.platform.launcher
+
+    testImplementation libs.slf4j.api
+    testImplementation libs.log4j.api
+    testImplementation libs.log4j.core
+    testImplementation libs.log4j.slf4j2.impl
+
+    testImplementation libs.apache.commons.compress
+    testImplementation platform(libs.jackson.bom)
+    testImplementation libs.jackson.core
+    testImplementation libs.jackson.databind
+    testImplementation libs.jackson.dataformat.yaml
+}
+```
+
+## gradle kotlin version catalog 사용 예제
+
+### `libs.versions.toml` 예제
 
 아래 예제는 library 와 plugin 버전을 함께 관리하는 가장 전형적인 형태이다.
 
 ```toml
 # ref: libs.versions.dotted-key
 [versions]
+jackson = "2.19.1"
 java = "25" # libs.versions.java
-spring-boot = "3.5.3"
-spring-dependency-management = "1.1.7"
 junit = "5.12.2"
 slf4j = "2.0.17"
-jackson = "2.19.1"
+spring-boot = "3.5.3"
+spring-dependency-management = "1.1.7"
 
 # ref: libs.dotted-key
 [libraries]
-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" } # libs.spring.boot.starter.web
-spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" } # libs.spring.boot.starter.web
 
 # ref: libs.plugins.dotted-key
 [plugins]
-
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" } # libs.plugins.spring.boot
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 
@@ -104,7 +203,7 @@ spring-web = ["spring-boot-starter-web", "jackson-databind"] # libs.bundles.spri
 - `[plugins]`: Gradle plugin id 와 plugin 버전 정의
 - `[bundles]`: 여러 library alias를 하나로 묶음
 
-## build.gradle.kts에서 사용하는 방법
+### build.gradle.kts에서 사용하는 방법
 
 Kotlin DSL 기준 예시는 아래와 같다.
 
