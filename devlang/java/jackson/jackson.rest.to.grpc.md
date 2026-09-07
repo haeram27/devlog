@@ -159,7 +159,6 @@ public sealed interface MyFilter
         public FrequencyFilter { type = FilterType.FREQUENCY; }
     }
 }
-
 ```
 
 #### Pagination.java
