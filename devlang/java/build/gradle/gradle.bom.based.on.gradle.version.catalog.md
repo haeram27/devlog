@@ -30,7 +30,8 @@ dependencies {
 }
 ```
 
-version catalog를 쓰면 버전은 `.toml`에 모으고, 빌드 스크립트에서는 alias만 사용한다.
+version catalog를 쓰면 버전은 `.toml`에 모으고, 빌드 스크립트에서는 alias만 사용할 수 도 있다.
+다만 alias를 사용하는 경우 build.gradle(.kts)에서 사용하는 library들을 `.toml`에서 확인하지 않는한 정확히 어느 library를 사용하는지를 build.gradle에서 확인할 수 없게 되므로 주의가 필요하다.
 
 ```kotlin
 dependencies {
