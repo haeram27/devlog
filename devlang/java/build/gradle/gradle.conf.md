@@ -60,19 +60,18 @@ gradle의 주 설정 파일은 크게 `.properties` 파일과 `.gradle` 파일�
 
 ## [PROXY SETTINGS]
 ## proxy on/off in gradle jvm, set true if need to enble proxy with following
-systemProp.proxySet=false
 ## http proxy
 systemProp.http.keepAlive=true
 systemProp.http.proxyHost=127.0.0.1
 systemProp.http.proxyPort=9913
-systemProp.http.nonProxyHosts=localhost|*.internal.com
+systemProp.http.nonProxyHosts=localhost|127.*|*.internal.com
 #systemProp.http.proxyUser=username
 #systemProp.http.proxyPassword=password
 ## https Proxy (usually same as HTTP)
 systemProp.https.keepAlive=true
 systemProp.https.proxyHost=127.0.0.1
 systemProp.https.proxyPort=9913
-systemProp.https.nonProxyHosts=localhost|*.internal.com
+systemProp.https.nonProxyHosts=localhost|127.*|*.internal.com
 #systemProp.https.proxyUser=username
 #systemProp.https.proxyPassword=password
 
