@@ -306,6 +306,45 @@ openssl enc -e -k secretpassword123 -aes-256-cbc -a -md sha512 -pbkdf2 -iter 112
 openssl enc -d -k secretpassword123 -aes-256-cbc -a -md sha512 -pbkdf2 -iter 1122 -salt -in ./text.enc -out ./text.dec
 ```
 
+#### 서버 인증서 생성
+
+실무 선택 조건:
+- **RSA**: 구형 클라이언트/장비 포함, 레거시 호환성 최우선일 때
+- **ECDSA(P-256)**: 공개 서비스 기본 권장 (성능/보안/호환성 균형)
+- **Ed25519**: 최신 클라이언트 중심 또는 내부망 (지원 범위 확인 필수)
+
+##### 1) CA 개인키/인증서 생성
+
+```bash
+openssl genrsa -out ca-key.pem 4096
+openssl req -x509 -new -nodes -key ca-key.pem -sha256 -days 3650 -out ca-cert.pem
+```
+
+##### 2) 서버 개인키 생성 (택1)
+
+```bash
+# RSA
+openssl genrsa -out server-key-rsa.pem 3072
+
+# ECDSA P-256
+openssl ecparam -name prime256v1 -genkey -noout -out server-key-ecdsa.pem
+
+# Ed25519
+openssl genpkey -algorithm Ed25519 -out server-key-ed25519.pem
+```
+
+##### 3) 서버 CSR 생성 (예: ECDSA 키 사용)
+
+```bash
+openssl req -new -key server-key-ecdsa.pem -out server.csr
+```
+
+##### 4) 서버 인증서 생성 (CA 서명)
+
+```bash
+openssl x509 -req -in server.csr -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 365 -sha256
+```
+
 ## 압축파일 (tar)
 
 ### tar 주요 옵션

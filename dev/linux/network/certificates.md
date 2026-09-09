@@ -34,8 +34,75 @@
 - 용도: 특정 서비스(예: Apache, Nginx, VPN 등)를 구동하기 위한 서버 본인의 인증서와 비밀키를 보관하는 곳입니다.
 - 특징:
   - 내부 사설 CA 인증서나 Let's Encrypt 등으로 발급받은 본인 서버의 도메인 인증서를 주로 저장합니다.
-    - OS 업데이트의 영향을 받지 않으며, 관리자가 수동으로 파일을 관리합니다.
-    - 시스템에 따라 /etc/ssl/certs 또는 /etc/pki 등으로 경로가 조금씩 다를 수 있습니다.
+  - OS 업데이트의 영향을 받지 않으며, 관리자가 수동으로 파일을 관리합니다.
+  - 시스템에 따라 /etc/ssl/certs 또는 /etc/pki 등으로 경로가 조금씩 다를 수 있습니다.
+
+## Linux 신뢰할 수 있는 인증서 저장
+
+전역 경로:
+
+- Ubuntu/Debian:
+  - `/etc/ssl/certs`
+  - `/usr/local/share/ca-certificates`
+
+- Red Hat 계열:
+  - `/etc/pki/tls/certs`
+  - `/etc/pki/ca-trust/source/anchors`
+
+업데이트 명령:
+
+- Ubuntu/Debian:
+
+  ```bash
+  update-ca-certificates
+  ```
+
+- CentOS/RHEL:
+
+  ```bash
+  update-ca-trust
+  ```
+
+
+- `/etc/ssl/cert` 경로는 대부분의 Linux 배포판에서 전역적으로 신뢰할 수 있는 CA 인증서를 저장하는 기본 디렉터리
+- 다만 Debian이나 Redhat에서는 각각 다른 경로에 인증서 파일을 저장한 후 /etc/ssl/certs 디렉토리에 파일 또는 디렉토리를 링크를 거는 방식으로 사용한다.
+- Linux는 각 경로에 인증서 파일을 위치시키고 업데이트 명령을 사용하면 각 시스템이 사용하는 CA 인증서 통합 파일에 인증서가 추가 된다.
+
+### Debian/Ubuntu 인증서 저장 경로
+
+/usr/local/share/ca-certificates
+
+### Debian/Ubuntu 시스템에 인증서 등록
+
+```bash
+sudo cp my-ca-cert.pem /usr/local/share/ca-certificates
+sudo ln -s /etc/ssl/certs/my-ca-cert.crt /usr/local/share/ca-certificates/my-ca-cert.crt
+sudo update-ca-certificates
+```
+
+### Debian/Ubuntu 인증서 추가 완료 확인
+
+```bash
+cat /etc/ssl/certs/ca-certificates.crt
+```
+
+### Redhat 인증서 저장 경로
+
+/etc/pki/tls/certs
+
+### Debian 시스템에 인증서 등록
+
+```bash
+sudo cp my-ca-cert.pem /etc/pki/ca-trust/source/anchors
+sudo update-ca-trust
+```
+
+### Rhel 인증서 추가 완료 확인
+
+```bash
+cat /etc/pki/tls/certs/ca-bundle.crt | grep <인증서 내용 한 라인>
+cat /etc/pki/tls/certs/ca-bundle.trust.crt | grep <인증서 내용 한 라인>
+```
 
 ## 사설 인증서 등록
 
