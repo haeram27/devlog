@@ -61,3 +61,38 @@ Google에서 기본으로 제공하는 유용한 타입들입니다.
 - Timestamp: 날짜와 시간 (google/protobuf/timestamp.proto)
 - Duration: 시간 간격 (google/protobuf/duration.proto)
 - Empty: 인자나 반환값이 없을 때 사용하는 빈 메시지 (google/protobuf/empty.proto)
+
+## 5. proto3 `optional` 적용 가능 타입
+
+`optional`은 **단일(singular) 필드**에만 사용할 수 있으며, 기본값과 별개로 "값이 설정되었는지"를 구분하고 싶을 때 사용합니다.
+
+| 구분 | optional 사용 |
+|---|---|
+| 스칼라(숫자, bool, string, bytes) | 가능 |
+| enum | 가능 |
+| message | 보통 불필요 (optional 없이도 "설정됨/미설정" presence 확인 가능) |
+| repeated | 불가 |
+| map | 불가 |
+| oneof 내부 필드 | 불가 |
+
+> 여기서 message 설명의 presence는 **필드 값 자체**가 아니라 **필드가 설정되었는지 여부(has/set)** 를 추적한다는 의미입니다.
+> 따라서 message 필드는 proto3에서 기본적으로 optional과 유사한 존재 여부 확인이 가능합니다.
+
+- 스칼라( int32 ,  string  등): 기본 proto3에서는 값만 보이고, “미설정”과 “기본값(0, 빈문자열)” 구분이 안 됨 → 그래서  optional 이 필요
+- message 필드:  optional  없이도 “필드가 아예 없음” vs “필드가 존재함”을 구분 가능 (언어별로  hasX() ,  nil/null 여부  등으로 확인)
+
+즉, message 가 문법적으로  optional  키워드를 꼭 써야 한다기보다, 존재 여부 추적 기능이 기본 제공된다고 이해하면 됩니다.
+
+예시:
+
+```protobuf
+message UserProfile {
+  optional int32 age = 1;       // 가능
+  optional string nickname = 2; // 가능
+  optional Status status = 3;   // 가능 (enum)
+
+  Profile profile = 4;          // optional 없이도 존재 여부 확인 가능
+  repeated string tags = 5;     // optional 불가
+  map<string, string> meta = 6; // optional 불가
+}
+```
