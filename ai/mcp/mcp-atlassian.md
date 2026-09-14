@@ -11,11 +11,11 @@ atlassian 공식 mcp가 cloud 지원 전용이라면, 이 프로젝트는 사내
 
 단, 사내 온프레미스(Data Center/Server)형 atlassian이라면 `mcp-atlassian` 대신 `atlassian-skills` 사용이 적극 권장됩니다.
 
-사내 온프레미스(Data Center/Server)에서는 atlassian-skills 프로젝트가 기술적으로 훨씬 유리하고 좋은 선택입니다.
-
 `mcp-atlassian`이 표준 mcp 서버라면 `atlassian-skills`는 경량 cli 명령으로 구현되며, AI 클라이언트가 skill로 cli 명령 형태로 호출하는 방식이라 사용 비용이 매우 낮습니다.
 
-두 프로젝트는 사내망 환경에서 마주하게 되는 비용(토큰 소모)과 문서 정밀도 문제에서 명확한 차이점을 보입니다.
+mcp 방식은 API 사용에 필요한 많은 scheme가 AI 컨텍스트에 로딩 될 수 있어 토큰 사용량이 매우 높습니다.
+
+**cli 환경을 사용하는 개발자에게는 `atlassian-skills`를 사용하는 것이 토큰 절약에 매우 도움이 되며 추천됩니다. `mcp-atlassian`은 반드시 필요한 경우(cli가 지원되지 않거나, 사내 AI 모델을 사용하는 경우 등)를 제외하고는 사용을 지양 하는 것이 좋습니다.**
 
 **mcp-atlassian vs atlassian-skills 비교**
 
