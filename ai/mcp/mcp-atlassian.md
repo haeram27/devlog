@@ -9,6 +9,24 @@ atlassian 공식 mcp가 cloud 지원 전용이라면, 이 프로젝트는 사내
 - [github repository](https://github.com/sooperset/mcp-atlassian)
 - [공식 문서](https://mcp-atlassian.soomiles.com/docs)
 
+단, 사내 온프레미스(Data Center/Server)형 atlassian이라면 `mcp-atlassian` 대신 `atlassian-skills` 사용이 적극 권장됩니다.
+
+사내 온프레미스(Data Center/Server)에서는 atlassian-skills 프로젝트가 기술적으로 훨씬 유리하고 좋은 선택입니다.
+
+`mcp-atlassian`이 표준 mcp 서버라면 `atlassian-skills`는 경량 cli 명령으로 구현되며, AI 클라이언트가 skill로 cli 명령 형태로 호출하는 방식이라 사용 비용이 매우 낮습니다.
+
+두 프로젝트는 사내망 환경에서 마주하게 되는 비용(토큰 소모)과 문서 정밀도 문제에서 명확한 차이점을 보입니다.
+
+**mcp-atlassian vs atlassian-skills 비교**
+
+| 비교 항목 | mcp-atlassian (sooperset) | atlassian-skills |
+|---|---|---|
+| 주요 타겟 | Atlassian Cloud 위주 (온프레미스도 지원) | Atlassian 온프레미스(Server/DC) 최적화 |
+| 토큰 소모량 | 매우 많음 (복잡한 장황한 JSON 응답 구조) | 50% 이상 절감 (에이전트용 경량 컴팩트 출력) |
+| Confluence 편집 정밀도 | 에디터 수정 시 마크업이 깨지거나 변형될 위험 있음 | 손실 없는 마크다운 무결성 유지 (cfxmark 증명 기술 적용) |
+| 동작 방식 | 표준 MCP 통신 규격 서버 | Claude Code / Copilot에 최적화된 경량 CLI/MCP 에이전트 |
+
+
 ## python과 uv 설치
 
 `mcp-atlassian`은 python으로 제작된 프로젝트 이므로 사용하려면, python 실행 환경이 필요하다.
