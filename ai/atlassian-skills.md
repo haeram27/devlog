@@ -109,6 +109,8 @@ Project permissions = Project read
 Repository permissions = Repository write
 ```
 
+다음은 `atlassian-skills` 용 windows 사용자 환경 변수 설정 예이다.
+
 ```pwsh
 [System.Environment]::SetEnvironmentVariable('ATLS_DEFAULT_JIRA_URL', 'https://atlassian.net', 'User')
 [System.Environment]::SetEnvironmentVariable('JIRA_PERSONAL_TOKEN', 'YOUR_ACTUAL_PERSONAL_TOKEN', 'User')
