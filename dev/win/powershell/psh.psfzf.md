@@ -12,7 +12,7 @@ PowerShell을 열고 아래 순서대로 명령어를 입력하세요.
 
 먼저 PowerShell용 fzf 래퍼 모듈을 설치합니다.
 
-```ps1
+```pwsh
 Install-Module -Name PSFzf -Scope CurrentUser -Force
 ```
 
@@ -20,7 +20,7 @@ Install-Module -Name PSFzf -Scope CurrentUser -Force
 
 터미널이 켜질 때마다 자동으로 단축키가 로드되도록 프로필 설정 파일($PROFILE)을 메모장으로 엽니다.
 
-```ps1
+```pwsh
 notepad $PROFILE
 ```
 
@@ -42,7 +42,7 @@ Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
 
 터미널을 재시작하거나 아래 명령어로 설정을 즉시 적용합니다.
 
-```ps1
+```pwsh
 . $PROFILE
 ```
 
@@ -71,13 +71,13 @@ Powershell Gallery PsFzf > Manual Download
 
 Powershell 버전 5- 경로:
 
-```ps1
+```pwsh
    %USERPROFILE%\Documents\WindowsPowerShell\Modules
 ```
 
 Powershell 버전 7+ 경로:
 
-```ps1
+```pwsh
    %USERPROFILE%\Documents\PowerShell\Modules
 ```
 
@@ -95,7 +95,7 @@ Powershell 버전 7+ 경로:
   1. 열려 있는 PowerShell 창을 완전히 닫고 새로 엽니다.
   2. 아래 명령어를 입력해 설정 파일을 메모장으로 켭니다.
 
-```ps1
+```pwsh
 notepad $PROFILE
 ```
 

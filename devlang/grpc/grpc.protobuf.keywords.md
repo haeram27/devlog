@@ -36,6 +36,7 @@ Protobuf(특히 proto3) 문법에서 사용되는 주요 키워드와 식별자 
 - 기타: bool, string, bytes
 
 ## 4. 기타 특수 식별자
+
 문법 명세에 포함된 제어용 단어들입니다.
 
 - to / max: reserved 2 to 10; 또는 reserved 10 to max;와 같이 범위를 지정할 때 사용합니다.

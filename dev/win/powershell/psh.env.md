@@ -3,7 +3,7 @@
 
 ## psh 버전확인
 
-```ps1
+```pwsh
 $PSVersionTable.PSVersion
 # 또는 version 7 인 경우
 pwsh -v
@@ -11,7 +11,7 @@ pwsh -v
 
 ## psh 7 설치 및 업그레이드
 
-```ps1
+```pwsh
 # 관리자 계정으로 powershell을 열고
 winget install --id Microsoft.PowerShell --source winget
 # upgrade
@@ -35,13 +35,13 @@ Linux의 zsh + oh-my-zsh 느낌과 가장 비슷한 조합은 PowerShell 7 + Oh 
 
 관리자 권한 PowerShell에서:
 
-```ps1
+```pwsh
 winget install JanDeDobbeleer.OhMyPosh -s winget
 ```
 
 설치 확인:
 
-```ps1
+```pwsh
 oh-my-posh version
 ```
 
@@ -55,7 +55,7 @@ Nerd Font는 특정 유니코드에 아이콘 이미지를 표시하는 폰트�
 
 예를 들어 Meslo 폰트 설치:
 
-```ps1
+```pwsh
 oh-my-posh font install meslo
 ```
 
@@ -75,19 +75,19 @@ MesloLGM Nerd Font Mono
 
 프로필 파일 생성: (바로 편집으로 건너뛰기 가능)
 
-```ps1
+```pwsh
 New-Item -Path $PROFILE -Type File -Force
 ```
 
 프로필 편집:
 
-```ps1
+```pwsh
 notepad $PROFILE
 ```
 
 파일의 제일 아래에 내용 추가:
 
-```ps1
+```pwsh
 oh-my-posh init pwsh | Invoke-Expression
 ```
 
@@ -97,7 +97,7 @@ oh-my-posh init pwsh | Invoke-Expression
 
 테마 json 다운로드:
 
-```ps1
+```pwsh
 mkdir $env:USERPROFILE\.env\posh
 cd $env:USERPROFILE\.env\posh
 git clone https://github.com/JanDeDobbeleer/oh-my-posh.git
@@ -109,7 +109,7 @@ $env:USERPROFILE\.env\posh\themes
 
 예를 들어 pure 테마 사용:
 
-```ps1
+```pwsh
 oh-my-posh init pwsh --config "$env:USERPROFILE\.env\posh\themes\pure.omp.json" | Invoke-Expression
 ```
 
@@ -119,7 +119,7 @@ oh-my-posh init pwsh --config "$env:USERPROFILE\.env\posh\themes\pure.omp.json" 
 
 PowerShell 프로필에 아래도 함께 넣으면 사용성이 좋아집니다.
 
-```ps1
+```pwsh
 Import-Module PSReadLine
 
 Set-PSReadLineOption -PredictionSource History
@@ -135,7 +135,7 @@ gVim은 winget으로 설치하는 것이 가장 간단합니다. Vim 패키지�
 
 ### 설치
 
-```ps1
+```pwsh
 winget install -e --id vim.vim
 ```
 
@@ -144,12 +144,12 @@ winget install -e --id vim.vim
 일반적으로 설치 후 Path 환경변수에 등록되지 않으면 즉시 명령 이름으로 실행할 수 없다.
 
 1. CLI 버전:
-```ps1
+```pwsh
 vim --version
 ```
 
 2. gVim 실행:
-```ps1
+```pwsh
 gvim
 ```
 
@@ -163,12 +163,12 @@ gvim
 
 설치 위치 확인, 결과가 True이면 파일이 존재하는 것
 
-```ps1
+```pwsh
 Test-Path "$env:LOCALAPPDATA\Programs\Vim\vim.exe"
 ```
 
 환경 변수 등록
-```ps1
+```pwsh
 [Environment]::SetEnvironmentVariable("Path",[Environment]::GetEnvironmentVariable("Path", "User") + ";$env:LOCALAPPDATA\Programs\Vim","User")
 ```
 
@@ -178,26 +178,26 @@ PowerShell 프로필에 vim 스타일 별칭을 추가할 수 있습니다.
 
 `$PROFILE`에 넣어두면 매번 사용할 수 있습니다.
 
-```ps1
+```pwsh
 notepad $PROFILE
 ```
 
 추가:
 
-```ps1
+```pwsh
 Set-Alias vi vim
 Set-Alias gvi gvim
 ```
 
 설정 반영:
 
-```ps1
+```pwsh
 . $PROFILE
 ```
 
 ## 최종 profile 예
 
-```ps1
+```pwsh
 # Path: ~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 # Edit: vi $PROFILE
 # UserHome: ~ or $env:USERPROFILE or %USERPROFILE%

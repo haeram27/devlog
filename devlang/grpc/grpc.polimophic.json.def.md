@@ -64,7 +64,8 @@ Json문서에 payload1, payload2 중 1개만 포함될 수 있는 다형성 예�
 
 ## 한 줄 결론
 
-> sw comment: GRPC로 Value만 다형성인 Json을 전달 해야 할 때, Value를 stirng으로 전달하고 프로그래밍 적으로 Type 검사를 하는 방식이 가장 유리한 것 같다.
+> sw comment: Java>Ggrc>Java 구조에서 GRPC로 Value만 다형성인 Json을 전달 해야 할 때,
+> Grpc에서 다형성 Value Json를 stirng으로 송수신 Java 측에서 Type 검사를 하는 방식이 가장 유리.
 
 가변 JSON을 protobuf 메시지의 한 필드로 전달할 때, 보통은 다음 6가지 방식을 고려합니다.
 이 중 `oneof`는 key/value 모두 변환하는 다형성 케이스에 사용되며 그외에는 value만 다형성인 케이스에 사용됩니다.
