@@ -64,9 +64,26 @@ uv python install 3.13
 - uvx.exe : mcp-atlassian 같은 파이썬 기반 CLI 프로그램을 컴퓨터에 영구 설치하지 않고, 격리된 임시 환경에서 1회성으로 즉시 실행해 주는 도구입니다.
 - uvw.exe : 윈도우 환경에서 터미널(콘솔) 창이 보이지 않게 백그라운드 전용(Windowless)으로 파이썬 스크립트나 프로그램을 실행해 주는 특수 실행기입니다.
 
+Windows:
+
 ```pwsh
 # uv 설치 
 winget install --id=astral-sh.uv -e
+uv --version
+```
+
+Linux-Ubuntu(Debian)
+
+```bash
+# uv 설치
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# proxy 사용 (localhost:9913)과 함께 uv 설치
+curl -x http://localhost:9913 -LsSf https://astral.sh/uv/install.sh | sh
+
+# 현재 셸에 PATH 반영 후 버전 확인
+# (일부 환경은 ~/.local/bin/env 파일이 없을 수 있으므로 fallback 처리)
+[ -f "$HOME/.local/bin/env" ] && source "$HOME/.local/bin/env"; [[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
 uv --version
 ```
 
@@ -85,7 +102,7 @@ atls --version
 
 ## 사용자 환경 변수에 ATLASSIAN 액세스 정보 등록
 
-windows/linux에서 다음의 사용자 환경 변수를 등록하면 mcp-atlassian이 자동으로 접속 정보를 사용하게 된다.
+아래와 같이 운영체제별로 사용자 환경 변수를 등록하면 `mcp-atlassian`/`atlassian-skills`가 자동으로 접속 정보를 사용한다.
 
 Authentication 관련 환경변수는 atlassian cloud냐 Server 형이냐에 따라서 약간의 차이가 있으므로 공식문서를 참조한다.
 
@@ -109,7 +126,9 @@ Project permissions = Project read
 Repository permissions = Repository write
 ```
 
-다음은 `atlassian-skills` 용 windows 사용자 환경 변수 설정 예이다.
+### Windows (PowerShell)
+
+다음은 `atlassian-skills`용 Windows 사용자 환경 변수 설정 예이다.
 
 ```pwsh
 [System.Environment]::SetEnvironmentVariable('ATLS_DEFAULT_JIRA_URL', 'https://atlassian.net', 'User')
@@ -118,6 +137,34 @@ Repository permissions = Repository write
 [System.Environment]::SetEnvironmentVariable('CONFLUENCE_PERSONAL_TOKEN', 'YOUR_ACTUAL_PERSONAL_TOKEN', 'User')
 [System.Environment]::SetEnvironmentVariable('ATLS_DEFAULT_BITBUCKET_URL', 'https://atlassian.net', 'User')
 [System.Environment]::SetEnvironmentVariable('BITBUCKET_TOKEN', 'YOUR_ACTUAL_PERSONAL_TOKEN', 'User')
+```
+
+### Linux-Ubuntu (bash/zsh)
+
+현재 터미널 세션에만 적용:
+
+```bash
+export ATLS_DEFAULT_JIRA_URL='https://atlassian.net'
+export JIRA_PERSONAL_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+export ATLS_DEFAULT_CONFLUENCE_URL='https://atlassian.net'
+export CONFLUENCE_PERSONAL_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+export ATLS_DEFAULT_BITBUCKET_URL='https://atlassian.net'
+export BITBUCKET_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+```
+
+로그인 시 자동 적용(영구 저장):
+
+```bash
+cat <<'EOF' >> ~/.bashrc
+export ATLS_DEFAULT_JIRA_URL='https://atlassian.net'
+export JIRA_PERSONAL_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+export ATLS_DEFAULT_CONFLUENCE_URL='https://atlassian.net'
+export CONFLUENCE_PERSONAL_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+export ATLS_DEFAULT_BITBUCKET_URL='https://atlassian.net'
+export BITBUCKET_TOKEN='YOUR_ACTUAL_PERSONAL_TOKEN'
+EOF
+
+source ~/.bashrc
 ```
 
 사용자 환경 변수가 등록되면, 이를 사용하는 프로그램(터미널 등)은 새로 시작하여야 적용된다.
