@@ -1,5 +1,20 @@
 # Reverse Proxy를 이용한 단일 포트(443) 기반 다중 웹 애플리케이션 서비스 구성
 
+리버스 프록시 전용/중심 솔루션이 여러가지 있다.
+
+대표적으로:
+
+• HAProxy: L4/L7 프록시·로드밸런서에 매우 강함, 고성능/안정성
+• Envoy Proxy: 서비스 메쉬/마이크로서비스 환경에 강함 (동적 라우팅, observability)
+• Traefik: Docker/Kubernetes 연동이 쉬워서 자동 라우팅/자동 인증서에 강함
+• Caddy: 설정이 간단하고 HTTPS 자동화(ACME)가 매우 편함
+• Apache HTTP Server (mod_proxy): 기존 Apache 운영 환경이면 자연스럽게 선택 가능
+• Kong / APISIX / Tyk: 리버스 프록시 + API Gateway 기능(인증, rate limit, plugin)
+
+단순 웹서비스면 Caddy/Traefik, 전통적 고성능 LB면 HAProxy, 클라우드 네이티브/서비스메쉬면 Envoy, API 정책 중심이면 Kong/APISIX가 잘 맞습니다.
+
+L4/L7 LB 및 proxy 기능이 주라면 `haproxy` 사용을 가장 추천 한다.
+
 ## 개요
 
 서버에 여러 개의 웹 애플리케이션이 설치되어 있는 경우 일반적으로 각 애플리케이션은 서로 다른 포트를 사용한다.
@@ -322,4 +337,3 @@ https://c.myserver.com ──► Reverse Proxy ──► localhost:5000
 ```
 
 즉, 하나의 서버 IP와 하나의 공개 포트(443)만으로 여러 웹 애플리케이션을 서비스할 수 있으며, 이를 "Host 기반 Virtual Host + Reverse Proxy 구성"이라고 한다.
-``
