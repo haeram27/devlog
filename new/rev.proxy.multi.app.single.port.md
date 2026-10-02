@@ -337,3 +337,162 @@ https://c.myserver.com ──► Reverse Proxy ──► localhost:5000
 ```
 
 즉, 하나의 서버 IP와 하나의 공개 포트(443)만으로 여러 웹 애플리케이션을 서비스할 수 있으며, 이를 "Host 기반 Virtual Host + Reverse Proxy 구성"이라고 한다.
+
+---
+
+## HAProxy (Docker)로 실제 테스트 가능한 구성
+
+아래 절차는 **로컬/테스트 서버에서 바로 실행 가능한 수준**으로 작성했다.  
+목표는 다음과 같다.
+
+- 외부 노출 포트: `443` 하나
+- 내부 앱: `app-a(8080)`, `app-b(9090)`, `app-c(5000)`
+- 라우팅 기준: `Host` 헤더 (`a.myserver.com`, `b.myserver.com`, `c.myserver.com`)
+
+### 1) 디렉터리 준비
+
+```bash
+mkdir -p rev-proxy-test/haproxy/certs
+cd rev-proxy-test
+```
+
+### 2) 테스트용 백엔드 + HAProxy compose 파일 작성
+
+`docker-compose.yml`
+
+```yaml
+services:
+  app-a:
+    image: traefik/whoami:v1.10
+    container_name: app-a
+    command: --port=8080
+    expose:
+      - "8080"
+
+  app-b:
+    image: traefik/whoami:v1.10
+    container_name: app-b
+    command: --port=9090
+    expose:
+      - "9090"
+
+  app-c:
+    image: traefik/whoami:v1.10
+    container_name: app-c
+    command: --port=5000
+    expose:
+      - "5000"
+
+  haproxy:
+    image: haproxy:2.9
+    container_name: haproxy-rp
+    ports:
+      - "443:443"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro
+    depends_on:
+      - app-a
+      - app-b
+      - app-c
+```
+
+### 3) HAProxy 설정 파일 작성
+
+`haproxy/haproxy.cfg`
+
+```cfg
+global
+    log stdout format raw local0
+    maxconn 2000
+
+defaults
+    mode http
+    log global
+    option httplog
+    option dontlognull
+    timeout connect 5s
+    timeout client  30s
+    timeout server  30s
+
+frontend fe_https
+    bind *:443 ssl crt /usr/local/etc/haproxy/certs/wildcard.myserver.com.pem alpn h2,http/1.1
+
+    acl host_a hdr(host) -i a.myserver.com
+    acl host_b hdr(host) -i b.myserver.com
+    acl host_c hdr(host) -i c.myserver.com
+
+    use_backend be_app_a if host_a
+    use_backend be_app_b if host_b
+    use_backend be_app_c if host_c
+
+    default_backend be_unknown
+
+backend be_app_a
+    server app-a app-a:8080 check
+
+backend be_app_b
+    server app-b app-b:9090 check
+
+backend be_app_c
+    server app-c app-c:5000 check
+
+backend be_unknown
+    http-request deny deny_status 421
+```
+
+> `421 Misdirected Request`를 사용해, 정의되지 않은 Host 요청을 명확히 차단한다.
+
+### 4) 테스트용 TLS 인증서 생성 (self-signed)
+
+테스트용이므로 wildcard 인증서를 self-signed로 생성한다.
+
+```bash
+openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
+  -keyout haproxy/certs/wildcard.myserver.com.key \
+  -out haproxy/certs/wildcard.myserver.com.crt \
+  -subj "/CN=*.myserver.com"
+
+cat haproxy/certs/wildcard.myserver.com.crt haproxy/certs/wildcard.myserver.com.key \
+  > haproxy/certs/wildcard.myserver.com.pem
+```
+
+### 5) 컨테이너 실행
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+### 6) 라우팅 테스트
+
+DNS를 아직 안 붙였다면 `curl --resolve`로 Host+SNI를 강제로 테스트할 수 있다.
+
+```bash
+curl -k --resolve a.myserver.com:443:127.0.0.1 https://a.myserver.com
+curl -k --resolve b.myserver.com:443:127.0.0.1 https://b.myserver.com
+curl -k --resolve c.myserver.com:443:127.0.0.1 https://c.myserver.com
+```
+
+결과 본문에서 각 요청이 서로 다른 백엔드(`app-a`, `app-b`, `app-c`)로 전달되는 것을 확인한다.
+
+정의되지 않은 Host 차단 테스트:
+
+```bash
+curl -k --resolve x.myserver.com:443:127.0.0.1 https://x.myserver.com -i
+```
+
+응답 코드가 `421`이면 정상이다.
+
+### 7) 운영 전환 시 필수 변경점
+
+- self-signed 인증서 대신 공인 인증서(예: Let's Encrypt)로 교체
+- `be_unknown` 정책(차단/리다이렉트)을 조직 보안정책에 맞게 확정
+- 방화벽은 외부에서 `443`만 허용하고, 내부 앱 포트(8080/9090/5000)는 외부 차단
+- 헬스체크/로그 수집(예: stdout -> Loki/ELK) 연계
+
+### 8) 정리/종료
+
+```bash
+docker compose down
+```
