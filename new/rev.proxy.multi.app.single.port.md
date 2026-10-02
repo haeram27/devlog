@@ -4,12 +4,12 @@
 
 대표적으로:
 
-• HAProxy: L4/L7 프록시·로드밸런서에 매우 강함, 고성능/안정성
-• Envoy Proxy: 서비스 메쉬/마이크로서비스 환경에 강함 (동적 라우팅, observability)
-• Traefik: Docker/Kubernetes 연동이 쉬워서 자동 라우팅/자동 인증서에 강함
-• Caddy: 설정이 간단하고 HTTPS 자동화(ACME)가 매우 편함
-• Apache HTTP Server (mod_proxy): 기존 Apache 운영 환경이면 자연스럽게 선택 가능
-• Kong / APISIX / Tyk: 리버스 프록시 + API Gateway 기능(인증, rate limit, plugin)
+- HAProxy: L4/L7 프록시·로드밸런서에 매우 강함, 고성능/안정성
+- Envoy Proxy: 서비스 메쉬/마이크로서비스 환경에 강함 (동적 라우팅, observability)
+- Traefik: Docker/Kubernetes 연동이 쉬워서 자동 라우팅/자동 인증서에 강함
+- Caddy: 설정이 간단하고 HTTPS 자동화(ACME)가 매우 편함
+- Apache HTTP Server (mod_proxy): 기존 Apache 운영 환경이면 자연스럽게 선택 가능
+- Kong / APISIX / Tyk: 리버스 프록시 + API Gateway 기능(인증, rate limit, plugin)
 
 단순 웹서비스면 Caddy/Traefik, 전통적 고성능 LB면 HAProxy, 클라우드 네이티브/서비스메쉬면 Envoy, API 정책 중심이면 Kong/APISIX가 잘 맞습니다.
 
