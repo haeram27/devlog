@@ -2,7 +2,7 @@
 
 GrpcServiceExecutor 예:
 
-```
+```java
 package com.example.grpc.server.util;
 
 import com.google.protobuf.InvalidProtocolBufferException;
