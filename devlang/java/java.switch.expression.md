@@ -6,7 +6,7 @@ Java의 `switch`도 Kotlin의 `when`처럼 statement/expression 두 형태로 �
 
 ## 1. 전통적 `switch` 문 (콜론 기반) — 언제나 exhaustiveness 없음
 
-Java 초창기부터 있던 형태다. `case ... :` + `break`를 쓰고, 값을 만들지 않고 순수하게 제어 흐름만 담당한다.
+Java 초창기부터 있던 형태다. `case ... :` + `break`를 쓰고, 반환 값을 만들지 않고 순수하게 제어 흐름만 담당한다.
 
 ```java
 void log(int status) {
@@ -36,11 +36,11 @@ void log(Status s) {
 }
 ```
 
-**이 형태는 statement이고, 값을 만들지 않으므로 exhaustiveness를 요구할 이유가 없다** — Kotlin의 `when` statement와 동일한 성격이다.
+**이 형태는 statement이고, 반환 값을 만들지 않으므로 exhaustiveness를 요구할 이유가 없다** — Kotlin의 `when` statement와 동일한 성격이다.
 
-## 2. `switch` 식 (화살표, Java 14+) — 값을 만들어야 하므로 exhaustive해야 함
+## 2. `switch` 식 (화살표, Java 14+) — 반환 값을 만들어야 하므로 exhaustive해야 함
 
-`->`를 쓰고 `= switch(...) { ... }` 형태로 값을 만들어낸다. **값을 반드시 생산해야 하므로, 모든 경우를 커버하지 않으면 컴파일 에러**다.
+`->`를 쓰고 `= switch(...) { ... }` 형태로 반환 값을 만들어낸다. **반환 값을 반드시 생산해야 하므로, 모든 경우를 커버하지 않으면 컴파일 에러**다.
 
 ```java
 String label = switch (status) {
@@ -51,7 +51,7 @@ String label = switch (status) {
 // 컴파일 에러: "the switch expression does not cover all possible input values"
 ```
 
-`default`를 추가하거나 모든 enum 상수를 다뤄야 컴파일된다. 이건 Kotlin의 `when` expression과 정확히 같은 규칙이다 — **값을 만드는 식은 반드시 총체적(total)이어야 한다.**
+`default`를 추가하거나 모든 enum 상수를 다뤄야 컴파일된다. 이건 Kotlin의 `when` expression과 정확히 같은 규칙이다 — **반환값을 만드는 식은 반드시 총체적(total)이어야 한다.**
 
 ```java
 String label = switch (status) {

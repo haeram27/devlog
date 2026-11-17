@@ -2,6 +2,14 @@
 
 `when`은 Kotlin에서 문(statement)으로도, 식(expression)으로도 쓸 수 있다. 겉모습은 비슷해 보여도 컴파일러가 이 둘을 다르게 취급하며, 특히 **exhaustiveness(누락 없음) 검사 여부**가 갈린다.
 
+**빠른 요약**
+- **expression**: `when` 결과값을 대입/반환/인자 전달로 **소비**한다.
+  - sealed class/interface, enum에서 분기 누락 시 컴파일 에러(exhaustive 강제)
+- **statement**: `when` 결과값을 버리고 **부수효과**만 수행한다.
+  - 분기 누락이 있어도 컴파일이 통과할 수 있음
+- **exhaustiveness**
+  - 분기문이 가능한 모든 경우를 빠짐없이 처리했는지를 의미. 예를 들어 Kotlin  when 에서 sealed 타입/enum을 다룰 때, 모든 하위 타입(또는 enum 상수)을 모두  case 로 작성하면 exhaustive이고, 하나라도 빠지면 non-exhaustive이다. exhaustive가 강제되는 문맥에서는 누락 시 컴파일 에러가 발생.
+
 ## 1. 판단 기준: "결과값을 실제로 소비하는가"
 
 문/식을 가르는 기준은 `=` 뒤에 오느냐가 아니라, **`when`의 결과값이 어딘가에서 실제로 사용되는가**다. `= when(...)`은 그 소비 방법 중 가장 흔한 형태일 뿐이고, 아래 형태들도 전부 동일하게 expression으로 취급된다.

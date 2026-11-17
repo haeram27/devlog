@@ -119,6 +119,10 @@ fd --type x
 fd --type e
 ```
 
+- `-e, --extension <ext>`: filter search results by their file extension (include-only)
+- `-E, --exclude <pattern>`: Exclude files/directories that match the given glob pattern
+- `-t, --type <filetype>`: filter the search by type
+
 주요 `--type` 값은 다음과 같다.
 
 | 값 | 검색 대상 |
@@ -165,7 +169,16 @@ fd -e jpg -0 | xargs -0 tar -cvf images.tar
 
 ## 검색 결과에 명령어 실행
 
-`-x, --exec`는 검색 결과마다 명령어를 실행한다. `{}`는 현재 검색 결과로 대체된다.
+`-x, --exec`와 `-X, --exec-batch`는 검색 결과를 다른 명령어로 바로 전달할 때 사용한다.
+
+| 옵션 | 실행 방식 | 적합한 상황 |
+|---|---|---|
+| `-x, --exec` | 검색 결과 **1개마다** 명령어를 1번 실행 | 파일별 개별 처리(삭제, 권한 변경, 파일별 검사) |
+| `-X, --exec-batch` | 검색 결과 **전체를 묶어** 명령어를 실행 | 한 번에 처리(포맷터, `wc`, `git add` 등) |
+
+### `--exec` (`-x`)
+
+`--exec`는 매치된 경로마다 별도 명령을 실행한다. `{}`는 현재 경로로 치환된다.
 
 ```bash
 # 실행 전에 처리할 명령을 확인
@@ -173,16 +186,26 @@ fd -e tmp -x echo rm '{}'
 
 # 실제로 .tmp 파일 삭제
 fd -e tmp -x rm '{}'
+
+# 각 파일의 sha256 해시 계산
+fd -e iso -x sha256sum '{}'
 ```
 
 파일을 변경하거나 삭제하는 명령은 먼저 `echo`로 결과를 확인한 후 실행한다.
 
-`-X, --exec-batch`는 검색 결과 전체를 하나의 명령어 인자로 전달한다.
+### `--exec-batch` (`-X`)
+
+`--exec-batch`는 검색 결과를 모아 한 번(또는 필요한 최소 횟수)으로 실행한다.
 
 ```bash
 # 검색한 모든 Markdown 파일을 한 번에 wc에 전달
 fd -e md -X wc -l
+
+# 검색한 JS 파일을 한 번에 prettier로 포맷
+fd -e js -X prettier --write
 ```
+
+실무에서는 **파일별로 독립 실행이 필요하면 `-x`**, **전체를 한 번에 처리하면 되는 작업은 `-X`**를 사용하면 된다.
 
 ## 심볼릭 링크와 디렉토리 제외
 
