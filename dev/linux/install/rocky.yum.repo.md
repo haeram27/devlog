@@ -88,7 +88,9 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-$releasever
 - [Rockylinux-Software Management-DNF](https://docs.rockylinux.org/10/books/admin_guide/13-softwares/#dnf-dandified-yum)
 - [Variables in /etc/yum.repos.d/XXX.repo](https://unix.stackexchange.com/questions/19701/yum-how-can-i-view-variables-like-releasever-basearch-yum0)
 
-#### Rocky 8-10, repo 가변 변수 확인
+#### repo 가변 변수 확인
+
+`.repo` 파일을 통해 패키지 repository 
 
 - python 명령 실행
 
@@ -100,7 +102,7 @@ db.conf.substitutions.update_from_etc("/")
 print(json.dumps(db.conf.substitutions, indent=2))'
 ```
 
-- rocky9
+- rocky 9
 
 ```bash
 {
@@ -234,6 +236,15 @@ gpgkey=https://download.docker.com/linux/rhel/gpg
 ## repo 파일 변경후 시스템 반영
 
 ```bash
-rm -rf /var/cache/dnf    # 기존 다운로드된 패키지의 메타데이터 캐시 삭제
-dnf update -y            # 시스템 패키지를 최신으로 업데이트 및 의존성 정리. "dnf upgrade" 명령과 동일하며 내부적으로 upgrade로 처리됨
+# 기존 다운로드된 패키지의 메타데이터 캐시 삭제
+rm -rf /var/cache/dnf
+
+# 저장소(repository) 메타데이터를 다운로드하여 로컬 캐시에 저장
+# yum repo 설정의 저장소로 부터 메타데이터만 다운로드 하므로 저장소 연결 테스트에 적합
+dnf makecache -v
+
+# 저장소(repository)로 부터 패키지를 최신으로 업데이트 및 의존성 정리.
+# "update"와 "upgrade"는 동일 명령
+# 이 명령은 makecache 기능을 포함함
+dnf upgrade -y
 ```

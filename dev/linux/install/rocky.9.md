@@ -142,7 +142,7 @@ gpgkey=https://download.docker.com/linux/rhel/gpg
 dnf update && dnf upgrade -y
 ```
 
-## firewalld disable
+### firewalld disable
 
 rocky는 기본적으로firewalld 가 구동 되며, 이 경우 서버에 http/https 서버 구동시, 접속 요청 수신이 차단된다.
 
@@ -155,10 +155,22 @@ systemctl mask firewalld
 
 ### SSHD 로그인 설정
 
+#### 설정 확인
+
+```bash
+# openssh 현재 설정 확인
+sshd -T | egrep 'pubkeyauthentication|permitrootlogin|passwordauthentication'
+
+# 특정 설정 위치 찾기
+grep -R "PubkeyAuthentication" /etc/ssh
+```
+
+#### 설정 변경
+
 ```bash
 $ sudo vi /etc/ssh/sshd_config
-PubkeyAuthentication yes
-PasswordAuthentication yes
+PubkeyAuthentication no
+PasswordAuthentication no
 
 $ sudo systemctl restart ssh
 ```
@@ -167,6 +179,7 @@ $ sudo systemctl restart ssh
 
 ```bash
 vi ~/.ssh/authorized_keys
+chmod 400 ~/.ssh/authorized_keys
 ```
 
 ### locale 변경
@@ -249,7 +262,7 @@ sysctl --system
 
 - https://docs.docker.com/engine/install/fedora/
 
-#### 기존 버전 삭제
+#### 기존 버전 삭제 (Optional)
 
 ```bash
 sudo dnf remove docker \

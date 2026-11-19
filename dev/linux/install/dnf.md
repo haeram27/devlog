@@ -67,14 +67,18 @@ dnf install -y <package_name>[-<version>[-<release>.<os_dist>]]
 options:
 
 - `--allowerasing`
-  - allow erasing of installed packages to resolve dependencies
-  - 종속성 해결을 위해 이미 설치된 패키지를 삭제 가능 = 상위 버전 업그레이드 허용 옵션
+  - `install`과 `update` 명령에 사용 가능
+  - 패키지 의존성 충돌을 해결하기 위해 기존 패키지를 제거(erasing)하는 것을 허용하는 옵션
+  - 기본적으로 DNF는 설치/업데이트 과정에서 기존 패키지를 제거해야 하는 상황이 발생하면 작업을 중단
+  - 서로 동시에 존재할 수 없는 패키지 설치에 사용
 
 - `-b`, `--best`
   - try the best available package versions in transactions.
+  - 최신 버전을 설치하고 설치할 수 없다면 실패
 
 - `--nobest`
   - do not limit the transaction to the best candidate
+  - 최신 버전이 설치 불가능하면 설치 가능한 버전 중 가장 적절한 버전을 선택
 
 ex:
 
@@ -112,12 +116,19 @@ dnf module list postgresql
 
 ## [dnf command list](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_software_with_the_dnf_tool/assembly_yum-commands-list_managing-software-with-the-dnf-tool)
 
+### Commands for repository
+
+| **Command** | **Description** |
+| --- | --- |
+| dnf makecache -v | * Download metadata from package repository |
+| dnf upgrade -y   | * (Alias. update) Upgrade installed packages from repository |
+
 ### Commands for listing content
 
 | **Command** | **Description** |
 | --- | --- |
-| dnf search \<term\>                                              | Search for a package by using term related to the package. |
-| dnf repoquery \<package\>                                        | Search for enabled **DNF**repositories for a selected package and its version. |
+| dnf search \<term\>                                              | * Search for a package by using term related to the package. |
+| dnf repoquery \<package\>                                        | * Search for enabled **DNF**repositories for a selected package and its version. |
 | dnf list                                                         | List information about all installed and available packages. |
 | dnf list --installed<br>dnf repoquery --installed                | List all packages installed on your system. |
 | dnf list --available \<package\><br>dnf repoquery                | List all packages in all enabled repositories that are available to install.<br>$ dnf list --available --showduplicates \<package\> |
