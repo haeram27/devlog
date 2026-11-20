@@ -392,7 +392,11 @@ docker-engine
 #### 최신 버전 설치
 
 ```bash
-sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+# 설치
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 삭제
+sudo dnf remove -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 #### docker 특정 버전 설치
@@ -421,7 +425,9 @@ COMPOSE_VERSION_STRING=2.27.1
 docker 특정 버전 설치
 
 ```bash
-$ sudo dnf install docker-ce-<CE_VERSION_STRING> docker-ce-cli-<CE_VERSION_STRING> containerd.io docker-buildx-plugin docker-compose-plugin-<COMPOSE_VERSION_STRING>
+$ sudo dnf install -y docker-ce-<CE_VERSION_STRING> docker-ce-cli-<CE_VERSION_STRING> docker-ce-rootless-extras-<CE_VERSION_STRING> containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo dnf install -y docker-ce-28.5.2 docker-ce-cli-28.5.2 docker-ce-rootless-extras-28.5.2 containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 runc 다른 버전 다운로드 방법
@@ -452,23 +458,6 @@ sudo systemctl enable --now docker
 systemctl status docker
 sudo docker run hello-world
 ```
-
-#### Private Registry 사용시 docker pull timeout 오류 수정
-
-```bash
-$ vi /etc/docker/daemon.json
-{
-  "max-concurrent-downloads": 1,
-  "max-concurrent-uploads": 1
-}
-
-$ systemctl restart docker
-```
-
-- 사내 Registry(Artifactory, Harbor, Nexus 등)를 사용할 때 병렬 다운로드시 timeout 오류 발생하는 경우 많음
-- 이는 Layered 이미지의 병렬다운로드 제한 등의 서버 환경이 원인
-- max-concurrent-downloads 미설정 시 기본 값은 3
-
 
 ### root 비밀번호 변경 (su 사용 필요 시)
 
