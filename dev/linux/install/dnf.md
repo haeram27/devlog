@@ -15,13 +15,13 @@ dnf list --installed | grep <package>
 
 ## repository의 설치 가능한 package 검색
 
-### 패키지 버전 정렬
+### 패키지 리스트 (버전 정렬 - 추천)
 
 ```bash
 dnf list --available --showduplicates <package>
 ```
 
-### list-available과 동일 결과 패키지 이름 정렬
+### 패키지 리스트 (출력 문자열 정렬)
 
 ```bash
 dnf repoquery --showduplicates <package>
