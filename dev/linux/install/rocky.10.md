@@ -427,7 +427,7 @@ docker 특정 버전 설치
 ```bash
 $ sudo dnf install -y docker-ce-<CE_VERSION_STRING> docker-ce-cli-<CE_VERSION_STRING> docker-ce-rootless-extras-<CE_VERSION_STRING> containerd.io docker-buildx-plugin docker-compose-plugin
 
-sudo dnf install -y docker-ce-28.5.2 docker-ce-cli-28.5.2 docker-ce-rootless-extras-28.5.2 containerd.io docker-buildx-plugin docker-compose-plugin
+ex$ sudo dnf install -y docker-ce-28.5.2 docker-ce-cli-28.5.2 docker-ce-rootless-extras-28.5.2 containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 runc 다른 버전 다운로드 방법
