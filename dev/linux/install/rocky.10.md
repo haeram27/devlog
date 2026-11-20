@@ -453,6 +453,23 @@ systemctl status docker
 sudo docker run hello-world
 ```
 
+#### Private Registry 사용시 docker pull timeout 오류 수정
+
+```bash
+$ vi /etc/docker/daemon.json
+{
+  "max-concurrent-downloads": 1,
+  "max-concurrent-uploads": 1
+}
+
+$ systemctl restart docker
+```
+
+- 사내 Registry(Artifactory, Harbor, Nexus 등)를 사용할 때 병렬 다운로드시 timeout 오류 발생하는 경우 많음
+- 이는 Layered 이미지의 병렬다운로드 제한 등의 서버 환경이 원인
+- max-concurrent-downloads 미설정 시 기본 값은 3
+
+
 ### root 비밀번호 변경 (su 사용 필요 시)
 
 ```bash
